@@ -1,5 +1,5 @@
 name: flow_coordinator
-description: "A new Flutter package project."
+description: "A new Flutter package project." # TODO: Add a description
 version: 0.0.1
 homepage:
 
@@ -15,6 +15,8 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+
+# TODO: Remove comments
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
