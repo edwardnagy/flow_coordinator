@@ -1,3 +1,3 @@
 library flow_coordinator;
 
-export 'src/flow_coordinator.dart';
+export 'src/router_flow_coordinator_state.dart';
