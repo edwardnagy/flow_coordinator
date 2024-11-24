@@ -20,7 +20,8 @@ void main() {
   });
 
   testWidgets(
-    'Default back button dispatcher is created and updated without a provided dispatcher',
+    'Default back button dispatcher is created and updated '
+    'without a provided dispatcher',
     (tester) async {
       // Set up the test flow coordinator
       final testCoordinatorMockRouterDelegate =
@@ -210,7 +211,8 @@ void main() {
   );
 
   testWidgets(
-    'Default back button dispatcher is replaced and forgotten with the provided dispatcher',
+    'Default back button dispatcher is replaced and forgotten '
+    'with the provided dispatcher',
     (tester) async {
       // Set up the test coordinator
       final testCoordinatorMockRouterDelegate =

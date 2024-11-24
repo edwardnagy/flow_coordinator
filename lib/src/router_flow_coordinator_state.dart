@@ -41,13 +41,15 @@ abstract class RouterFlowCoordinatorState<T extends StatefulWidget, C>
   @override
   Widget build(BuildContext context) {
     if (_defaultBackButtonDispatcher case final defaultBackButtonDispatcher?) {
-      if (routerConfig.backButtonDispatcher == null) {
-        // Take priority if no custom back button dispatcher is provided
-        defaultBackButtonDispatcher.takePriority();
-      } else {
-        // Forget default back button dispatcher if custom back button dispatcher is provided
+      final isCustomBackButtonDispatcherProvided =
+          routerConfig.backButtonDispatcher != null;
+      if (isCustomBackButtonDispatcherProvided) {
+        // Forget default back button dispatcher
         defaultBackButtonDispatcher.parent.forget(defaultBackButtonDispatcher);
         _defaultBackButtonDispatcher = null;
+      } else {
+        // Take priority over the parent back button dispatcher
+        defaultBackButtonDispatcher.takePriority();
       }
     }
 
