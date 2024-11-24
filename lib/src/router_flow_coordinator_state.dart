@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+// TODO: Add documentation
 abstract class RouterFlowCoordinatorState<T extends StatefulWidget, C>
     extends State<T> {
   ChildBackButtonDispatcher? _defaultBackButtonDispatcher;
