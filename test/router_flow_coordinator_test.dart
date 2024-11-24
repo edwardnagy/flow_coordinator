@@ -20,7 +20,7 @@ void main() {
   });
 
   testWidgets(
-    'Creates and updates default back button dispatcher when none is provided',
+    'Default back button dispatcher is created and updated without a provided dispatcher',
     (tester) async {
       // Set up the test flow coordinator
       final testCoordinatorMockRouterDelegate =
@@ -85,7 +85,7 @@ void main() {
   );
 
   testWidgets(
-    'Forgets default back button dispatcher when widget is disposed',
+    'Default back button dispatcher is forgotten on widget disposal',
     (tester) async {
       // Set up the test coordinator
       final testCoordinatorMockRouterDelegate =
@@ -133,7 +133,7 @@ void main() {
   );
 
   testWidgets(
-    'Takes priority for the default back button dispatcher when the widget is built',
+    'Default back button dispatcher takes priority upon widget build',
     (tester) async {
       // Set up the test coordinator
       final testCoordinatorMockRouterDelegate =
@@ -175,7 +175,7 @@ void main() {
   );
 
   testWidgets(
-    'Uses the provided back button dispatcher when one is specified',
+    'Provided back button dispatcher is used when specified',
     (tester) async {
       // Set up the test coordinator
       final testCoordinatorMockRouterDelegate =
@@ -210,7 +210,7 @@ void main() {
   );
 
   testWidgets(
-    'Replaces and forgets the default back button dispatcher when a new one is provided',
+    'Default back button dispatcher is replaced and forgotten with the provided dispatcher',
     (tester) async {
       // Set up the test coordinator
       final testCoordinatorMockRouterDelegate =
