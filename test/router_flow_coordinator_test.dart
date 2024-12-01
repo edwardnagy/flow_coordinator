@@ -238,7 +238,8 @@ void main() {
               invocation.positionalArguments[0] as VoidCallback;
         });
 
-        // Do not provide a back button dispatcher, so the default one is created
+        // Do not provide a back button dispatcher,
+        // so the default one is created
         when(mockRootRouterDelegate.build(any)).thenReturn(
           TestRouterFlowCoordinator(
             routerConfig: RouterConfig(
