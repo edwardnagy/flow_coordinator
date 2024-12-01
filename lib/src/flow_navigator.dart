@@ -4,10 +4,9 @@ import 'flow_navigator_scope.dart';
 
 // TODO: Add documentation
 abstract interface class FlowNavigator {
-  /// Returns the nearest [FlowNavigator] for the given [context].
+  /// Returns the nearest [FlowNavigator] that encloses the given [context].
   ///
-  /// Throws a [FlutterError] if none is found. Use [maybeOf] to return null
-  /// instead.
+  /// Throws a [FlutterError] if no [FlowNavigator] is found in the widget tree.
   static FlowNavigator of(BuildContext context) {
     final navigatorScope =
         context.getInheritedWidgetOfExactType<FlowNavigatorScope>();
@@ -25,39 +24,51 @@ The context used was: $context
     return navigatorScope.navigator;
   }
 
-  /// Returns the nearest [FlowNavigator] in the given [context], or null if no
-  /// [FlowNavigator] is found.
+  /// Returns the nearest [FlowNavigator] that encloses the given [context],
+  /// or null if no [FlowNavigator] is found.
   static FlowNavigator? maybeOf(BuildContext context) {
     final navigatorScope =
         context.getInheritedWidgetOfExactType<FlowNavigatorScope>();
     return navigatorScope?.navigator;
   }
 
-  /// Pushes the given [page] onto the navigator.
+  /// Pushes the given [page] onto the navigator's stack.
   void push(Page page);
 
-  /// Sets the navigator's history to the given [pages].
+  /// Sets the navigator's page history to the provided list of [pages].
   void setPages(List<Page> pages);
 
-  /// Replaces the current page with the given [page].
+  /// Replaces the current page (top of the stack) with the given [page].
   void replaceCurrentPage(Page page);
 
-  /// Returns whether this navigator or its parent can pop.
+  /// Returns whether this navigator or any of its ancestor navigators from the
+  /// widget tree can pop.
   bool canPop();
 
-  /// Same as [Navigator.canPop]. Only considers this navigator.
+  /// Returns whether this navigator can pop.
+  ///
+  /// Behaves like [Navigator.canPop].
   bool canPopInternally();
 
-  /// Attempts to pop this navigator, and if unsuccessful, delegates to the
-  /// parent navigator's [maybePop].
+  /// Attempts to pop this navigator or any of its ancestor navigators from the
+  /// widget tree.
+  ///
+  /// Returns true if a navigator was popped, otherwise false.
   Future<bool> maybePop<T extends Object?>([T? result]);
 
-  /// Same as [Navigator.pop]. Only considers this navigator.
+  /// Attempts to pop this navigator.
+  ///
+  /// Returns true if this navigator was popped, otherwise false.
+  ///
+  /// Behaves like [Navigator.maybePop].
   Future<bool> maybePopInternally<T extends Object?>([T? result]);
 
-  /// Calls [popInternally] and if false, calls [pop] on the parent navigator.
+  /// Pops the closest navigator in the widget tree that can pop. If no
+  /// navigator can pop, the root navigator is popped.
   void pop<T extends Object?>([T? result]);
 
-  /// Same as [Navigator.pop]. Only considers this navigator.
+  /// Pops this navigator.
+  ///
+  /// Behaves like [Navigator.pop].
   void popInternally<T extends Object?>([T? result]);
 }
