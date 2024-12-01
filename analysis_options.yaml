@@ -11,3 +11,4 @@ linter:
     omit_local_variable_types: true
     unawaited_futures: true
     sort_constructors_first: true
+    directives_ordering: true
