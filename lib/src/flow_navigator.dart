@@ -7,9 +7,10 @@ abstract interface class FlowNavigator {
   /// Returns the nearest [FlowNavigator] that encloses the given [context].
   ///
   /// Throws a [FlutterError] if no [FlowNavigator] is found in the widget tree.
-  static FlowNavigator of(BuildContext context) {
-    final navigatorScope =
-        context.getInheritedWidgetOfExactType<FlowNavigatorScope>();
+  static FlowNavigator of(BuildContext context, {bool listen = false}) {
+    final navigatorScope = listen
+        ? context.dependOnInheritedWidgetOfExactType<FlowNavigatorScope>()
+        : context.getInheritedWidgetOfExactType<FlowNavigatorScope>();
     if (navigatorScope == null) {
       throw FlutterError(
         '''
@@ -21,15 +22,16 @@ The context used was: $context
 ''',
       );
     }
-    return navigatorScope.navigator;
+    return navigatorScope.flowNavigator;
   }
 
   /// Returns the nearest [FlowNavigator] that encloses the given [context],
   /// or null if no [FlowNavigator] is found.
-  static FlowNavigator? maybeOf(BuildContext context) {
-    final navigatorScope =
-        context.getInheritedWidgetOfExactType<FlowNavigatorScope>();
-    return navigatorScope?.navigator;
+  static FlowNavigator? maybeOf(BuildContext context, {bool listen = false}) {
+    final navigatorScope = listen
+        ? context.dependOnInheritedWidgetOfExactType<FlowNavigatorScope>()
+        : context.getInheritedWidgetOfExactType<FlowNavigatorScope>();
+    return navigatorScope?.flowNavigator;
   }
 
   /// Pushes the given [page] onto the navigator's stack.

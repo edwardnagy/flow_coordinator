@@ -5,14 +5,14 @@ import 'flow_navigator.dart';
 class FlowNavigatorScope extends InheritedWidget {
   const FlowNavigatorScope({
     super.key,
-    required this.navigator,
+    required this.flowNavigator,
     required super.child,
   });
 
-  final FlowNavigator navigator;
+  final FlowNavigator flowNavigator;
 
   @override
   bool updateShouldNotify(FlowNavigatorScope oldWidget) {
-    return navigator != oldWidget.navigator;
+    return flowNavigator != oldWidget.flowNavigator;
   }
 }
