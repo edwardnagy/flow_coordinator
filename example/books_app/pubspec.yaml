@@ -1,0 +1,22 @@
+name: books_app
+description: "A sample app that showcases common navigation scenarios."
+publish_to: "none"
+version: 0.1.0
+
+environment:
+  sdk: ^3.5.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flow_coordinator:
+    path: ../..
+  flutter_adaptive_scaffold: ^0.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
