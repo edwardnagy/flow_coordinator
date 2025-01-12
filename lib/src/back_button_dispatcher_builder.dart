@@ -23,31 +23,31 @@ class _BackButtonDispatcherBuilderState
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final parent = Router.maybeOf(context)?.backButtonDispatcher;
-    if (_backButtonDispatcher case final backButtonDispatcher?) {
-      final previousParent = backButtonDispatcher.parent;
-      if (parent != previousParent) {
-        previousParent.forget(backButtonDispatcher);
-        _backButtonDispatcher = parent?.createChildBackButtonDispatcher();
-      }
-    } else {
-      _backButtonDispatcher = parent?.createChildBackButtonDispatcher();
+    final oldBackButtonDispatcher = _backButtonDispatcher;
+    oldBackButtonDispatcher?.parent.forget(oldBackButtonDispatcher);
+
+    // Only handle back button events if the closest focus scope has focus.
+    // Topmost routes are expected to request focus. If we don't have focus,
+    // it means that another route is on top of this one, so this route (i.e.,
+    // nested routers within this route) should not handle back button events.
+    if (FocusScope.of(context).hasFocus) {
+      _backButtonDispatcher = Router.maybeOf(context)
+          ?.backButtonDispatcher
+          ?.createChildBackButtonDispatcher();
+      _backButtonDispatcher?.takePriority();
     }
   }
 
   @override
   void dispose() {
-    if (_backButtonDispatcher case final backButtonDispatcher?) {
-      backButtonDispatcher.parent.forget(backButtonDispatcher);
-    }
+    final backButtonDispatcher = _backButtonDispatcher;
+    backButtonDispatcher?.parent.forget(backButtonDispatcher);
 
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    _backButtonDispatcher?.takePriority();
-
     return widget.builder(context, _backButtonDispatcher);
   }
 }
