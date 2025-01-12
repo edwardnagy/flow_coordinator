@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'back_button_dispatcher_builder.dart';
+import 'flow_back_button_dispatcher_builder.dart';
 import 'flow_configuration.dart';
 import 'flow_navigator.dart';
 import 'flow_navigator_scope.dart';
@@ -77,7 +77,7 @@ class FlowCoordinatorState<S extends StatefulWidget, T> extends State<S>
           routeInformationProvider: routeInformationProvider,
         );
 
-        return BackButtonDispatcherBuilder(
+        return FlowBackButtonDispatcherBuilder(
           builder: (context, backButtonDispatcher) {
             return FlowNavigatorScope(
               flowNavigator: _routerDelegate,

@@ -1,6 +1,6 @@
 library flow_coordinator;
 
-export 'src/back_button_dispatcher_builder.dart';
+export 'src/flow_back_button_dispatcher_builder.dart';
 export 'src/flow_configuration.dart';
 export 'src/flow_coordinator.dart';
 export 'src/flow_coordinator_state.dart';

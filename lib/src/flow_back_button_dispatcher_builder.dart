@@ -1,9 +1,12 @@
 import 'package:flutter/widgets.dart';
 
-/// A widget that creates a child back button dispatcher with higher priority
-/// than the parent dispatcher.
-class BackButtonDispatcherBuilder extends StatefulWidget {
-  const BackButtonDispatcherBuilder({super.key, required this.builder});
+/// A widget that provides a [ChildBackButtonDispatcher] to its [builder] that
+/// can be passed to a nested [Router] to handle back button events.
+///
+/// The [ChildBackButtonDispatcher] is created if the nearest [FocusScope] has
+/// focus, ensuring back button events are handled by the topmost route only.
+class FlowBackButtonDispatcherBuilder extends StatefulWidget {
+  const FlowBackButtonDispatcherBuilder({super.key, required this.builder});
 
   final Widget Function(
     BuildContext context,
@@ -11,12 +14,12 @@ class BackButtonDispatcherBuilder extends StatefulWidget {
   ) builder;
 
   @override
-  State<BackButtonDispatcherBuilder> createState() =>
-      _BackButtonDispatcherBuilderState();
+  State<FlowBackButtonDispatcherBuilder> createState() =>
+      _FlowBackButtonDispatcherBuilderState();
 }
 
-class _BackButtonDispatcherBuilderState
-    extends State<BackButtonDispatcherBuilder> {
+class _FlowBackButtonDispatcherBuilderState
+    extends State<FlowBackButtonDispatcherBuilder> {
   ChildBackButtonDispatcher? _backButtonDispatcher;
 
   @override
@@ -31,9 +34,10 @@ class _BackButtonDispatcherBuilderState
     // it means that another route is on top of this one, so this route (i.e.,
     // nested routers within this route) should not handle back button events.
     if (FocusScope.of(context).hasFocus) {
-      _backButtonDispatcher = Router.maybeOf(context)
-          ?.backButtonDispatcher
-          ?.createChildBackButtonDispatcher();
+      final parentBackButtonDispatcher =
+          Router.maybeOf(context)?.backButtonDispatcher;
+      _backButtonDispatcher =
+          parentBackButtonDispatcher?.createChildBackButtonDispatcher();
       _backButtonDispatcher?.takePriority();
     }
   }
