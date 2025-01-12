@@ -1,8 +1,8 @@
 import 'package:flutter/widgets.dart';
 
 // TODO: Add documentation
-class FlowRoute<T> {
-  const FlowRoute(
+class FlowConfiguration<T> {
+  const FlowConfiguration(
     this.flowState, {
     // required this.parsedRouteInformation,
     this.childRouteInformation,

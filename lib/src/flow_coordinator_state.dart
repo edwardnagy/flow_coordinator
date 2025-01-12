@@ -2,9 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'back_button_dispatcher_builder.dart';
+import 'flow_configuration.dart';
 import 'flow_navigator.dart';
 import 'flow_navigator_scope.dart';
-import 'flow_route.dart';
 import 'flow_route_handler.dart';
 import 'flow_route_information_provider.dart';
 import 'flow_route_information_provider_builder.dart';
@@ -18,7 +18,8 @@ class FlowCoordinatorState<S extends StatefulWidget, T> extends State<S>
 
   FlowNavigator get flowNavigator => _routerDelegate;
 
-  RouteInformationParser<FlowRoute<T>>? get routeInformationParser => null;
+  RouteInformationParser<FlowConfiguration<T>>? get routeInformationParser =>
+      null;
 
   /// The initial route information in case the parent flow doesn't provide any.
   RouteInformation get initialRouteInformation => RouteInformation(uri: Uri());
@@ -27,18 +28,18 @@ class FlowCoordinatorState<S extends StatefulWidget, T> extends State<S>
       FlowRouterDelegate<T>(initialPages: initialPages);
 
   @override
-  Future<void> setNewState(T flowState) {
+  Future<void> setNewFlowState(T flowState) {
     return SynchronousFuture(null);
   }
 
   @override
-  Future<void> setInitialState(T flowState) {
-    return setNewState(flowState);
+  Future<void> setInitialFlowState(T flowState) {
+    return setNewFlowState(flowState);
   }
 
   @override
-  Future<void> setRestoredState(T flowState) {
-    return setNewState(flowState);
+  Future<void> setRestoredFlowState(T flowState) {
+    return setNewFlowState(flowState);
   }
 
   @override
@@ -51,30 +52,11 @@ class FlowCoordinatorState<S extends StatefulWidget, T> extends State<S>
     final currentFlowState = currentConfiguration.flowState;
     final currentRouteInformation =
         routeInformationParser?.restoreRouteInformation(
-      FlowRoute(currentFlowState, childRouteInformation: childRouteInformation),
+      FlowConfiguration(currentFlowState,
+          childRouteInformation: childRouteInformation),
     );
     return currentRouteInformation;
   }
-
-  // @override
-  // void buildCurrentRouteInformation(
-  //   RouteInformation routeInformation, {
-  //   required RouteInformationReportingType type,
-  // }) {
-  //   final currentConfiguration = _routerDelegate.currentConfiguration;
-  //   if (currentConfiguration == null) return;
-
-  //   final currentFlowState = currentConfiguration.flowState;
-  //   final currentRouteInformation =
-  //       routeInformationParser?.restoreRouteInformation(
-  //     FlowRoute(currentFlowState, childRouteInformation: routeInformation),
-  //   );
-  //   if (currentRouteInformation == null) return;
-
-  //   Router.maybeOf(context)
-  //       ?.routeInformationProvider
-  //       ?.routerReportsNewRouteInformation(currentRouteInformation, type: type);
-  // }
 
   @override
   void dispose() {

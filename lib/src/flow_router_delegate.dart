@@ -1,13 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'flow_configuration.dart';
 import 'flow_navigator.dart';
-import 'flow_route.dart';
 import 'flow_route_handler.dart';
 import 'flow_state_page_wrapper.dart';
 
-final class FlowRouterDelegate<T> extends RouterDelegate<FlowRoute<T>>
-    with ChangeNotifier, PopNavigatorRouterDelegateMixin<FlowRoute<T>>
+final class FlowRouterDelegate<T> extends RouterDelegate<FlowConfiguration<T>>
+    with ChangeNotifier, PopNavigatorRouterDelegateMixin<FlowConfiguration<T>>
     implements FlowNavigator {
   FlowRouterDelegate({
     required List<Page> initialPages,
@@ -22,25 +22,25 @@ final class FlowRouterDelegate<T> extends RouterDelegate<FlowRoute<T>>
   final GlobalKey<NavigatorState>? navigatorKey = GlobalKey();
 
   @override
-  Future<void> setNewRoutePath(FlowRoute<T> configuration) {
+  Future<void> setNewRoutePath(FlowConfiguration<T> configuration) {
     return flowRouteHandler?.setNewFlowRoute(configuration) ??
         SynchronousFuture(null);
   }
 
   @override
-  Future<void> setInitialRoutePath(FlowRoute<T> configuration) {
+  Future<void> setInitialRoutePath(FlowConfiguration<T> configuration) {
     return flowRouteHandler?.setInitialFlowRoute(configuration) ??
         SynchronousFuture(null);
   }
 
   @override
-  Future<void> setRestoredRoutePath(FlowRoute<T> configuration) {
+  Future<void> setRestoredRoutePath(FlowConfiguration<T> configuration) {
     return flowRouteHandler?.setRestoredFlowRoute(configuration) ??
         SynchronousFuture(null);
   }
 
   @override
-  FlowRoute<T>? get currentConfiguration {
+  FlowConfiguration<T>? get currentConfiguration {
     final lastPage = _pages.lastOrNull;
     if (lastPage is FlowStatePageWrapper) {
       final flowState = lastPage.flowState;
@@ -51,7 +51,7 @@ final class FlowRouterDelegate<T> extends RouterDelegate<FlowRoute<T>>
           'Ensure that FlowConfigWrapperPage is of the correct type.',
         );
       }
-      return FlowRoute(flowState);
+      return FlowConfiguration(flowState);
     } else {
       return null;
     }

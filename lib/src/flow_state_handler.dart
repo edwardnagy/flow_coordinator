@@ -7,11 +7,11 @@ abstract interface class FlowStateHandler<T> {
   ///
   /// Consider using a [SynchronousFuture] if the result can be computed
   /// synchronously to avoid waiting for the next microtask to schedule a build.
-  Future<void> setNewState(T flowState);
+  Future<void> setNewFlowState(T flowState);
 
   // TODO: Add documentation
-  Future<void> setInitialState(T flowState);
+  Future<void> setInitialFlowState(T flowState);
 
   // TODO: Add documentation
-  Future<void> setRestoredState(T flowState);
+  Future<void> setRestoredFlowState(T flowState);
 }
