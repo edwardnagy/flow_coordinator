@@ -2,9 +2,6 @@ import 'package:flutter/widgets.dart';
 
 /// A widget that provides a [ChildBackButtonDispatcher] to its [builder] that
 /// can be passed to a nested [Router] to handle back button events.
-///
-/// The [ChildBackButtonDispatcher] is created if the nearest [FocusScope] has
-/// focus, ensuring back button events are handled by the topmost route only.
 class FlowBackButtonDispatcherBuilder extends StatefulWidget {
   const FlowBackButtonDispatcherBuilder({super.key, required this.builder});
 
@@ -22,22 +19,20 @@ class _FlowBackButtonDispatcherBuilderState
     extends State<FlowBackButtonDispatcherBuilder> {
   ChildBackButtonDispatcher? _backButtonDispatcher;
 
+  bool _isTopRoute(BuildContext context) =>
+      (FlowBackButtonDispatcherScope.maybeOf(context)?.isTopRoute ?? true) &&
+      (ModalRoute.of(context)?.isCurrent ?? true);
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final oldBackButtonDispatcher = _backButtonDispatcher;
-    oldBackButtonDispatcher?.parent.forget(oldBackButtonDispatcher);
-
-    // Only handle back button events if the closest focus scope has focus.
-    // Topmost routes are expected to request focus. If we don't have focus,
-    // it means that another route is on top of this one, so this route (i.e.,
-    // nested routers within this route) should not handle back button events.
-    if (FocusScope.of(context).hasFocus) {
-      final parentBackButtonDispatcher =
-          Router.maybeOf(context)?.backButtonDispatcher;
-      _backButtonDispatcher =
-          parentBackButtonDispatcher?.createChildBackButtonDispatcher();
+    final backButtonDispatcher = _backButtonDispatcher;
+    backButtonDispatcher?.parent.forget(backButtonDispatcher);
+    if (_isTopRoute(context)) {
+      _backButtonDispatcher = Router.maybeOf(context)
+          ?.backButtonDispatcher
+          ?.createChildBackButtonDispatcher();
       _backButtonDispatcher?.takePriority();
     }
   }
@@ -52,6 +47,28 @@ class _FlowBackButtonDispatcherBuilderState
 
   @override
   Widget build(BuildContext context) {
-    return widget.builder(context, _backButtonDispatcher);
+    return FlowBackButtonDispatcherScope(
+      isTopRoute: _isTopRoute(context),
+      child: Builder(
+        builder: (context) => widget.builder(context, _backButtonDispatcher),
+      ),
+    );
   }
+}
+
+class FlowBackButtonDispatcherScope extends InheritedWidget {
+  const FlowBackButtonDispatcherScope({
+    super.key,
+    required super.child,
+    required this.isTopRoute,
+  });
+
+  final bool isTopRoute;
+
+  static FlowBackButtonDispatcherScope? maybeOf(BuildContext context) => context
+      .dependOnInheritedWidgetOfExactType<FlowBackButtonDispatcherScope>();
+
+  @override
+  bool updateShouldNotify(FlowBackButtonDispatcherScope oldWidget) =>
+      isTopRoute != oldWidget.isTopRoute;
 }
