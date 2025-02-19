@@ -16,11 +16,6 @@ abstract class FlowRouteInformationProvider extends RouteInformationProvider {
   Stream<ConsumableValue<RouteInformation>> get childConsumableValueStream;
 
   ConsumableValue<RouteInformation>? get childConsumableValue;
-
-  void childReportsNewRouteInformation(
-    RouteInformation childRouteInformation, {
-    RouteInformationReportingType type = RouteInformationReportingType.none,
-  });
 }
 
 /// A wrapper for values that ensures single-use consumption.
@@ -67,8 +62,6 @@ class RootFlowRouteInformationProvider extends PlatformRouteInformationProvider
     ConsumableValue(value),
   );
 
-  RouteInformation? _pendingReportedRouteInformation;
-
   @override
   ConsumableValue<RouteInformation>? get childConsumableValue =>
       _childConsumableValueController.value;
@@ -88,23 +81,42 @@ class RootFlowRouteInformationProvider extends PlatformRouteInformationProvider
     _childConsumableValueController.add(ConsumableValue(value));
   }
 
+  bool _routeInformationReportingTaskScheduled = false;
+
+  /// The route information that is pending to be reported.
+  RouteInformation? _pendingRouteInformation;
+
+  void _scheduleRouteInformationReportingTask() {
+    if (_routeInformationReportingTaskScheduled) {
+      return;
+    }
+    _routeInformationReportingTaskScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback(
+      _reportRouteInformation,
+      debugLabel: 'RootFlowRouteInformationProvider.reportRouteInfo',
+    );
+  }
+
+  void _reportRouteInformation(Duration timestamp) {
+    assert(_routeInformationReportingTaskScheduled);
+    _routeInformationReportingTaskScheduled = false;
+
+    if (_pendingRouteInformation case final pendingRouteInformation?) {
+      final isNewRouteInformation = pendingRouteInformation.uri != value.uri;
+      if (isNewRouteInformation) {
+        super.routerReportsNewRouteInformation(pendingRouteInformation);
+      }
+      _pendingRouteInformation = null;
+    }
+  }
+
   @override
-  void childReportsNewRouteInformation(
-    RouteInformation childRouteInformation, {
+  void routerReportsNewRouteInformation(
+    RouteInformation routeInformation, {
     RouteInformationReportingType type = RouteInformationReportingType.none,
   }) {
-    // Reports only the last update in case of multiple synchronous updates.
-    // This avoids interfering with browser history, which can break the
-    // back and forward navigation buttons.
-    _pendingReportedRouteInformation = childRouteInformation;
-    Future.microtask(() {
-      // Ignore this update if the route information has changed since this
-      // call.
-      if (_pendingReportedRouteInformation != childRouteInformation) {
-        return;
-      }
-      routerReportsNewRouteInformation(childRouteInformation, type: type);
-    });
+    _pendingRouteInformation = routeInformation;
+    _scheduleRouteInformationReportingTask();
   }
 }
 
@@ -155,37 +167,6 @@ class ChildFlowRouteInformationProvider extends FlowRouteInformationProvider
     _consumableValueSubscription?.cancel();
     _childConsumableValueController.close();
     super.dispose();
-  }
-
-  @override
-  void routerReportsNewRouteInformation(
-    RouteInformation routeInformation, {
-    RouteInformationReportingType type = RouteInformationReportingType.none,
-  }) {
-    _value = routeInformation;
-    parent.childReportsNewRouteInformation(
-      routeInformation,
-      type: type,
-    );
-  }
-
-  @override
-  void childReportsNewRouteInformation(
-    RouteInformation childRouteInformation, {
-    RouteInformationReportingType type = RouteInformationReportingType.none,
-  }) {
-    // Update the child route information.
-    _childConsumableValueController.add(
-      ConsumableValue(childRouteInformation, isConsumed: true),
-    );
-    final routeInformation = routeInformationProcessor.createRouteInformation(
-      childRouteInformation: childRouteInformation,
-    );
-    if (routeInformation == null) {
-      // TODO: Log the error.
-      return;
-    }
-    parent.childReportsNewRouteInformation(routeInformation, type: type);
   }
 
   void setChildValue(RouteInformation childValue) {

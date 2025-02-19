@@ -4,7 +4,6 @@ import 'package:flutter/widgets.dart';
 import 'flow_configuration.dart';
 import 'flow_navigator.dart';
 import 'flow_route_handler.dart';
-import 'flow_state_page_wrapper.dart';
 
 final class FlowRouterDelegate<T> extends RouterDelegate<FlowConfiguration<T>>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<FlowConfiguration<T>>
@@ -37,24 +36,6 @@ final class FlowRouterDelegate<T> extends RouterDelegate<FlowConfiguration<T>>
   Future<void> setRestoredRoutePath(FlowConfiguration<T> configuration) {
     return flowRouteHandler?.setRestoredFlowRoute(configuration) ??
         SynchronousFuture(null);
-  }
-
-  @override
-  FlowConfiguration<T>? get currentConfiguration {
-    final lastPage = _pages.lastOrNull;
-    if (lastPage is FlowStatePageWrapper) {
-      final flowState = lastPage.flowState;
-      if (flowState is! T) {
-        throw FlutterError(
-          'Expected a FlowConfigPageWrapper<$T>, '
-          'but found: ${lastPage.runtimeType}.\n'
-          'Ensure that FlowConfigWrapperPage is of the correct type.',
-        );
-      }
-      return FlowConfiguration(flowState);
-    } else {
-      return null;
-    }
   }
 
   @override
@@ -128,27 +109,10 @@ final class FlowRouterDelegate<T> extends RouterDelegate<FlowConfiguration<T>>
 
   @override
   Widget build(BuildContext context) {
-    final effectivePages = _pages.map((page) {
-      if (page case final FlowStatePageWrapper flowStatePageWrapper) {
-        return flowStatePageWrapper.page;
-      } else {
-        return page;
-      }
-    }).toList();
-
     return Navigator(
       key: navigatorKey,
-      pages: effectivePages,
-      onDidRemovePage: (effectiveRemovedPage) {
-        final removedIndex = effectivePages.lastIndexOf(effectiveRemovedPage);
-        if (removedIndex == -1) {
-          // Page is already removed (e.g., because of a new deep link).
-          return;
-        }
-        _pages.removeAt(removedIndex);
-        // Notify the router that a new [currentConfiguration] is available.
-        notifyListeners();
-      },
+      pages: _pages,
+      onDidRemovePage: _pages.remove,
     );
   }
 }

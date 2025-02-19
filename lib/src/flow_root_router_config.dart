@@ -2,15 +2,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'flow_route_information_provider.dart';
+import 'flow_route_information_reporter.dart';
 
 class FlowRouterConfig extends RouterConfig<RouteInformation> {
   FlowRouterConfig({
-    required Widget home,
+    required WidgetBuilder builder,
     String? initialRoutePath,
     FlowRouteInformationProvider? flowRouteInformationProvider,
     BackButtonDispatcher? backButtonDispatcher,
   }) : super(
-          routerDelegate: FlowRootRouterDelegate(home: home),
+          // TODO: Dispose of the router delegate.
+          routerDelegate: FlowRootRouterDelegate(builder: builder),
           routeInformationProvider: flowRouteInformationProvider ??
               RootFlowRouteInformationProvider(
                 initialRouteInformation: RouteInformation(
@@ -52,10 +54,10 @@ class FlowRootRouteInformationParser
 class FlowRootRouterDelegate extends RouterDelegate<RouteInformation>
     with ChangeNotifier {
   FlowRootRouterDelegate({
-    required this.home,
+    required this.builder,
   });
 
-  final Widget home;
+  final WidgetBuilder builder;
 
   @override
   Future<void> setNewRoutePath(RouteInformation configuration) =>
@@ -65,5 +67,16 @@ class FlowRootRouterDelegate extends RouterDelegate<RouteInformation>
   Future<bool> popRoute() => SynchronousFuture(false);
 
   @override
-  Widget build(BuildContext context) => home;
+  Widget build(BuildContext context) {
+    final rootRouteInformationProvider =
+        Router.of(context).routeInformationProvider;
+    assert(rootRouteInformationProvider != null);
+    final reporter = RootFlowRouteInformationReporter(
+      routeInformationProvider: rootRouteInformationProvider!,
+    );
+    return FlowRouteInformationReporterScope(
+      reporter,
+      child: Builder(builder: builder),
+    );
+  }
 }
