@@ -6,14 +6,13 @@ import 'flow_configuration.dart';
 import 'flow_navigator.dart';
 import 'flow_navigator_scope.dart';
 import 'flow_route_handler.dart';
-import 'flow_route_information_provider.dart';
 import 'flow_route_information_provider_builder.dart';
 import 'flow_router_delegate.dart';
 import 'flow_state_handler.dart';
 
 // TODO: Add documentation
 class FlowCoordinatorState<S extends StatefulWidget, T> extends State<S>
-    implements FlowStateHandler<T>, RouteInformationProcessor {
+    implements FlowStateHandler<T> {
   List<Page> get initialPages => [];
 
   FlowNavigator get flowNavigator => _routerDelegate;
@@ -40,22 +39,6 @@ class FlowCoordinatorState<S extends StatefulWidget, T> extends State<S>
   @override
   Future<void> setRestoredFlowState(T flowState) {
     return setNewFlowState(flowState);
-  }
-
-  @override
-  RouteInformation? createRouteInformation({
-    required RouteInformation childRouteInformation,
-  }) {
-    final currentConfiguration = _routerDelegate.currentConfiguration;
-    if (currentConfiguration == null) return null;
-
-    final currentFlowState = currentConfiguration.flowState;
-    final currentRouteInformation =
-        routeInformationParser?.restoreRouteInformation(
-      FlowConfiguration(currentFlowState,
-          childRouteInformation: childRouteInformation),
-    );
-    return currentRouteInformation;
   }
 
   @override

@@ -3,14 +3,6 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:rxdart/subjects.dart';
 
-abstract interface class RouteInformationProcessor {
-  /// Creates a new [RouteInformation] by combining the current state of the flow
-  /// with the provided [childRouteInformation].
-  RouteInformation? createRouteInformation({
-    required RouteInformation childRouteInformation,
-  });
-}
-
 abstract class FlowRouteInformationProvider extends RouteInformationProvider {
   /// The value that child (nested) flow coordinators can consume.
   Stream<ConsumableValue<RouteInformation>> get childConsumableValueStream;
