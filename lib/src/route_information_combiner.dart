@@ -28,9 +28,7 @@ class DefaultRouteInformationCombiner implements RouteInformationCombiner {
   }) {
     final currentUri = currentRouteInformation.uri;
     final childUri = childRouteInformation.uri;
-
-    // Combine the URIs.
-    var uri = Uri(
+    final uri = Uri(
       pathSegments:
           currentUri.pathSegments.isEmpty && childUri.pathSegments.isEmpty
               ? null
@@ -46,10 +44,6 @@ class DefaultRouteInformationCombiner implements RouteInformationCombiner {
             },
       fragment: childUri.fragment.isEmpty ? null : childUri.fragment,
     );
-
-    // Prefix the URI with a slash if it doesn't have one.
-    uri = uri.toString().startsWith('/') ? uri : Uri.parse('/$uri');
-
     return RouteInformation(
       uri: uri,
       state: childRouteInformation.state,

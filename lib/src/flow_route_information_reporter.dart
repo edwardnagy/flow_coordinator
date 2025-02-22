@@ -32,8 +32,17 @@ class RootFlowRouteInformationReporter extends FlowRouteInformationReporter {
 
   @override
   void childReportsRouteInformation(RouteInformation childRouteInformation) {
+    // Prefix the URI with a slash if it doesn't have one.
+    final uri = childRouteInformation.uri;
+    final prefixedUri =
+        uri.toString().startsWith('/') ? uri : Uri.parse('/$uri');
+    final prefixedRouteInformation = RouteInformation(
+      uri: prefixedUri,
+      state: childRouteInformation.state,
+    );
+
     routeInformationProvider
-        .routerReportsNewRouteInformation(childRouteInformation);
+        .routerReportsNewRouteInformation(prefixedRouteInformation);
   }
 }
 
