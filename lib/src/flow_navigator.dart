@@ -16,7 +16,7 @@ abstract interface class FlowNavigator {
         '''
 FlowNavigator.of() called with a context that does not contain a FlowNavigatorScope.
 
-This happens if no NavigatorFlowCoordinatorState is found above this widget in the widget tree.
+This happens if no FlowCoordinatorState is found above this widget in the widget tree.
 
 The context used was: $context
 ''',
