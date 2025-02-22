@@ -1,22 +1,22 @@
 import 'package:flow_coordinator/flow_coordinator.dart';
 import 'package:flutter/material.dart';
 
-import 'flow/authenticated/authenticated_flow_coordinator.dart';
+import 'flow/home_flow_coordinator.dart';
 
 void main() {
-  runApp(const MainApp());
+  runApp(const App());
 }
 
-class MainApp extends StatefulWidget {
-  const MainApp({super.key});
+class App extends StatefulWidget {
+  const App({super.key});
 
   @override
-  State<MainApp> createState() => _MainAppState();
+  State<App> createState() => _AppState();
 }
 
-class _MainAppState extends State<MainApp> {
+class _AppState extends State<App> {
   final _routerConfig = FlowRouterConfig(
-    home: const AuthenticatedFlowCoordinator(),
+    builder: (context) => const HomeFlowCoordinator(),
   );
 
   @override

@@ -5,6 +5,16 @@ class BookCreationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      appBar: AppBar(
+        leading: ModalRoute.of(context) is RawDialogRoute
+            ? const CloseButton()
+            : null,
+        title: const Text('Create a new book'),
+      ),
+      body: const Center(
+        child: Text('Create a new book'),
+      ),
+    );
   }
 }

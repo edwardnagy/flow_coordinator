@@ -8,7 +8,7 @@ abstract interface class BooksListScreenListener<T extends StatefulWidget>
     extends State<T> {
   void onCategorySelected(BookCategory category);
 
-  void onBookSelected({required String bookId, required BookCategory category});
+  void onBookSelected({required String bookID, required BookCategory category});
 
   void onCreateBook();
 }
@@ -26,34 +26,46 @@ class _BooksListScreenState extends State<BooksListScreen>
     with SingleTickerProviderStateMixin {
   static const _categories = BookCategory.values;
 
-  late final _tabController = TabController(
-    length: _categories.length,
-    initialIndex: 0,
-    vsync: this,
-  );
+  late final TabController _tabController;
 
-  void _updateSelectedTab() {
-    if (widget.selectedCategory case final selectedCategory?) {
-      _tabController.index = _categories.indexOf(selectedCategory);
+  void _onTabChanged() {
+    if (_tabController.indexIsChanging) {
+      return;
+    }
+    final newCategory = _categories[_tabController.index];
+    if (newCategory != widget.selectedCategory) {
+      FlowCoordinator.of<BooksListScreenListener>(context)
+          .onCategorySelected(newCategory);
     }
   }
 
   @override
   void initState() {
     super.initState();
-    _updateSelectedTab();
+    final int initialTabIndex;
+    if (widget.selectedCategory case final selectedCategory?) {
+      initialTabIndex = _categories.indexOf(selectedCategory);
+    } else {
+      initialTabIndex = 0;
+    }
+    _tabController = TabController(
+      length: _categories.length,
+      initialIndex: initialTabIndex,
+      vsync: this,
+    )..addListener(_onTabChanged);
   }
 
   @override
-  void didUpdateWidget(covariant BooksListScreen oldWidget) {
+  void didUpdateWidget(BooksListScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.selectedCategory != oldWidget.selectedCategory) {
-      _updateSelectedTab();
+    if (widget.selectedCategory case final widgetCategory?) {
+      _tabController.index = _categories.indexOf(widgetCategory);
     }
   }
 
   @override
   void dispose() {
+    _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
     super.dispose();
   }
@@ -85,10 +97,7 @@ class _BooksListScreenState extends State<BooksListScreen>
               subtitle: Text(book.authorName),
               onTap: () {
                 FlowCoordinator.of<BooksListScreenListener>(context)
-                    .onBookSelected(
-                  bookId: book.id,
-                  category: book.category,
-                );
+                    .onBookSelected(bookID: book.id, category: book.category);
                 controller.closeView(searchQuery);
               },
             );
@@ -101,35 +110,34 @@ class _BooksListScreenState extends State<BooksListScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Books'),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: _categories
+              .map(
+                (category) => Tab(
+                  text: switch (category) {
+                    BookCategory.fiction => 'Fiction',
+                    BookCategory.romance => 'Romance',
+                    BookCategory.biography => 'Biography',
+                  },
+                ),
+              )
+              .toList(),
+        ),
+      ),
       body: Column(
         children: [
-          Padding(
-            padding: EdgeInsets.only(
-              top: 16.0 + MediaQuery.paddingOf(context).top,
-              left: 16.0 + MediaQuery.of(context).padding.left,
-              right: 16.0 + MediaQuery.of(context).padding.right,
-              bottom: 8.0,
-            ),
-            child: _searchBar(context),
-          ),
-          TabBar(
-            controller: _tabController,
-            onTap: (index) {
-              FlowCoordinator.of<BooksListScreenListener>(context)
-                  .onCategorySelected(_categories[index]);
-            },
-            tabs: _categories
-                .map(
-                  (category) => Tab(
-                    text: switch (category) {
-                      BookCategory.fiction => 'Fiction',
-                      BookCategory.romance => 'Romance',
-                      BookCategory.biography => 'Biography',
-                    },
-                  ),
-                )
-                .toList(),
-          ),
+          // Padding(
+          //   padding: EdgeInsets.only(
+          //     top: 16.0 + MediaQuery.paddingOf(context).top,
+          //     left: 16.0 + MediaQuery.of(context).padding.left,
+          //     right: 16.0 + MediaQuery.of(context).padding.right,
+          //     bottom: 8.0,
+          //   ),
+          //   child: _searchBar(context),
+          // ),
           Expanded(
             child: MediaQuery(
               data: MediaQuery.of(context).copyWith(
@@ -154,7 +162,7 @@ class _BooksListScreenState extends State<BooksListScreen>
                             FlowCoordinator.of<BooksListScreenListener>(
                               context,
                             ).onBookSelected(
-                              bookId: book.id,
+                              bookID: book.id,
                               category: category,
                             );
                           },
@@ -170,8 +178,7 @@ class _BooksListScreenState extends State<BooksListScreen>
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          FlowCoordinator.of<BooksListScreenListener>(context)
-              .onCreateBook();
+          FlowCoordinator.of<BooksListScreenListener>(context).onCreateBook();
         },
         label: const Text('Add Book'),
         icon: const Icon(Icons.add),

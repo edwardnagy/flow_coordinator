@@ -1,18 +1,35 @@
 import 'package:flutter/material.dart';
 
+import '../data/book.dart';
 import '../data/book_repository.dart';
 
 class BookDetailsScreen extends StatelessWidget {
   const BookDetailsScreen({
     super.key,
-    required this.bookId,
+    required this.bookID,
   });
 
-  final String bookId;
+  final String bookID;
 
   @override
   Widget build(BuildContext context) {
-    final book = BookRepository().getBookById(bookId);
+    Book? book;
+    try {
+      book = BookRepository().getBookByID(bookID);
+    } on StateError {
+      book = null;
+    }
+
+    if (book == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Book not found'),
+        ),
+        body: const Center(
+          child: Text('The book was not found.'),
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(

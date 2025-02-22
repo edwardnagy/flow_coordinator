@@ -6,8 +6,8 @@ class BookRepository {
   List<Book> getBooksByCategory(BookCategory category) =>
       _mockBooks.where((book) => book.category == category).toList();
 
-  Book getBookById(String bookId) =>
-      _mockBooks.firstWhere((book) => book.id == bookId);
+  Book getBookByID(String bookID) =>
+      _mockBooks.firstWhere((book) => book.id == bookID);
 
   List<Book> searchBooks(String query) => _mockBooks
       .where((book) =>
@@ -19,37 +19,37 @@ class BookRepository {
 const _mockBooks = [
   // Fiction
   Book(
-    id: '0',
+    id: 'the-great-gatsby',
     title: 'The Great Gatsby',
     authorName: 'F. Scott Fitzgerald',
     category: BookCategory.fiction,
   ),
   Book(
-    id: '1',
+    id: 'to-kill-a-mockingbird',
     title: 'To Kill a Mockingbird',
     authorName: 'Harper Lee',
     category: BookCategory.fiction,
   ),
   Book(
-    id: '2',
+    id: '1984',
     title: '1984',
     authorName: 'George Orwell',
     category: BookCategory.fiction,
   ),
   Book(
-    id: '3',
+    id: 'pride-and-prejudice',
     title: 'Pride and Prejudice',
     authorName: 'Jane Austen',
     category: BookCategory.fiction,
   ),
   Book(
-    id: '4',
+    id: 'the-catcher-in-the-rye',
     title: 'The Catcher in the Rye',
     authorName: 'J.D. Salinger',
     category: BookCategory.fiction,
   ),
   Book(
-    id: '5',
+    id: 'animal-farm',
     title: 'Animal Farm',
     authorName: 'George Orwell',
     category: BookCategory.fiction,
@@ -57,31 +57,31 @@ const _mockBooks = [
 
   // Romance
   Book(
-    id: '6',
+    id: 'sense-and-sensibility',
     title: 'Sense and Sensibility',
     authorName: 'Jane Austen',
     category: BookCategory.romance,
   ),
   Book(
-    id: '7',
+    id: 'the-notebook',
     title: 'The Notebook',
     authorName: 'Nicholas Sparks',
     category: BookCategory.romance,
   ),
   Book(
-    id: '8',
+    id: 'gone-with-the-wind',
     title: 'Gone with the Wind',
     authorName: 'Margaret Mitchell',
     category: BookCategory.romance,
   ),
   Book(
-    id: '9',
+    id: 'the-fault-in-our-stars',
     title: 'The Fault in Our Stars',
     authorName: 'John Green',
     category: BookCategory.romance,
   ),
   Book(
-    id: '10',
+    id: 'me-before-you',
     title: 'Me Before You',
     authorName: 'Jojo Moyes',
     category: BookCategory.romance,
@@ -89,19 +89,19 @@ const _mockBooks = [
 
   // Biography
   Book(
-    id: '11',
+    id: 'steve-jobs',
     title: 'Steve Jobs',
     authorName: 'Walter Isaacson',
     category: BookCategory.biography,
   ),
   Book(
-    id: '12',
+    id: 'becoming',
     title: 'Becoming',
     authorName: 'Michelle Obama',
     category: BookCategory.biography,
   ),
   Book(
-    id: '13',
+    id: 'the-diary-of',
     title: 'The Diary of a Young Girl',
     authorName: 'Anne Frank',
     category: BookCategory.biography,
