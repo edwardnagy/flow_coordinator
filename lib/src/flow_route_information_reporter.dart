@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-import 'flow_configuration.dart';
+import 'route_information_combiner.dart';
 
 abstract class FlowRouteInformationReporter {
   static FlowRouteInformationReporter of(BuildContext context) {
@@ -23,44 +23,6 @@ The context used was: $context
   void childReportsRouteInformation(RouteInformation childRouteInformation);
 }
 
-class ChildFlowRouteInformationReporter<T>
-    extends FlowRouteInformationReporter {
-  ChildFlowRouteInformationReporter({
-    required this.parent,
-    required this.routeInformationParser,
-  });
-
-  final FlowRouteInformationReporter parent;
-  final RouteInformationParser<FlowConfiguration<T>> routeInformationParser;
-
-  late T _flowState;
-
-  void setFlowState(T flowState) {
-    _flowState = flowState;
-    final configuration = FlowConfiguration(flowState);
-    final routeInformation =
-        routeInformationParser.restoreRouteInformation(configuration);
-
-    if (routeInformation != null) {
-      parent.childReportsRouteInformation(routeInformation);
-    }
-  }
-
-  @override
-  void childReportsRouteInformation(RouteInformation childRouteInformation) {
-    final configuration = FlowConfiguration(
-      _flowState,
-      childRouteInformation: childRouteInformation,
-    );
-    final routeInformation =
-        routeInformationParser.restoreRouteInformation(configuration);
-
-    if (routeInformation != null) {
-      parent.childReportsRouteInformation(routeInformation);
-    }
-  }
-}
-
 class RootFlowRouteInformationReporter extends FlowRouteInformationReporter {
   RootFlowRouteInformationReporter({
     required this.routeInformationProvider,
@@ -75,6 +37,34 @@ class RootFlowRouteInformationReporter extends FlowRouteInformationReporter {
   }
 }
 
+class ChildFlowRouteInformationReporter extends FlowRouteInformationReporter {
+  ChildFlowRouteInformationReporter({
+    required this.parent,
+    required this.routeInformationCombiner,
+  });
+
+  final FlowRouteInformationReporter parent;
+  final RouteInformationCombiner routeInformationCombiner;
+
+  late RouteInformation _currentRouteInformation;
+
+  void setCurrentRouteInformation(RouteInformation routeInformation) {
+    _currentRouteInformation = routeInformation;
+    parent.childReportsRouteInformation(routeInformation);
+  }
+
+  @override
+  void childReportsRouteInformation(RouteInformation childRouteInformation) {
+    final routeInformation = routeInformationCombiner.combine(
+      currentRouteInformation: _currentRouteInformation,
+      childRouteInformation: childRouteInformation,
+    );
+    parent.childReportsRouteInformation(routeInformation);
+  }
+}
+
+/// NOTE: Reporting happens on the route level, not the router level. Only the
+/// top-most route should report route information.
 class FlowRouteInformationReporterScope extends InheritedWidget {
   const FlowRouteInformationReporterScope(
     this.value, {
@@ -83,12 +73,6 @@ class FlowRouteInformationReporterScope extends InheritedWidget {
   });
 
   final FlowRouteInformationReporter value;
-
-  static FlowRouteInformationReporterScope? maybeOf(
-    BuildContext context,
-  ) =>
-      context.dependOnInheritedWidgetOfExactType<
-          FlowRouteInformationReporterScope>();
 
   @override
   bool updateShouldNotify(

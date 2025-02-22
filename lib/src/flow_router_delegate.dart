@@ -1,12 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'flow_configuration.dart';
 import 'flow_navigator.dart';
-import 'flow_route_handler.dart';
 
-final class FlowRouterDelegate<T> extends RouterDelegate<FlowConfiguration<T>>
-    with ChangeNotifier, PopNavigatorRouterDelegateMixin<FlowConfiguration<T>>
+final class FlowRouterDelegate extends RouterDelegate<RouteInformation>
+    with ChangeNotifier, PopNavigatorRouterDelegateMixin
     implements FlowNavigator {
   FlowRouterDelegate({
     required List<Page> initialPages,
@@ -14,29 +12,18 @@ final class FlowRouterDelegate<T> extends RouterDelegate<FlowConfiguration<T>>
 
   List<Page> _pages;
 
-  FlowNavigator? parentFlowNavigator;
-  FlowRouteHandler<T>? flowRouteHandler;
+  FlowNavigator? _parentFlowNavigator;
 
   @override
   final GlobalKey<NavigatorState>? navigatorKey = GlobalKey();
 
-  @override
-  Future<void> setNewRoutePath(FlowConfiguration<T> configuration) {
-    return flowRouteHandler?.setNewFlowRoute(configuration) ??
-        SynchronousFuture(null);
+  void setParentFlowNavigator(FlowNavigator? parentFlowNavigator) {
+    _parentFlowNavigator = parentFlowNavigator;
   }
 
   @override
-  Future<void> setInitialRoutePath(FlowConfiguration<T> configuration) {
-    return flowRouteHandler?.setInitialFlowRoute(configuration) ??
-        SynchronousFuture(null);
-  }
-
-  @override
-  Future<void> setRestoredRoutePath(FlowConfiguration<T> configuration) {
-    return flowRouteHandler?.setRestoredFlowRoute(configuration) ??
-        SynchronousFuture(null);
-  }
+  Future<void> setNewRoutePath(RouteInformation configuration) =>
+      SynchronousFuture(null);
 
   @override
   void push(Page page) {
@@ -62,7 +49,7 @@ final class FlowRouterDelegate<T> extends RouterDelegate<FlowConfiguration<T>>
     if (canPopInternally) {
       return true;
     }
-    final canParentPop = parentFlowNavigator?.canPop();
+    final canParentPop = _parentFlowNavigator?.canPop();
     if (canParentPop == true) {
       return true;
     }
@@ -80,7 +67,7 @@ final class FlowRouterDelegate<T> extends RouterDelegate<FlowConfiguration<T>>
     if (internalPopResult) {
       return true;
     }
-    final parentPopResult = await parentFlowNavigator?.maybePop(result);
+    final parentPopResult = await _parentFlowNavigator?.maybePop(result);
     if (parentPopResult == true) {
       return true;
     }
@@ -94,7 +81,7 @@ final class FlowRouterDelegate<T> extends RouterDelegate<FlowConfiguration<T>>
 
   @override
   void pop<S extends Object?>([S? result]) {
-    final parentFlowNavigator = this.parentFlowNavigator;
+    final parentFlowNavigator = _parentFlowNavigator;
     if (canPopInternally() || parentFlowNavigator == null) {
       popInternally(result);
     } else {

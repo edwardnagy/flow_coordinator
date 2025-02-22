@@ -8,6 +8,8 @@ class FlowRouterConfig extends RouterConfig<RouteInformation> {
   FlowRouterConfig({
     required WidgetBuilder builder,
     String? initialRoutePath,
+    // TODO: Can this be a RouteInformationProvider?
+    // TODO: Add option to disable the slash prefix for the URI.
     FlowRouteInformationProvider? flowRouteInformationProvider,
     BackButtonDispatcher? backButtonDispatcher,
   }) : super(
@@ -21,7 +23,7 @@ class FlowRouterConfig extends RouterConfig<RouteInformation> {
                   ),
                 ),
               ),
-          routeInformationParser: FlowRootRouteInformationParser(),
+          routeInformationParser: IdentityRouteInformationParser(),
           backButtonDispatcher:
               backButtonDispatcher ?? RootBackButtonDispatcher(),
         );
@@ -38,7 +40,8 @@ String _getInitialRouteName({String? initialRoutePath}) {
           WidgetsBinding.instance.platformDispatcher.defaultRouteName;
 }
 
-class FlowRootRouteInformationParser
+/// A parser that returns the route information as is.
+class IdentityRouteInformationParser
     extends RouteInformationParser<RouteInformation> {
   @override
   Future<RouteInformation> parseRouteInformation(
@@ -70,13 +73,16 @@ class FlowRootRouterDelegate extends RouterDelegate<RouteInformation>
   Widget build(BuildContext context) {
     final rootRouteInformationProvider =
         Router.of(context).routeInformationProvider;
-    assert(rootRouteInformationProvider != null);
-    final reporter = RootFlowRouteInformationReporter(
-      routeInformationProvider: rootRouteInformationProvider!,
-    );
-    return FlowRouteInformationReporterScope(
-      reporter,
-      child: Builder(builder: builder),
+    // TODO: Support null rootRouteInformationProvider or other than FlowRouteInformationProvider.
+    assert(rootRouteInformationProvider is FlowRouteInformationProvider);
+    return FlowRouteInformationProviderScope(
+      rootRouteInformationProvider as FlowRouteInformationProvider,
+      child: FlowRouteInformationReporterScope(
+        RootFlowRouteInformationReporter(
+          routeInformationProvider: rootRouteInformationProvider,
+        ),
+        child: Builder(builder: builder),
+      ),
     );
   }
 }

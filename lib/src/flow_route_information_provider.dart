@@ -3,44 +3,19 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:rxdart/subjects.dart';
 
+import 'consumable_value.dart';
+
 abstract class FlowRouteInformationProvider extends RouteInformationProvider {
+  static FlowRouteInformationProvider? maybeOf(BuildContext context) {
+    final scope = context.dependOnInheritedWidgetOfExactType<
+        FlowRouteInformationProviderScope>();
+    return scope?.value;
+  }
+
   /// The value that child (nested) flow coordinators can consume.
   Stream<ConsumableValue<RouteInformation>> get childConsumableValueStream;
 
   ConsumableValue<RouteInformation>? get childConsumableValue;
-}
-
-/// A wrapper for values that ensures single-use consumption.
-///
-/// Used to encapsulate values, such as route information, that should
-/// only be processed once. After being consumed, the value is marked
-/// as consumed and ignored by other listeners.
-///
-/// Example:
-/// ```dart
-/// final value = ConsumableValue('Navigate to home');
-/// if (!value.isConsumed) {
-///   print(value.value); // Use the value.
-///   value.isConsumed = true; // Mark as consumed.
-/// }
-/// ```
-class ConsumableValue<T> {
-  /// Creates a consumable value.
-  ConsumableValue(this.value, {this.isConsumed = false});
-
-  /// The wrapped value.
-  final T value;
-
-  /// Whether this value has been consumed.
-  ///
-  /// Once consumed, it should not be used again.
-  bool isConsumed;
-
-  T? getAndConsumeOrNull() {
-    if (isConsumed) return null;
-    isConsumed = true;
-    return value;
-  }
 }
 
 class RootFlowRouteInformationProvider extends PlatformRouteInformationProvider
@@ -96,6 +71,7 @@ class RootFlowRouteInformationProvider extends PlatformRouteInformationProvider
     if (_pendingRouteInformation case final pendingRouteInformation?) {
       final isNewRouteInformation = pendingRouteInformation.uri != value.uri;
       if (isNewRouteInformation) {
+        // TODO: Add logging for the reported route information.
         super.routerReportsNewRouteInformation(pendingRouteInformation);
       }
       _pendingRouteInformation = null;
@@ -116,7 +92,6 @@ class ChildFlowRouteInformationProvider extends FlowRouteInformationProvider
     with ChangeNotifier {
   ChildFlowRouteInformationProvider({
     required this.parent,
-    required this.routeInformationProcessor,
     required RouteInformation initialValue,
   }) : _value =
             parent.childConsumableValue?.getAndConsumeOrNull() ?? initialValue {
@@ -125,7 +100,6 @@ class ChildFlowRouteInformationProvider extends FlowRouteInformationProvider
   }
 
   final FlowRouteInformationProvider parent;
-  final RouteInformationProcessor routeInformationProcessor;
 
   StreamSubscription? _consumableValueSubscription;
 
@@ -162,9 +136,20 @@ class ChildFlowRouteInformationProvider extends FlowRouteInformationProvider
   }
 
   void setChildValue(RouteInformation childValue) {
-    if (childValue == _childConsumableValueController.valueOrNull?.value) {
-      return;
-    }
     _childConsumableValueController.add(ConsumableValue(childValue));
   }
+}
+
+class FlowRouteInformationProviderScope extends InheritedWidget {
+  const FlowRouteInformationProviderScope(
+    this.value, {
+    super.key,
+    required super.child,
+  });
+
+  final FlowRouteInformationProvider value;
+
+  @override
+  bool updateShouldNotify(FlowRouteInformationProviderScope oldWidget) =>
+      value != oldWidget.value;
 }
