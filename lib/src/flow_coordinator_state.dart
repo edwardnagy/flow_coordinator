@@ -22,30 +22,39 @@ class FlowCoordinatorState<T extends StatefulWidget> extends State<T> {
 
   late final _routerDelegate = FlowRouterDelegate(initialPages: initialPages);
 
-  ChildFlowRouteInformationProvider? _routeInformationProvider;
+  late final _routeInformationProvider =
+      ChildFlowRouteInformationProvider(initialValue: initialRouteInformation);
 
   /// Called when new route information is received from the platform or the
-  /// parent flow.
+  /// parent flow. New pages can be pushed or set here using [flowNavigator].
   ///
-  /// Navigates to the corresponding route based on the route information.
   /// The returned route information will be forwarded to the nested flows.
   ///
   /// If the result can be computed synchronously, consider using a
   /// [SynchronousFuture] to avoid making the [Router] wait for the next
   /// microtask to schedule a build.
-  Future<RouteInformation?> setNewRoute(RouteInformation routeInformation) {
+  Future<RouteInformation?> onNewRouteInformation(
+    RouteInformation routeInformation,
+  ) {
     return SynchronousFuture(null);
   }
 
-  void _processRouteInformation(
-    ChildFlowRouteInformationProvider provider,
-    RouteInformation routeInformation,
-  ) {
-    // TODO: Add logging for the received route information per flow.
-    setNewRoute(routeInformation).then((childRouteInformation) {
+  /// Sets a new route information to handle by [onNewRouteInformation].
+  void setNewRouteInformation(RouteInformation routeInformation) {
+    onNewRouteInformation(routeInformation).then((childRouteInformation) {
       if (childRouteInformation != null) {
-        provider.setChildValue(childRouteInformation);
+        _routeInformationProvider.setChildValue(childRouteInformation);
       }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    setNewRouteInformation(initialRouteInformation);
+    _routeInformationProvider.addListener(() {
+      setNewRouteInformation(_routeInformationProvider.value);
     });
   }
 
@@ -53,50 +62,16 @@ class FlowCoordinatorState<T extends StatefulWidget> extends State<T> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    _routerDelegate.setParentFlowNavigator(
-      FlowNavigator.maybeOf(context, listen: true),
-    );
+    final parentNavigator = FlowNavigator.maybeOf(context, listen: true);
+    _routerDelegate.setParentFlowNavigator(parentNavigator);
 
     final parentProvider = FlowRouteInformationProvider.maybeOf(context);
-    if (parentProvider == null) {
-      // If there is no parent, dispose of the current provider.
-      _routeInformationProvider?.dispose();
-      _routeInformationProvider = null;
-    } else {
-      final ChildFlowRouteInformationProvider? newProvider;
-      if (_routeInformationProvider case final lastProvider?) {
-        if (parentProvider == lastProvider.parent) {
-          // Keep the previous provider if the parent hasn't changed.
-          newProvider = null;
-        } else {
-          // Create a new child provider if the parent has changed.
-          newProvider = ChildFlowRouteInformationProvider(
-            parent: parentProvider,
-            initialValue: lastProvider.value,
-          );
-          // Dispose of the previous provider.
-          lastProvider.dispose();
-        }
-      } else {
-        // If there is no previous provider, create a new child provider.
-        newProvider = ChildFlowRouteInformationProvider(
-          parent: parentProvider,
-          initialValue: initialRouteInformation,
-        );
-      }
-      if (newProvider case final newProvider?) {
-        _routeInformationProvider = newProvider;
-        _processRouteInformation(newProvider, newProvider.value);
-        newProvider.addListener(
-          () => _processRouteInformation(newProvider, newProvider.value),
-        );
-      }
-    }
+    _routeInformationProvider.registerParentProvider(parentProvider);
   }
 
   @override
   void dispose() {
-    _routeInformationProvider?.dispose();
+    _routeInformationProvider.dispose();
     _routerDelegate.dispose();
     super.dispose();
   }
@@ -105,23 +80,19 @@ class FlowCoordinatorState<T extends StatefulWidget> extends State<T> {
   Widget build(BuildContext context) {
     return FlowBackButtonDispatcherBuilder(
       builder: (context, backButtonDispatcher) {
-        Widget router = RouteInformationCombinerScope(
-          routeInformationCombiner,
-          child: FlowNavigatorScope(
-            flowNavigator: _routerDelegate,
-            child: Router(
-              routerDelegate: _routerDelegate,
-              backButtonDispatcher: backButtonDispatcher,
+        return FlowRouteInformationProviderScope(
+          _routeInformationProvider,
+          child: RouteInformationCombinerScope(
+            routeInformationCombiner,
+            child: FlowNavigatorScope(
+              flowNavigator: _routerDelegate,
+              child: Router(
+                routerDelegate: _routerDelegate,
+                backButtonDispatcher: backButtonDispatcher,
+              ),
             ),
           ),
         );
-        if (_routeInformationProvider case final routeInformationProvider?) {
-          router = FlowRouteInformationProviderScope(
-            routeInformationProvider,
-            child: router,
-          );
-        }
-        return router;
       },
     );
   }

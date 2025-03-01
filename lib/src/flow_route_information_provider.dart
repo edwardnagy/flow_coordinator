@@ -91,17 +91,20 @@ class RootFlowRouteInformationProvider extends PlatformRouteInformationProvider
 class ChildFlowRouteInformationProvider extends FlowRouteInformationProvider
     with ChangeNotifier {
   ChildFlowRouteInformationProvider({
-    required this.parent,
     required RouteInformation initialValue,
-  }) : _value =
-            parent.childConsumableValue?.getAndConsumeOrNull() ?? initialValue {
-    _consumableValueSubscription =
-        parent.childConsumableValueStream.listen(_onValueReceivedFromParent);
+  }) : _value = initialValue;
+
+  StreamSubscription? _valueFromParentSubscription;
+
+  void registerParentProvider(FlowRouteInformationProvider? parent) {
+    if (parent?.childConsumableValue case final consumableValue?) {
+      _onValueReceivedFromParent(consumableValue);
+    }
+
+    _valueFromParentSubscription?.cancel();
+    _valueFromParentSubscription =
+        parent?.childConsumableValueStream.listen(_onValueReceivedFromParent);
   }
-
-  final FlowRouteInformationProvider parent;
-
-  StreamSubscription? _consumableValueSubscription;
 
   final _childConsumableValueController =
       BehaviorSubject<ConsumableValue<RouteInformation>>();
@@ -109,6 +112,10 @@ class ChildFlowRouteInformationProvider extends FlowRouteInformationProvider
   @override
   RouteInformation get value => _value;
   RouteInformation _value;
+  set value(RouteInformation newValue) {
+    _value = newValue;
+    notifyListeners();
+  }
 
   @override
   ConsumableValue<RouteInformation>? get childConsumableValue =>
@@ -122,7 +129,7 @@ class ChildFlowRouteInformationProvider extends FlowRouteInformationProvider
     ConsumableValue<RouteInformation> consumableValue,
   ) {
     final value = consumableValue.getAndConsumeOrNull();
-    if (value == null || value == _value) return;
+    if (value == null) return;
 
     _value = value;
     notifyListeners();
@@ -130,7 +137,7 @@ class ChildFlowRouteInformationProvider extends FlowRouteInformationProvider
 
   @override
   void dispose() {
-    _consumableValueSubscription?.cancel();
+    _valueFromParentSubscription?.cancel();
     _childConsumableValueController.close();
     super.dispose();
   }

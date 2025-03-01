@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 
 import 'flow_route_information_provider.dart';
 import 'flow_route_information_reporter.dart';
+import 'identity_route_information_parser.dart';
 
 class FlowRouterConfig extends RouterConfig<RouteInformation> {
   FlowRouterConfig({
@@ -23,7 +24,7 @@ class FlowRouterConfig extends RouterConfig<RouteInformation> {
                   ),
                 ),
               ),
-          routeInformationParser: IdentityRouteInformationParser(),
+          routeInformationParser: const IdentityRouteInformationParser(),
           backButtonDispatcher:
               backButtonDispatcher ?? RootBackButtonDispatcher(),
         );
@@ -38,20 +39,6 @@ String _getInitialRouteName({String? initialRoutePath}) {
       ? WidgetsBinding.instance.platformDispatcher.defaultRouteName
       : initialRoutePath ??
           WidgetsBinding.instance.platformDispatcher.defaultRouteName;
-}
-
-/// A parser that returns the route information as is.
-class IdentityRouteInformationParser
-    extends RouteInformationParser<RouteInformation> {
-  @override
-  Future<RouteInformation> parseRouteInformation(
-    RouteInformation routeInformation,
-  ) =>
-      SynchronousFuture(routeInformation);
-
-  @override
-  RouteInformation restoreRouteInformation(RouteInformation configuration) =>
-      configuration;
 }
 
 class FlowRootRouterDelegate extends RouterDelegate<RouteInformation>
