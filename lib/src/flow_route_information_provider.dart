@@ -12,10 +12,12 @@ abstract class FlowRouteInformationProvider extends RouteInformationProvider {
     return scope?.value;
   }
 
+  ConsumableValue<RouteInformation>? get childConsumableValue;
+
+  // TODO: Use a valueNotifier instead because the current value can always be accessed by the getter.
+  // Listeners just need to be notified when the value changes.
   /// The value that child (nested) flow coordinators can consume.
   Stream<ConsumableValue<RouteInformation>> get childConsumableValueStream;
-
-  ConsumableValue<RouteInformation>? get childConsumableValue;
 }
 
 class RootFlowRouteInformationProvider extends PlatformRouteInformationProvider
@@ -94,15 +96,18 @@ class ChildFlowRouteInformationProvider extends FlowRouteInformationProvider
     required RouteInformation initialValue,
   }) : _value = initialValue;
 
-  StreamSubscription? _valueFromParentSubscription;
+  /// Subscribes to the child consumable value stream of the parent provider.
+  StreamSubscription? _valueSubscription;
 
+  // TODO: This subscribes to the parent's child consumable value stream.
+  // But [ChildRouteInformationFilter] has a workaround for this.
+  // Can this be improved somehow for better maintainability? Maybe moved somewhere else?
   void registerParentProvider(FlowRouteInformationProvider? parent) {
-    if (parent?.childConsumableValue case final consumableValue?) {
-      _onValueReceivedFromParent(consumableValue);
+    if (parent?.childConsumableValue case final childConsumableValue?) {
+      _onValueReceivedFromParent(childConsumableValue);
     }
-
-    _valueFromParentSubscription?.cancel();
-    _valueFromParentSubscription =
+    _valueSubscription?.cancel();
+    _valueSubscription =
         parent?.childConsumableValueStream.listen(_onValueReceivedFromParent);
   }
 
@@ -137,7 +142,7 @@ class ChildFlowRouteInformationProvider extends FlowRouteInformationProvider
 
   @override
   void dispose() {
-    _valueFromParentSubscription?.cancel();
+    _valueSubscription?.cancel();
     _childConsumableValueController.close();
     super.dispose();
   }

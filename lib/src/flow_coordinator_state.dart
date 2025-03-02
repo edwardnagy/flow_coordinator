@@ -8,15 +8,27 @@ import 'flow_route_information_provider.dart';
 import 'flow_router_delegate.dart';
 import 'route_information_combiner.dart';
 
-// TODO: Add documentation
+/// Manages navigation and route information within a flow-based navigation
+/// structure.
+///
+/// This stateful widget acts as a coordinator for handling route updates,
+/// managing route information propagation, and ensuring correct navigation
+/// behavior within a flow-based navigation hierarchy.
 class FlowCoordinatorState<T extends StatefulWidget> extends State<T> {
+  /// The initial list of pages for this flow.
+  ///
+  /// Can be overridden to provide specific initial pages.
   List<Page> get initialPages => [];
 
+  /// Provides access to the [FlowNavigator] for this flow.
   FlowNavigator get flowNavigator => _routerDelegate;
 
-  /// The initial route information in case the parent flow doesn't provide any.
+  /// The initial route information used when no parent flow provides route
+  /// data.
   RouteInformation get initialRouteInformation => RouteInformation(uri: Uri());
 
+  /// Defines how route information is combined within this flow when nested
+  /// flows report their route information.
   RouteInformationCombiner get routeInformationCombiner =>
       const DefaultRouteInformationCombiner();
 
@@ -25,23 +37,30 @@ class FlowCoordinatorState<T extends StatefulWidget> extends State<T> {
   late final _routeInformationProvider =
       ChildFlowRouteInformationProvider(initialValue: initialRouteInformation);
 
-  /// Called when new route information is received from the platform or the
-  /// parent flow. New pages can be pushed or set here using [flowNavigator].
+  /// Handles incoming route information from the platform or parent flow.
   ///
-  /// The returned route information will be forwarded to the nested flows.
+  /// This method allows new pages to be pushed or set using [flowNavigator].
+  /// The returned [RouteInformation], if non-null, will be forwarded to nested
+  /// flows.
   ///
-  /// If the result can be computed synchronously, consider using a
-  /// [SynchronousFuture] to avoid making the [Router] wait for the next
-  /// microtask to schedule a build.
-  Future<RouteInformation?> onNewRouteInformation(
+  /// Consider using a [SynchronousFuture] if the result can be computed
+  /// synchronously to avoid waiting for the next microtask to schedule the
+  /// build.
+  Future<RouteInformation?> handleRouteInformation(
     RouteInformation routeInformation,
   ) {
     return SynchronousFuture(null);
   }
 
-  /// Sets a new route information to handle by [onNewRouteInformation].
+  /// Updates the current route information.
   void setNewRouteInformation(RouteInformation routeInformation) {
-    onNewRouteInformation(routeInformation).then((childRouteInformation) {
+    _routeInformationProvider.value = routeInformation;
+  }
+
+  /// Processes changes in route information and propagates updates to child
+  /// flows.
+  void _processNewRouteInformation(RouteInformation routeInformation) {
+    handleRouteInformation(routeInformation).then((childRouteInformation) {
       if (childRouteInformation != null) {
         _routeInformationProvider.setChildValue(childRouteInformation);
       }
@@ -52,9 +71,10 @@ class FlowCoordinatorState<T extends StatefulWidget> extends State<T> {
   void initState() {
     super.initState();
 
-    setNewRouteInformation(initialRouteInformation);
+    // Initialize with the current route information and set up listeners.
+    _processNewRouteInformation(_routeInformationProvider.value);
     _routeInformationProvider.addListener(() {
-      setNewRouteInformation(_routeInformationProvider.value);
+      _processNewRouteInformation(_routeInformationProvider.value);
     });
   }
 
