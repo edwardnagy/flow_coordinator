@@ -15,11 +15,11 @@ class ChildRouteInformationFilter extends StatefulWidget {
   /// Creates a [ChildRouteInformationFilter].
   ///
   /// Wraps [child] with a new [FlowRouteInformationProvider] that
-  /// forwards route updates based on [isCurrentMatching].
+  /// forwards route updates based on [isMatchingRouteInformation].
   const ChildRouteInformationFilter({
     super.key,
     required this.child,
-    required this.isCurrentMatching,
+    required this.isMatchingRouteInformation,
   });
 
   /// The widget subtree that receives filtered route updates.
@@ -27,7 +27,8 @@ class ChildRouteInformationFilter extends StatefulWidget {
 
   /// Determines whether the current route information matches the
   /// condition to forward updates to the child.
-  final bool Function(RouteInformation routeInformation) isCurrentMatching;
+  final bool Function(RouteInformation routeInformation)
+      isMatchingRouteInformation;
 
   @override
   State<ChildRouteInformationFilter> createState() =>
@@ -53,7 +54,7 @@ class _ChildRouteInformationFilterState
   void _filterChildValue(
     ConsumableValue<RouteInformation> childConsumableValue,
   ) {
-    if (widget.isCurrentMatching(_parentValue)) {
+    if (widget.isMatchingRouteInformation(_parentValue)) {
       final routeInformation = childConsumableValue.getAndConsumeOrNull();
       if (routeInformation != null) {
         _routeInformationProvider.setChildValue(routeInformation);
@@ -96,7 +97,8 @@ class _ChildRouteInformationFilterState
   void didUpdateWidget(covariant ChildRouteInformationFilter oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget.isCurrentMatching != widget.isCurrentMatching) {
+    if (oldWidget.isMatchingRouteInformation !=
+        widget.isMatchingRouteInformation) {
       // Re-evaluate the condition and update child route info accordingly.
       if (_parentProvider?.childConsumableValue
           case final childConsumableValue?) {

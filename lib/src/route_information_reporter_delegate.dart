@@ -2,10 +2,10 @@ import 'package:flutter/widgets.dart';
 
 import 'route_information_combiner.dart';
 
-abstract class FlowRouteInformationReporter {
-  static FlowRouteInformationReporter of(BuildContext context) {
-    final scope = context.dependOnInheritedWidgetOfExactType<
-        FlowRouteInformationReporterScope>();
+abstract class RouteInformationReporterDelegate {
+  static RouteInformationReporterDelegate of(BuildContext context) {
+    final scope = context
+        .dependOnInheritedWidgetOfExactType<RouteInformationReporterScope>();
     if (scope == null) {
       throw FlutterError(
         '''
@@ -23,8 +23,9 @@ The context used was: $context
   void childReportsRouteInformation(RouteInformation childRouteInformation);
 }
 
-class RootFlowRouteInformationReporter extends FlowRouteInformationReporter {
-  RootFlowRouteInformationReporter({
+class RootRouteInformationReporterDelegate
+    extends RouteInformationReporterDelegate {
+  RootRouteInformationReporterDelegate({
     required this.routeInformationProvider,
   });
 
@@ -46,13 +47,14 @@ class RootFlowRouteInformationReporter extends FlowRouteInformationReporter {
   }
 }
 
-class ChildFlowRouteInformationReporter extends FlowRouteInformationReporter {
-  ChildFlowRouteInformationReporter({
+class ChildRouteInformationReporterDelegate
+    extends RouteInformationReporterDelegate {
+  ChildRouteInformationReporterDelegate({
     required this.parent,
     required this.routeInformationCombiner,
   });
 
-  final FlowRouteInformationReporter parent;
+  final RouteInformationReporterDelegate parent;
   final RouteInformationCombiner routeInformationCombiner;
 
   late RouteInformation _currentRouteInformation;
@@ -74,18 +76,18 @@ class ChildFlowRouteInformationReporter extends FlowRouteInformationReporter {
 
 /// NOTE: Reporting happens on the route level, not the router level. Only the
 /// top-most route should report route information.
-class FlowRouteInformationReporterScope extends InheritedWidget {
-  const FlowRouteInformationReporterScope(
+class RouteInformationReporterScope extends InheritedWidget {
+  const RouteInformationReporterScope(
     this.value, {
     super.key,
     required super.child,
   });
 
-  final FlowRouteInformationReporter value;
+  final RouteInformationReporterDelegate value;
 
   @override
   bool updateShouldNotify(
-    FlowRouteInformationReporterScope oldWidget,
+    RouteInformationReporterScope oldWidget,
   ) =>
       value != oldWidget.value;
 }

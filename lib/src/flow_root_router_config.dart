@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'flow_route_information_provider.dart';
-import 'flow_route_information_reporter.dart';
+import 'route_information_reporter_delegate.dart';
 import 'identity_route_information_parser.dart';
 
 class FlowRouterConfig extends RouterConfig<RouteInformation> {
@@ -64,8 +64,8 @@ class FlowRootRouterDelegate extends RouterDelegate<RouteInformation>
     assert(rootRouteInformationProvider is FlowRouteInformationProvider);
     return FlowRouteInformationProviderScope(
       rootRouteInformationProvider as FlowRouteInformationProvider,
-      child: FlowRouteInformationReporterScope(
-        RootFlowRouteInformationReporter(
+      child: RouteInformationReporterScope(
+        RootRouteInformationReporterDelegate(
           routeInformationProvider: rootRouteInformationProvider,
         ),
         child: Builder(builder: builder),

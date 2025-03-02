@@ -1,36 +1,37 @@
 import 'package:flutter/widgets.dart';
 
-import 'flow_route_information_reporter.dart';
 import 'route_information_combiner.dart';
+import 'route_information_reporter_delegate.dart';
 
-class RouteInformationScope extends StatefulWidget {
-  const RouteInformationScope({
+class RouteInformationReporter extends StatefulWidget {
+  const RouteInformationReporter({
     super.key,
     required this.child,
     required this.routeInformation,
-    this.isActive = true,
+    this.enabled = true,
   });
 
   final Widget child;
   final RouteInformation routeInformation;
-  final bool isActive;
+  final bool enabled;
 
   @override
-  State<RouteInformationScope> createState() => _RouteInformationScopeState();
+  State<RouteInformationReporter> createState() =>
+      _RouteInformationReporterState();
 }
 
-class _RouteInformationScopeState extends State<RouteInformationScope> {
-  late ChildFlowRouteInformationReporter _reporter;
+class _RouteInformationReporterState extends State<RouteInformationReporter> {
+  late ChildRouteInformationReporterDelegate _delegate;
   var _isReported = false;
 
-  /// Returns whether the route information should be reported.
+  /// Returns whether the route information can be reported.
   bool _canReport(BuildContext context) =>
-      widget.isActive &&
+      widget.enabled &&
       (_RouteStateScope.maybeOf(context)?.canReport ?? true) &&
       (ModalRoute.of(context)?.isCurrent ?? false);
 
   @override
-  void didUpdateWidget(covariant RouteInformationScope oldWidget) {
+  void didUpdateWidget(covariant RouteInformationReporter oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (oldWidget.routeInformation != widget.routeInformation) {
@@ -40,7 +41,7 @@ class _RouteInformationScopeState extends State<RouteInformationScope> {
         if (!mounted) return;
 
         if (_canReport(context)) {
-          _reporter.setCurrentRouteInformation(widget.routeInformation);
+          _delegate.setCurrentRouteInformation(widget.routeInformation);
           _isReported = true;
         } else {
           _isReported = false;
@@ -51,20 +52,20 @@ class _RouteInformationScopeState extends State<RouteInformationScope> {
 
   @override
   Widget build(BuildContext context) {
-    _reporter = ChildFlowRouteInformationReporter(
-      parent: FlowRouteInformationReporter.of(context),
+    _delegate = ChildRouteInformationReporterDelegate(
+      parent: RouteInformationReporterDelegate.of(context),
       routeInformationCombiner: RouteInformationCombiner.of(context),
     );
 
     // Wait for the next frame to ensure the parent's route information is set
-    // in didUpdateWidget (if it was updated) before we report the route
+    // in [didUpdateWidget] (if it was updated) before we report the route
     // information.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
 
       final canReport = _canReport(context);
       if (canReport && !_isReported) {
-        _reporter.setCurrentRouteInformation(widget.routeInformation);
+        _delegate.setCurrentRouteInformation(widget.routeInformation);
         _isReported = true;
       } else if (!canReport) {
         _isReported = false;
@@ -73,8 +74,8 @@ class _RouteInformationScopeState extends State<RouteInformationScope> {
 
     return _RouteStateScope(
       canReport: _canReport(context),
-      child: FlowRouteInformationReporterScope(
-        _reporter,
+      child: RouteInformationReporterScope(
+        _delegate,
         child: widget.child,
       ),
     );
