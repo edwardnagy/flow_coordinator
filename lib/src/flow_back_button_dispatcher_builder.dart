@@ -1,5 +1,9 @@
 import 'package:flutter/widgets.dart';
 
+import 'flow_route_status_scope.dart';
+
+// TODO: Handle back button events on Android in tabbed navigation.
+
 /// A widget that provides a [ChildBackButtonDispatcher] to its [builder] that
 /// can be passed to a nested [Router] to handle back button events.
 class FlowBackButtonDispatcherBuilder extends StatefulWidget {
@@ -19,9 +23,9 @@ class _FlowBackButtonDispatcherBuilderState
     extends State<FlowBackButtonDispatcherBuilder> {
   ChildBackButtonDispatcher? _backButtonDispatcher;
 
-  bool _isTopRoute(BuildContext context) =>
-      (FlowBackButtonDispatcherScope.maybeOf(context)?.isTopRoute ?? true) &&
-      (ModalRoute.of(context)?.isCurrent ?? true);
+  bool _canHandleBackButtonEvents(BuildContext context) =>
+      (FlowRouteStatusScope.maybeOf(context)?.isActive ?? true) &&
+      (FlowRouteStatusScope.maybeOf(context)?.isTopRoute ?? true);
 
   @override
   void didChangeDependencies() {
@@ -29,7 +33,8 @@ class _FlowBackButtonDispatcherBuilderState
 
     final backButtonDispatcher = _backButtonDispatcher;
     backButtonDispatcher?.parent.forget(backButtonDispatcher);
-    if (_isTopRoute(context)) {
+
+    if (_canHandleBackButtonEvents(context)) {
       _backButtonDispatcher = Router.maybeOf(context)
           ?.backButtonDispatcher
           ?.createChildBackButtonDispatcher();
@@ -47,28 +52,6 @@ class _FlowBackButtonDispatcherBuilderState
 
   @override
   Widget build(BuildContext context) {
-    return FlowBackButtonDispatcherScope(
-      isTopRoute: _isTopRoute(context),
-      child: Builder(
-        builder: (context) => widget.builder(context, _backButtonDispatcher),
-      ),
-    );
+    return widget.builder(context, _backButtonDispatcher);
   }
-}
-
-class FlowBackButtonDispatcherScope extends InheritedWidget {
-  const FlowBackButtonDispatcherScope({
-    super.key,
-    required super.child,
-    required this.isTopRoute,
-  });
-
-  final bool isTopRoute;
-
-  static FlowBackButtonDispatcherScope? maybeOf(BuildContext context) => context
-      .dependOnInheritedWidgetOfExactType<FlowBackButtonDispatcherScope>();
-
-  @override
-  bool updateShouldNotify(FlowBackButtonDispatcherScope oldWidget) =>
-      isTopRoute != oldWidget.isTopRoute;
 }

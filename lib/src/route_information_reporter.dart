@@ -1,19 +1,20 @@
 import 'package:flutter/widgets.dart';
 
+import 'flow_route_status_scope.dart';
 import 'route_information_combiner.dart';
 import 'route_information_reporter_delegate.dart';
 
+// TODO: Add documentation. Specify that FlowRouteStatusScope is needed for this
+// to work.
 class RouteInformationReporter extends StatefulWidget {
   const RouteInformationReporter({
     super.key,
     required this.child,
     required this.routeInformation,
-    this.enabled = true,
   });
 
   final Widget child;
   final RouteInformation routeInformation;
-  final bool enabled;
 
   @override
   State<RouteInformationReporter> createState() =>
@@ -24,11 +25,9 @@ class _RouteInformationReporterState extends State<RouteInformationReporter> {
   late ChildRouteInformationReporterDelegate _delegate;
   var _isReported = false;
 
-  /// Returns whether the route information can be reported.
   bool _canReport(BuildContext context) =>
-      widget.enabled &&
-      (_RouteStateScope.maybeOf(context)?.canReport ?? true) &&
-      (ModalRoute.of(context)?.isCurrent ?? false);
+      (FlowRouteStatusScope.maybeOf(context)?.isActive ?? true) &&
+      (FlowRouteStatusScope.maybeOf(context)?.isTopRoute ?? false);
 
   @override
   void didUpdateWidget(covariant RouteInformationReporter oldWidget) {
@@ -72,28 +71,9 @@ class _RouteInformationReporterState extends State<RouteInformationReporter> {
       }
     });
 
-    return _RouteStateScope(
-      canReport: _canReport(context),
-      child: RouteInformationReporterScope(
-        _delegate,
-        child: widget.child,
-      ),
+    return RouteInformationReporterScope(
+      _delegate,
+      child: widget.child,
     );
   }
-}
-
-class _RouteStateScope extends InheritedWidget {
-  const _RouteStateScope({
-    required super.child,
-    required this.canReport,
-  });
-
-  final bool canReport;
-
-  static _RouteStateScope? maybeOf(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<_RouteStateScope>();
-
-  @override
-  bool updateShouldNotify(_RouteStateScope oldWidget) =>
-      oldWidget.canReport != canReport;
 }

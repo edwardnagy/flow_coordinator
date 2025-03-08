@@ -2,26 +2,28 @@ import 'package:flutter/widgets.dart';
 
 import 'child_route_information_filter.dart';
 import 'flow_coordinator_state.dart';
+import 'flow_route_status_scope.dart';
 import 'route_information_reporter.dart';
 import 'route_information_utils.dart';
 
+// TODO: Fix docs for new name and functionality.
 /// Associates the given [RouteInformation] with the provided [child] subtree.
 ///
 /// More specifically, it has the following responsibilities:
 /// - Reports the specified [RouteInformation] to the closest
 /// [FlowCoordinatorState] ancestor when it is in a route where
-/// [Route.isActive], and all its ancestors (in parent Navigator routes) are
+/// [Route.isCurrent], and all its ancestors (in parent Navigator routes) are
 /// also active.
 /// - Filters route information updates passed to the child, ensuring only
 /// updates that satisfy the [isMatchingRouteInformation] condition are
 /// forwarded.
-class RouteInformationScopedSubtree extends StatelessWidget {
-  const RouteInformationScopedSubtree({
+class FlowRouteSubtree extends StatelessWidget {
+  const FlowRouteSubtree({
     super.key,
     required this.child,
     required this.routeInformation,
     this.isMatchingRouteInformation,
-    this.reportingEnabled = true,
+    this.isActive = true,
   });
 
   final Widget child;
@@ -41,20 +43,29 @@ class RouteInformationScopedSubtree extends StatelessWidget {
   final bool Function(RouteInformation routeInformation)?
       isMatchingRouteInformation;
 
-  // Whether the [RouteInformation] should be reported when this widget is in
-  // the active route.
-  final bool reportingEnabled;
+  /// Whether the provided [routeInformation] should be reported when this
+  /// widget is in the current/top route.
+  final bool isActive;
 
   @override
   Widget build(BuildContext context) {
-    return RouteInformationReporter(
-      routeInformation: routeInformation,
-      enabled: reportingEnabled,
-      child: ChildRouteInformationFilter(
-        isMatchingRouteInformation: isMatchingRouteInformation ??
-            (routeInformation) =>
-                routeInformation.matchesUrlPattern(this.routeInformation),
-        child: child,
+    final route = ModalRoute.of(context);
+
+    return FlowRouteStatusScope(
+      isActive:
+          isActive && (FlowRouteStatusScope.maybeOf(context)?.isActive ?? true),
+      isTopRoute: route == null
+          ? null
+          : route.isCurrent &&
+              (FlowRouteStatusScope.maybeOf(context)?.isTopRoute ?? true),
+      child: RouteInformationReporter(
+        routeInformation: routeInformation,
+        child: ChildRouteInformationFilter(
+          isMatchingRouteInformation: isMatchingRouteInformation ??
+              (routeInformation) =>
+                  routeInformation.matchesUrlPattern(this.routeInformation),
+          child: child,
+        ),
       ),
     );
   }
