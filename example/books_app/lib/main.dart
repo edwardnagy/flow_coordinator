@@ -1,7 +1,7 @@
 import 'package:flow_coordinator/flow_coordinator.dart';
 import 'package:flutter/material.dart';
 
-import 'flow/home_flow_coordinator.dart';
+import 'flows/home_flow_coordinator.dart';
 
 void main() {
   runApp(const App());

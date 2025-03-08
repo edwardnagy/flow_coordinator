@@ -56,14 +56,6 @@ class _BooksListScreenState extends State<BooksListScreen>
   }
 
   @override
-  void didUpdateWidget(BooksListScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.selectedCategory case final widgetCategory?) {
-      _tabController.index = _categories.indexOf(widgetCategory);
-    }
-  }
-
-  @override
   void dispose() {
     _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
@@ -109,6 +101,16 @@ class _BooksListScreenState extends State<BooksListScreen>
 
   @override
   Widget build(BuildContext context) {
+    // Wait for the next frame to select the initial tab to avoid marking
+    // the widget as needing to build in the build method.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      _tabController.index =
+          _categories.indexOf(widget.selectedCategory ?? _categories.first);
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Books'),

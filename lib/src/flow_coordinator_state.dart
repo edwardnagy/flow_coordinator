@@ -46,7 +46,7 @@ class FlowCoordinatorState<T extends StatefulWidget> extends State<T> {
   /// Consider using a [SynchronousFuture] if the result can be computed
   /// synchronously to avoid waiting for the next microtask to schedule the
   /// build.
-  Future<RouteInformation?> handleRouteInformation(
+  Future<RouteInformation?> handleNewRouteInformation(
     RouteInformation routeInformation,
   ) {
     return SynchronousFuture(null);
@@ -60,7 +60,7 @@ class FlowCoordinatorState<T extends StatefulWidget> extends State<T> {
   /// Processes changes in route information and propagates updates to child
   /// flows.
   void _processNewRouteInformation(RouteInformation routeInformation) {
-    handleRouteInformation(routeInformation).then((childRouteInformation) {
+    handleNewRouteInformation(routeInformation).then((childRouteInformation) {
       if (childRouteInformation != null) {
         _routeInformationProvider.setChildValue(childRouteInformation);
       }

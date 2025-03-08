@@ -6,6 +6,8 @@ import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 abstract interface class HomeScreenListener<T extends StatefulWidget>
     extends State<T> {
   void onTabSelected(HomeTab tab);
+
+  void resetNavigationStackForTab(HomeTab tab);
 }
 
 enum HomeTab {
@@ -13,6 +15,8 @@ enum HomeTab {
   search,
   settings,
 }
+
+const _keepTabStates = !kIsWeb;
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({
@@ -36,8 +40,13 @@ class HomeScreen extends StatelessWidget {
         transitionDuration: const Duration(milliseconds: 300),
         selectedIndex: tabs.indexOf(selectedTab),
         onSelectedIndexChange: (index) {
-          FlowCoordinator.of<HomeScreenListener>(context)
-              .onTabSelected(tabs[index]);
+          if (index == tabs.indexOf(selectedTab)) {
+            FlowCoordinator.of<HomeScreenListener>(context)
+                .resetNavigationStackForTab(selectedTab);
+          } else {
+            FlowCoordinator.of<HomeScreenListener>(context)
+                .onTabSelected(tabs[index]);
+          }
         },
         destinations: tabs
             .map((tab) => switch (tab) {
@@ -55,7 +64,12 @@ class HomeScreen extends StatelessWidget {
                     ),
                 })
             .toList(),
-        body: (context) => tabBuilder(context, selectedTab),
+        body: (context) => _keepTabStates
+            ? IndexedStack(
+                index: tabs.indexOf(selectedTab),
+                children: tabs.map((tab) => tabBuilder(context, tab)).toList(),
+              )
+            : tabBuilder(context, selectedTab),
       ),
     );
   }

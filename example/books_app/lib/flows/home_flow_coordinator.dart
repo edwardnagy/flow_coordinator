@@ -1,11 +1,11 @@
-import 'package:books_app/screen/book_creation_screen.dart';
+import 'package:books_app/screens/book_creation_screen.dart';
 import 'package:flow_coordinator/flow_coordinator.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../screen/home_screen.dart';
-import '../screen/not_found_screen.dart';
-import '../shared/dialog_page.dart';
+import '../screens/home_screen.dart';
+import '../screens/not_found_screen.dart';
+import '../widgets/dialog_page.dart';
 import 'books_flow_coordinator.dart';
 
 class HomeFlowCoordinator extends StatefulWidget {
@@ -21,7 +21,9 @@ final class _HomeFlowCoordinatorState
         HomeScreenListener<HomeFlowCoordinator>,
         BooksFlowListener<HomeFlowCoordinator> {
   @override
-  Future<RouteInformation?> setNewRoute(RouteInformation routeInformation) {
+  Future<RouteInformation?> handleNewRouteInformation(
+    RouteInformation routeInformation,
+  ) {
     // Parse the route information.
     final homeTab = switch (routeInformation.uri.pathSegments.firstOrNull) {
       null || '' || 'books' => HomeTab.books,
@@ -62,6 +64,20 @@ final class _HomeFlowCoordinatorState
   }
 
   @override
+  void resetNavigationStackForTab(HomeTab tab) {
+    final newRouteInformation = RouteInformation(
+      uri: Uri(
+        path: switch (tab) {
+          HomeTab.books => 'books',
+          HomeTab.search => 'search',
+          HomeTab.settings => 'settings',
+        },
+      ),
+    );
+    setNewRouteInformation(newRouteInformation);
+  }
+
+  @override
   void onCreateBook() {
     flowNavigator.push(_Pages.bookCreationPage());
   }
@@ -75,37 +91,36 @@ class _Pages {
 
   static Page homePage({
     required HomeTab? currentTab,
-  }) =>
-      MaterialPage(
-        key: const ValueKey('homePage'),
-        child: RouteInformationScope(
-          routeInformation: RouteInformation(
-            uri: Uri(
-              path: switch (currentTab) {
-                HomeTab.books => 'books',
-                HomeTab.search => 'search',
-                HomeTab.settings => 'settings',
-                _ => '',
-              },
+  }) {
+    return MaterialPage(
+      key: const ValueKey('homePage'),
+      child: HomeScreen(
+        selectedTab: currentTab,
+        tabBuilder: (context, tab) => switch (tab) {
+          HomeTab.books => FlowRouteSubtree(
+              routeInformation: RouteInformation(uri: Uri(path: 'books')),
+              isActive: currentTab == HomeTab.books,
+              child: const BooksFlowCoordinator(),
             ),
-          ),
-          child: HomeScreen(
-            selectedTab: currentTab,
-            tabBuilder: (context, tab) => switch (tab) {
-              HomeTab.books => const BooksFlowCoordinator(),
-              HomeTab.search => const Placeholder(),
-              HomeTab.settings => const Placeholder(),
-            },
-          ),
-        ),
-      );
+          HomeTab.search => FlowRouteSubtree(
+              routeInformation: RouteInformation(uri: Uri(path: 'search')),
+              isActive: currentTab == HomeTab.search,
+              child: const Placeholder(),
+            ),
+          HomeTab.settings => FlowRouteSubtree(
+              routeInformation: RouteInformation(uri: Uri(path: 'settings')),
+              isActive: currentTab == HomeTab.settings,
+              child: const Placeholder(),
+            ),
+        },
+      ),
+    );
+  }
 
   static Page bookCreationPage() => DialogPage(
         key: const ValueKey('bookCreationPage'),
-        child: RouteInformationScope(
-          routeInformation: RouteInformation(
-            uri: Uri(path: 'create-book'),
-          ),
+        child: FlowRouteSubtree(
+          routeInformation: RouteInformation(uri: Uri(path: 'create-book')),
           child: const BookCreationScreen(),
         ),
       );

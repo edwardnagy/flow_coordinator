@@ -3,8 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../data/book_category.dart';
-import '../screen/book_details_screen.dart';
-import '../screen/books_list_screen.dart';
+import '../screens/book_details_screen.dart';
+import '../screens/books_list_screen.dart';
 
 abstract interface class BooksFlowListener<T extends StatefulWidget>
     extends State<T> {
@@ -22,7 +22,9 @@ class _BooksFlowCoordinatorState
     extends FlowCoordinatorState<BooksFlowCoordinator>
     implements BooksListScreenListener<BooksFlowCoordinator> {
   @override
-  Future<RouteInformation?> setNewRoute(RouteInformation routeInformation) {
+  Future<RouteInformation?> handleNewRouteInformation(
+    RouteInformation routeInformation,
+  ) {
     // Parse the route information.
     final category = switch (routeInformation.uri.queryParameters['category']) {
       'fiction' => BookCategory.fiction,
@@ -69,7 +71,7 @@ class _Pages {
   static Page booksListPage({required BookCategory? selectedCategory}) =>
       MaterialPage(
         key: const ValueKey('booksListPage'),
-        child: RouteInformationScope(
+        child: FlowRouteSubtree(
           routeInformation: RouteInformation(
             uri: Uri(
               queryParameters: selectedCategory?.toQueryParameters(),
@@ -85,7 +87,7 @@ class _Pages {
   }) =>
       MaterialPage(
         key: ValueKey('bookDetailPage_$bookID'),
-        child: RouteInformationScope(
+        child: FlowRouteSubtree(
           routeInformation: RouteInformation(
             uri: Uri(
               pathSegments: [bookID],
