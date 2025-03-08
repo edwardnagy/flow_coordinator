@@ -109,6 +109,7 @@ class _ChildRouteInformationFilterState
 
   @override
   void dispose() {
+    _parentProvider?.removeListener(_copyParentValue);
     _childValueSubscription?.cancel();
     _routeInformationProvider.dispose();
     super.dispose();
