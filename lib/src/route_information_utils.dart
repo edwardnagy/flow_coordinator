@@ -17,11 +17,14 @@ extension RouteInformationUtils on RouteInformation {
   }) {
     final isPathMatching =
         pattern.uri.pathSegments.length <= uri.pathSegments.length &&
-            pattern.uri.pathSegments.asMap().entries.every((patternEntry) =>
-                patternEntry.value == uri.pathSegments[patternEntry.key]);
+            pattern.uri.pathSegments.asMap().entries.every(
+                  (patternEntry) =>
+                      patternEntry.value == uri.pathSegments[patternEntry.key],
+                );
     final isQueryMatching = pattern.uri.queryParameters.entries.every(
-        (patternEntry) =>
-            uri.queryParameters[patternEntry.key] == patternEntry.value);
+      (patternEntry) =>
+          uri.queryParameters[patternEntry.key] == patternEntry.value,
+    );
     final isFragmentMatching =
         pattern.uri.fragment.isEmpty || pattern.uri.fragment == uri.fragment;
     final isStateMatching =
