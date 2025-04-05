@@ -22,7 +22,10 @@ class _BooksFlowCoordinatorState
     extends FlowCoordinatorState<BooksFlowCoordinator>
     implements BooksListScreenListener<BooksFlowCoordinator> {
   @override
-  Future<RouteInformation?> handleNewRouteInformation(
+  List<Page> get initialPages => [_Pages.booksListPage(selectedCategory: null)];
+
+  @override
+  Future<RouteInformation?> onNewRouteInformation(
     RouteInformation routeInformation,
   ) {
     // Parse the route information.

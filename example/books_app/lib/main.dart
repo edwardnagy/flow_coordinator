@@ -15,15 +15,21 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-  final _routerConfig = FlowRouterConfig(
-    builder: (context) => const HomeFlowCoordinator(),
+  final _router = FlowCoordinatorRouter(
+    homeBuilder: (context) => const HomeFlowCoordinator(),
   );
+
+  @override
+  void dispose() {
+    _router.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
       darkTheme: ThemeData.dark(),
-      routerConfig: _routerConfig,
+      routerConfig: _router,
     );
   }
 }

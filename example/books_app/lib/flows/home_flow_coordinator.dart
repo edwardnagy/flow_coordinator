@@ -21,7 +21,7 @@ final class _HomeFlowCoordinatorState
         HomeScreenListener<HomeFlowCoordinator>,
         BooksFlowListener<HomeFlowCoordinator> {
   @override
-  Future<RouteInformation?> handleNewRouteInformation(
+  Future<RouteInformation?> onNewRouteInformation(
     RouteInformation routeInformation,
   ) {
     // Parse the route information.
