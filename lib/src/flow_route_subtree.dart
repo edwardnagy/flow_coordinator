@@ -1,50 +1,48 @@
 import 'package:flutter/widgets.dart';
 
 import 'child_route_information_filter.dart';
-import 'flow_coordinator_state.dart';
 import 'flow_route_status_scope.dart';
 import 'route_information_reporter.dart';
 import 'route_information_utils.dart';
 
-// TODO: Fix docs for new name and functionality.
-/// Associates the given [RouteInformation] with the provided [child] subtree.
+/// A widget that associates [RouteInformation] with the provided [child]
+/// subtree.
 ///
-/// More specifically, it has the following responsibilities:
-/// - Reports the specified [RouteInformation] to the closest
-/// [FlowCoordinatorState] ancestor when it is in a route where
-/// [Route.isCurrent], and all its ancestors (in parent Navigator routes) are
-/// also active.
-/// - Filters route information updates passed to the child, ensuring only
-/// updates that satisfy the [isMatchingRouteInformation] condition are
-/// forwarded.
+/// It serves two purposes:
+/// - Reports the [routeInformation] to the parent flow or the platform when the
+/// widget is in the top route.
+/// - Forwards child route updates to the child only if the
+/// [shouldForwardChildUpdates] predicate returns `true`.
 class FlowRouteSubtree extends StatelessWidget {
+  /// Creates a [FlowRouteSubtree].
   const FlowRouteSubtree({
     super.key,
     required this.child,
     required this.routeInformation,
-    this.isMatchingRouteInformation,
+    this.shouldForwardChildUpdates,
     this.isActive = true,
   });
 
   final Widget child;
 
-  /// The route information to report when in the active route.
+  /// The route information to be reported to the parent flow or the
+  /// platform.
   final RouteInformation routeInformation;
 
-  /// Determines whether a child [RouteInformation] update should be forwarded
-  /// to the child. It is called with the current route information of the
-  /// nearest [FlowCoordinatorState].
+  /// Determines whether the child subtree should receive child route
+  /// information updates from the parent flow.
   ///
-  /// If it returns true, the child receives the child [RouteInformation].
-  /// Otherwise, the update is filtered out.
+  /// It's called with the most recently consumed route information by the
+  /// parent flow.
   ///
-  /// It defaults to [RouteInformationUtils.matchesUrlPattern], using
-  /// [routeInformation] as the matching pattern.
-  final bool Function(RouteInformation routeInformation)?
-      isMatchingRouteInformation;
+  /// By default, [RouteInformationUtils.matchesUrlPattern] is used with the
+  /// [routeInformation] as the pattern.
+  final bool Function(RouteInformation parentConsumedRouteInformation)?
+      shouldForwardChildUpdates;
 
-  /// Whether the provided [routeInformation] should be reported when this
-  /// widget is in the current/top route.
+  /// Whether the [routeInformation] should be reported to parent flows (or the
+  /// platform) and back button events should be transmitted to the child
+  /// subtree when the widget is in the top route.
   final bool isActive;
 
   @override
@@ -61,7 +59,7 @@ class FlowRouteSubtree extends StatelessWidget {
       child: RouteInformationReporter(
         routeInformation: routeInformation,
         child: ChildRouteInformationFilter(
-          isMatchingRouteInformation: isMatchingRouteInformation ??
+          shouldForwardChildUpdates: shouldForwardChildUpdates ??
               (routeInformation) =>
                   routeInformation.matchesUrlPattern(this.routeInformation),
           child: child,

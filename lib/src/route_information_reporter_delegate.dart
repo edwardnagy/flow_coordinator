@@ -31,19 +31,43 @@ class RootRouteInformationReporterDelegate
 
   final RouteInformationProvider routeInformationProvider;
 
+  /// The route information pending to be reported.
+  RouteInformation? _pendingRouteInformation;
+
+  // TODO: Add logging for the reported route information.
+  void _reportRouteInformation() {
+    assert(
+      _pendingRouteInformation != null,
+      'Route information reporting task was scheduled but no route information '
+      'is pending.',
+    );
+    routeInformationProvider
+        .routerReportsNewRouteInformation(_pendingRouteInformation!);
+    _pendingRouteInformation = null;
+  }
+
   @override
   void childReportsRouteInformation(RouteInformation childRouteInformation) {
     // Prefix the URI with a slash if it doesn't have one.
+    const prefix = '/';
     final uri = childRouteInformation.uri;
     final prefixedUri =
-        uri.toString().startsWith('/') ? uri : Uri.parse('/$uri');
+        uri.toString().startsWith(prefix) ? uri : Uri.parse('$prefix$uri');
     final prefixedRouteInformation = RouteInformation(
       uri: prefixedUri,
       state: childRouteInformation.state,
     );
 
-    routeInformationProvider
-        .routerReportsNewRouteInformation(prefixedRouteInformation);
+    // Schedule the route information reporting task.
+    final isReportingNotScheduled = _pendingRouteInformation == null;
+    _pendingRouteInformation = prefixedRouteInformation;
+    if (isReportingNotScheduled) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _reportRouteInformation(),
+        debugLabel:
+            'RootRouteInformationReporterDelegate.reportRouteInformation',
+      );
+    }
   }
 }
 

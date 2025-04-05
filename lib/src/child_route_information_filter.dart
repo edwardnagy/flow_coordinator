@@ -1,9 +1,12 @@
-import 'dart:async';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'consumable_value.dart';
+import 'consumable.dart';
 import 'flow_route_information_provider.dart';
+
+typedef RouteInformationPredicate = bool Function(
+  RouteInformation routeInformation,
+);
 
 /// A widget that filters and forwards route updates to nested flows
 /// when the parent route matches a specified condition.
@@ -15,20 +18,20 @@ class ChildRouteInformationFilter extends StatefulWidget {
   /// Creates a [ChildRouteInformationFilter].
   ///
   /// Wraps [child] with a new [FlowRouteInformationProvider] that
-  /// forwards route updates based on [isMatchingRouteInformation].
+  /// forwards route updates based on [shouldForwardChildUpdates].
   const ChildRouteInformationFilter({
     super.key,
     required this.child,
-    required this.isMatchingRouteInformation,
+    required this.shouldForwardChildUpdates,
   });
 
   /// The widget subtree that receives filtered route updates.
   final Widget child;
 
-  /// Determines whether the current route information matches the
-  /// condition to forward updates to the child.
-  final bool Function(RouteInformation routeInformation)
-      isMatchingRouteInformation;
+  /// Whether the most recently consumed route information from the parent flow
+  /// matches the condition to forward child route information updates to the
+  /// child flow.
+  final RouteInformationPredicate shouldForwardChildUpdates;
 
   @override
   State<ChildRouteInformationFilter> createState() =>
@@ -37,59 +40,28 @@ class ChildRouteInformationFilter extends StatefulWidget {
 
 class _ChildRouteInformationFilterState
     extends State<ChildRouteInformationFilter> {
-  late final _routeInformationProvider = ChildFlowRouteInformationProvider(
-    initialValue: RouteInformation(uri: Uri()),
-  );
-
-  FlowRouteInformationProvider? _parentProvider;
-  StreamSubscription? _childValueSubscription;
-
-  RouteInformation get _parentValue {
-    assert(_parentProvider != null);
-    return _parentProvider!.value;
-  }
-
-  /// Filters and forwards the child's route information when the
-  /// parent route matches [widget.isCurrentMatching].
-  void _filterChildValue(
-    ConsumableValue<RouteInformation> childConsumableValue,
-  ) {
-    if (widget.isMatchingRouteInformation(_parentValue)) {
-      final routeInformation = childConsumableValue.getAndConsumeOrNull();
-      if (routeInformation != null) {
-        _routeInformationProvider.setChildValue(routeInformation);
-      }
-    }
-  }
-
-  /// Copies the parent route information into this widget’s provider.
-  void _copyParentValue() {
-    _routeInformationProvider.value = _parentValue;
-  }
+  ChildFlowRouteInformationProvider? _parentProvider;
+  _FilterFlowRouteInformationProvider? _filterProvider;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    // Remove previous listeners.
-    _parentProvider?.removeListener(_copyParentValue);
-    _childValueSubscription?.cancel();
+    final parentProvider = FlowRouteInformationProvider.of(context);
+    if (parentProvider != _parentProvider) {
+      _filterProvider?.dispose();
 
-    final parentProvider = FlowRouteInformationProvider.maybeOf(context);
-    _parentProvider = parentProvider;
+      assert(
+        parentProvider is ChildFlowRouteInformationProvider,
+        'The parent FlowRouteInformationProvider must be a '
+        'ChildFlowRouteInformationProvider to enable route filtering.',
+      );
+      _parentProvider = parentProvider as ChildFlowRouteInformationProvider;
 
-    if (parentProvider != null) {
-      // Sync with the new parent provider.
-      _copyParentValue();
-      parentProvider.addListener(_copyParentValue);
-
-      // Handle child route updates.
-      if (parentProvider.childConsumableValue
-          case final childConsumableValue?) {
-        _filterChildValue(childConsumableValue);
-      }
-      _childValueSubscription =
-          parentProvider.childConsumableValueStream.listen(_filterChildValue);
+      _filterProvider = _FilterFlowRouteInformationProvider(
+        parentProvider: parentProvider,
+        shouldForwardChildUpdates: widget.shouldForwardChildUpdates,
+      );
     }
   }
 
@@ -97,29 +69,83 @@ class _ChildRouteInformationFilterState
   void didUpdateWidget(covariant ChildRouteInformationFilter oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget.isMatchingRouteInformation !=
-        widget.isMatchingRouteInformation) {
-      // Re-evaluate the condition and update child route info accordingly.
-      if (_parentProvider?.childConsumableValue
-          case final childConsumableValue?) {
-        _filterChildValue(childConsumableValue);
-      }
+    if (oldWidget.shouldForwardChildUpdates !=
+        widget.shouldForwardChildUpdates) {
+      // Re-evaluate the condition and update child route information if needed.
+      _filterProvider!.setForwardingCriteria(widget.shouldForwardChildUpdates);
     }
   }
 
   @override
   void dispose() {
-    _parentProvider?.removeListener(_copyParentValue);
-    _childValueSubscription?.cancel();
-    _routeInformationProvider.dispose();
+    _filterProvider!.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return FlowRouteInformationProviderScope(
-      _routeInformationProvider,
+      _filterProvider!,
       child: widget.child,
     );
+  }
+}
+
+class _FilterFlowRouteInformationProvider
+    extends ChildFlowRouteInformationProvider {
+  _FilterFlowRouteInformationProvider({
+    required this.parentProvider,
+    required this.shouldForwardChildUpdates,
+  })  : _consumedValueNotifier = ValueNotifier(null),
+        _childValueNotifier = ValueNotifier(null) {
+    _updateValue();
+    parentProvider.consumedValueListenable.addListener(_updateValue);
+    _updateChildValueIfParentMatchesCriteria();
+    parentProvider.childValueListenable
+        .addListener(_updateChildValueIfParentMatchesCriteria);
+  }
+
+  final ChildFlowRouteInformationProvider parentProvider;
+  final ValueNotifier<RouteInformation?> _consumedValueNotifier;
+  final ValueNotifier<Consumable<RouteInformation>?> _childValueNotifier;
+
+  RouteInformationPredicate shouldForwardChildUpdates;
+
+  void setForwardingCriteria(RouteInformationPredicate value) {
+    shouldForwardChildUpdates = value;
+    // Re-evaluate the condition and update child route information if needed.
+    _updateChildValueIfParentMatchesCriteria();
+  }
+
+  @override
+  ValueListenable<RouteInformation?> get consumedValueListenable =>
+      _consumedValueNotifier;
+
+  @override
+  ValueListenable<Consumable<RouteInformation>?> get childValueListenable =>
+      _childValueNotifier;
+
+  void _updateValue() {
+    _consumedValueNotifier.value = parentProvider.consumedValueListenable.value;
+  }
+
+  void _updateChildValueIfParentMatchesCriteria() {
+    final parentConsumedValue = parentProvider.consumedValueListenable.value;
+    if (parentConsumedValue != null &&
+        shouldForwardChildUpdates(parentConsumedValue)) {
+      final routeInformation =
+          parentProvider.childValueListenable.value?.consumeOrNull();
+      if (routeInformation != null) {
+        _childValueNotifier.value = Consumable(routeInformation);
+      }
+    }
+  }
+
+  void dispose() {
+    parentProvider.consumedValueListenable.removeListener(_updateValue);
+    parentProvider.childValueListenable
+        .removeListener(_updateChildValueIfParentMatchesCriteria);
+    _consumedValueNotifier.dispose();
+    _childValueNotifier.dispose();
   }
 }

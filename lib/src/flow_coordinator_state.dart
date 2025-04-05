@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'consumable.dart';
 import 'flow_back_button_dispatcher_builder.dart';
 import 'flow_navigator.dart';
 import 'flow_navigator_scope.dart';
@@ -15,29 +16,32 @@ import 'route_information_combiner.dart';
 /// managing route information propagation, and ensuring correct navigation
 /// behavior within a flow-based navigation hierarchy.
 class FlowCoordinatorState<T extends StatefulWidget> extends State<T> {
-  /// The initial list of pages for this flow.
-  ///
-  /// Can be overridden to provide specific initial pages.
-  List<Page> get initialPages => [];
-
-  /// Provides access to the [FlowNavigator] for this flow.
-  FlowNavigator get flowNavigator => _routerDelegate;
-
-  /// The initial route information used when no parent flow provides route
-  /// data.
-  RouteInformation get initialRouteInformation => RouteInformation(uri: Uri());
-
-  /// Defines how route information is combined within this flow when nested
-  /// flows report their route information.
-  RouteInformationCombiner get routeInformationCombiner =>
-      const DefaultRouteInformationCombiner();
+  FlowRouteInformationProvider? _parentRouteInformationProvider;
 
   late final _routerDelegate = FlowRouterDelegate(initialPages: initialPages);
 
-  late final _routeInformationProvider =
-      ChildFlowRouteInformationProvider(initialValue: initialRouteInformation);
+  late final _routeInformationProvider = _ChildFlowRouteInformationProvider();
 
-  /// Handles incoming route information from the platform or parent flow.
+  /// The initial list of pages for this flow.
+  List<Page> get initialPages => [];
+
+  /// The [FlowNavigator] used for navigation within this flow.
+  @nonVirtual
+  FlowNavigator get flowNavigator => _routerDelegate;
+
+  /// The initial route information used when no route information is
+  /// provided by the parent flow.
+  RouteInformation? get initialRouteInformation => null;
+
+  /// Defines how route information from nested flows is combined into the
+  /// current flow.
+  RouteInformationCombiner get routeInformationCombiner =>
+      const DefaultRouteInformationCombiner();
+
+  /// Handles incoming route information for this flow.
+  ///
+  /// New route information may come from the parent flow, the system, or via
+  /// [setNewRouteInformation].
   ///
   /// This method allows new pages to be pushed or set using [flowNavigator].
   /// The returned [RouteInformation], if non-null, will be forwarded to nested
@@ -46,51 +50,76 @@ class FlowCoordinatorState<T extends StatefulWidget> extends State<T> {
   /// Consider using a [SynchronousFuture] if the result can be computed
   /// synchronously to avoid waiting for the next microtask to schedule the
   /// build.
-  Future<RouteInformation?> handleNewRouteInformation(
+  Future<RouteInformation?> onNewRouteInformation(
     RouteInformation routeInformation,
   ) {
     return SynchronousFuture(null);
   }
 
-  /// Updates the current route information.
+  /// Sets new route information for this flow.
+  ///
+  /// See [onNewRouteInformation] for details on how this information is
+  /// processed.
+  @mustCallSuper
   void setNewRouteInformation(RouteInformation routeInformation) {
-    _routeInformationProvider.value = routeInformation;
-  }
-
-  /// Processes changes in route information and propagates updates to child
-  /// flows.
-  void _processNewRouteInformation(RouteInformation routeInformation) {
-    handleNewRouteInformation(routeInformation).then((childRouteInformation) {
+    _routeInformationProvider.consumedValueNotifier.value = routeInformation;
+    onNewRouteInformation(routeInformation).then((childRouteInformation) {
       if (childRouteInformation != null) {
-        _routeInformationProvider.setChildValue(childRouteInformation);
+        _routeInformationProvider.childValueNotifier.value =
+            Consumable(childRouteInformation);
       }
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
-
-    // Initialize with the current route information and set up listeners.
-    _processNewRouteInformation(_routeInformationProvider.value);
-    _routeInformationProvider.addListener(() {
-      _processNewRouteInformation(_routeInformationProvider.value);
-    });
+  void _onValueReceivedFromParent() {
+    assert(_parentRouteInformationProvider != null);
+    final value = _parentRouteInformationProvider!.childValueListenable.value;
+    final routeInformation = value?.consumeOrNull();
+    if (routeInformation != null) {
+      setNewRouteInformation(routeInformation);
+    }
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
+    // Update the parent navigator.
     final parentNavigator = FlowNavigator.maybeOf(context, listen: true);
     _routerDelegate.setParentFlowNavigator(parentNavigator);
 
-    final parentProvider = FlowRouteInformationProvider.maybeOf(context);
-    _routeInformationProvider.registerParentProvider(parentProvider);
+    // Update the parent route information provider.
+    final parentRouteInformationProvider =
+        FlowRouteInformationProvider.of(context);
+    if (parentRouteInformationProvider != _parentRouteInformationProvider) {
+      _parentRouteInformationProvider?.childValueListenable
+          .removeListener(_onValueReceivedFromParent);
+
+      _parentRouteInformationProvider = parentRouteInformationProvider;
+
+      final routeInformation = parentRouteInformationProvider
+          .childValueListenable.value
+          ?.consumeOrNull();
+      if (routeInformation != null) {
+        setNewRouteInformation(routeInformation);
+      }
+      parentRouteInformationProvider.childValueListenable
+          .addListener(_onValueReceivedFromParent);
+    }
+
+    // Set the initial route information if other route information was not
+    // provided by the parent.
+    final initialRouteInformation = this.initialRouteInformation;
+    if (_routeInformationProvider.consumedValueListenable.value == null &&
+        initialRouteInformation != null) {
+      setNewRouteInformation(initialRouteInformation);
+    }
   }
 
   @override
   void dispose() {
+    _parentRouteInformationProvider?.childValueListenable
+        .removeListener(_onValueReceivedFromParent);
     _routeInformationProvider.dispose();
     _routerDelegate.dispose();
     super.dispose();
@@ -115,5 +144,25 @@ class FlowCoordinatorState<T extends StatefulWidget> extends State<T> {
         );
       },
     );
+  }
+}
+
+class _ChildFlowRouteInformationProvider
+    extends ChildFlowRouteInformationProvider {
+  @override
+  ValueListenable<RouteInformation?> get consumedValueListenable =>
+      consumedValueNotifier;
+
+  final consumedValueNotifier = ValueNotifier<RouteInformation?>(null);
+
+  @override
+  ValueListenable<Consumable<RouteInformation>?> get childValueListenable =>
+      childValueNotifier;
+
+  final childValueNotifier = ValueNotifier<Consumable<RouteInformation>?>(null);
+
+  void dispose() {
+    consumedValueNotifier.dispose();
+    childValueNotifier.dispose();
   }
 }
