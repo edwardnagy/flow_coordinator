@@ -15,7 +15,7 @@ import 'route_information_combiner.dart';
 /// This stateful widget acts as a coordinator for handling route updates,
 /// managing route information propagation, and ensuring correct navigation
 /// behavior within a flow-based navigation hierarchy.
-class FlowCoordinatorState<T extends StatefulWidget> extends State<T> {
+mixin FlowCoordinatorMixin<T extends StatefulWidget> on State<T> {
   FlowRouteInformationProvider? _parentRouteInformationProvider;
 
   late final _routerDelegate = FlowRouterDelegate(initialPages: initialPages);
@@ -60,7 +60,7 @@ class FlowCoordinatorState<T extends StatefulWidget> extends State<T> {
   ///
   /// See [onNewRouteInformation] for details on how this information is
   /// processed.
-  @mustCallSuper
+  @nonVirtual
   void setNewRouteInformation(RouteInformation routeInformation) {
     _routeInformationProvider.consumedValueNotifier.value = routeInformation;
     onNewRouteInformation(routeInformation).then((childRouteInformation) {
@@ -125,8 +125,8 @@ class FlowCoordinatorState<T extends StatefulWidget> extends State<T> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
+  /// Builds the router widget for this flow.
+  Widget flowRouter(BuildContext context) {
     return FlowBackButtonDispatcherBuilder(
       builder: (context, backButtonDispatcher) {
         return FlowRouteInformationProviderScope(

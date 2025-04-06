@@ -15,8 +15,8 @@ class HomeFlowCoordinator extends StatefulWidget {
   State<HomeFlowCoordinator> createState() => _HomeFlowCoordinatorState();
 }
 
-final class _HomeFlowCoordinatorState
-    extends FlowCoordinatorState<HomeFlowCoordinator>
+final class _HomeFlowCoordinatorState extends State<HomeFlowCoordinator>
+    with FlowCoordinatorMixin<HomeFlowCoordinator>
     implements
         HomeScreenListener<HomeFlowCoordinator>,
         BooksFlowListener<HomeFlowCoordinator> {
@@ -80,6 +80,11 @@ final class _HomeFlowCoordinatorState
   @override
   void onCreateBook() {
     flowNavigator.push(_Pages.bookCreationPage());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return flowRouter(context);
   }
 }
 

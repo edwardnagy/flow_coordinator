@@ -18,8 +18,8 @@ class BooksFlowCoordinator extends StatefulWidget {
   State<BooksFlowCoordinator> createState() => _BooksFlowCoordinatorState();
 }
 
-class _BooksFlowCoordinatorState
-    extends FlowCoordinatorState<BooksFlowCoordinator>
+class _BooksFlowCoordinatorState extends State<BooksFlowCoordinator>
+    with FlowCoordinatorMixin<BooksFlowCoordinator>
     implements BooksListScreenListener<BooksFlowCoordinator> {
   @override
   List<Page> get initialPages => [_Pages.booksListPage(selectedCategory: null)];
@@ -67,6 +67,11 @@ class _BooksFlowCoordinatorState
   @override
   void onCreateBook() {
     FlowCoordinator.of<BooksFlowListener>(context).onCreateBook();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return flowRouter(context);
   }
 }
 
