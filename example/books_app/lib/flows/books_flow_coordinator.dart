@@ -7,7 +7,7 @@ import '../screens/book_details_screen.dart';
 import '../screens/books_list_screen.dart';
 
 abstract interface class BooksFlowListener<T extends StatefulWidget>
-    extends State<T> {
+    implements FlowCoordinatorMixin<T> {
   void onCreateBook();
 }
 

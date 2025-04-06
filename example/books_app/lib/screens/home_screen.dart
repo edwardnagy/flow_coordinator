@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 
 abstract interface class HomeScreenListener<T extends StatefulWidget>
-    extends State<T> {
+    implements FlowCoordinatorMixin<T> {
   void onTabSelected(HomeTab tab);
 
   void resetNavigationStackForTab(HomeTab tab);

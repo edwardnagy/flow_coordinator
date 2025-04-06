@@ -5,7 +5,7 @@ import '../data/book_category.dart';
 import '../data/book_repository.dart';
 
 abstract interface class BooksListScreenListener<T extends StatefulWidget>
-    extends State<T> {
+    implements FlowCoordinatorMixin<T> {
   void onCategorySelected(BookCategory category);
 
   void onBookSelected({required String bookID, required BookCategory category});
