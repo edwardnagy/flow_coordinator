@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import 'flow_coordinator_mixin.dart';
 
-final class FlowCoordinator {
+sealed class FlowCoordinator {
   const FlowCoordinator._();
 
   /// Finds the nearest [FlowCoordinatorMixin] of type [T] in the widget tree.
