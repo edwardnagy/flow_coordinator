@@ -2,8 +2,6 @@ import 'package:flutter/widgets.dart';
 
 import 'flow_route_status_scope.dart';
 
-// TODO: Handle back button events on Android in tabbed navigation.
-
 /// A widget that provides a [ChildBackButtonDispatcher] to its [builder] that
 /// can be passed to a nested [Router] to handle back button events.
 class FlowBackButtonDispatcherBuilder extends StatefulWidget {
@@ -23,7 +21,7 @@ class _FlowBackButtonDispatcherBuilderState
     extends State<FlowBackButtonDispatcherBuilder> {
   ChildBackButtonDispatcher? _backButtonDispatcher;
 
-  bool _canHandleBackButtonEvents(BuildContext context) =>
+  bool _isEnabled(BuildContext context) =>
       (FlowRouteStatusScope.maybeOf(context)?.isActive ?? true) &&
       (FlowRouteStatusScope.maybeOf(context)?.isTopRoute ?? true);
 
@@ -34,7 +32,7 @@ class _FlowBackButtonDispatcherBuilderState
     final backButtonDispatcher = _backButtonDispatcher;
     backButtonDispatcher?.parent.forget(backButtonDispatcher);
 
-    if (_canHandleBackButtonEvents(context)) {
+    if (_isEnabled(context)) {
       _backButtonDispatcher = Router.maybeOf(context)
           ?.backButtonDispatcher
           ?.createChildBackButtonDispatcher();
