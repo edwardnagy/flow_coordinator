@@ -48,18 +48,7 @@ class FlowCoordinatorRouter implements RouterConfig<RouteInformation> {
   RouterDelegate<RouteInformation> get routerDelegate => _routerDelegate;
   late final _RootFlowRouterDelegate _routerDelegate = _RootFlowRouterDelegate(
     homeBuilder: homeBuilder,
-    rootFlowRouteInformationProvider: _flowRouteInformationProvider,
-    routeInformationReporterDelegate: _routeInformationReporterDelegate,
-  );
-
-  late final _RootFlowRouteInformationProvider _flowRouteInformationProvider =
-      _RootFlowRouteInformationProvider(
-    routeInformationProvider: routeInformationProvider,
-  );
-
-  late final RootRouteInformationReporterDelegate
-      _routeInformationReporterDelegate = RootRouteInformationReporterDelegate(
-    routeInformationProvider: routeInformationProvider,
+    initialRouteInformation: routeInformationProvider.value,
   );
 
   static Uri _effectiveInitialUri({
@@ -91,7 +80,6 @@ class FlowCoordinatorRouter implements RouterConfig<RouteInformation> {
   }
 
   void dispose() {
-    _flowRouteInformationProvider.dispose();
     _routerDelegate.dispose();
   }
 }
@@ -100,27 +88,62 @@ class _RootFlowRouterDelegate extends RouterDelegate<RouteInformation>
     with ChangeNotifier {
   _RootFlowRouterDelegate({
     required this.homeBuilder,
-    required this.rootFlowRouteInformationProvider,
-    required this.routeInformationReporterDelegate,
-  });
+    required RouteInformation initialRouteInformation,
+  }) : _rootFlowRouteInformationProvider = _RootFlowRouteInformationProvider(
+          initialRouteInformation: initialRouteInformation,
+        ) {
+    _routeInformationReporterDelegate.addListener(_onRouteInformationReported);
+  }
 
   final WidgetBuilder homeBuilder;
-  final _RootFlowRouteInformationProvider rootFlowRouteInformationProvider;
-  final RootRouteInformationReporterDelegate routeInformationReporterDelegate;
+  final _RootFlowRouteInformationProvider _rootFlowRouteInformationProvider;
+
+  final _routeInformationReporterDelegate =
+      RootRouteInformationReporterDelegate();
+
+  RouteInformation? _currentRouteInformation;
+
+  void _onRouteInformationReported() {
+    final routeInformation =
+        _routeInformationReporterDelegate.reportedRouteInformation;
+    final isNewRouteInformation =
+        routeInformation?.uri != _currentRouteInformation?.uri ||
+            routeInformation?.state != _currentRouteInformation?.state;
+    if (isNewRouteInformation) {
+      _currentRouteInformation = routeInformation;
+      notifyListeners();
+    }
+  }
 
   @override
-  Future<void> setNewRoutePath(RouteInformation configuration) =>
-      SynchronousFuture(null);
+  Future<void> setNewRoutePath(RouteInformation configuration) {
+    _currentRouteInformation = configuration;
+    _rootFlowRouteInformationProvider.setChildValue(configuration);
+    return SynchronousFuture(null);
+  }
 
   @override
   Future<bool> popRoute() => SynchronousFuture(false);
 
+  // TODO: Add logging for the reported route information.
+  @override
+  RouteInformation? get currentConfiguration => _currentRouteInformation;
+
+  @override
+  void dispose() {
+    _rootFlowRouteInformationProvider.dispose();
+    _routeInformationReporterDelegate
+      ..removeListener(_onRouteInformationReported)
+      ..dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return FlowRouteInformationProviderScope(
-      rootFlowRouteInformationProvider,
+      _rootFlowRouteInformationProvider,
       child: RouteInformationReporterScope(
-        routeInformationReporterDelegate,
+        _routeInformationReporterDelegate,
         child: Builder(builder: homeBuilder),
       ),
     );
@@ -129,25 +152,20 @@ class _RootFlowRouterDelegate extends RouterDelegate<RouteInformation>
 
 class _RootFlowRouteInformationProvider extends FlowRouteInformationProvider {
   _RootFlowRouteInformationProvider({
-    required this.routeInformationProvider,
-  }) : _childValueNotifier =
-            ValueNotifier(Consumable(routeInformationProvider.value)) {
-    routeInformationProvider.addListener(_onRouteInformationChanged);
-  }
+    required RouteInformation initialRouteInformation,
+  }) : _childValueNotifier = ValueNotifier(Consumable(initialRouteInformation));
 
-  final RouteInformationProvider routeInformationProvider;
   final ValueNotifier<Consumable<RouteInformation>> _childValueNotifier;
 
   @override
   ValueListenable<Consumable<RouteInformation>> get childValueListenable =>
       _childValueNotifier;
 
-  void _onRouteInformationChanged() {
-    _childValueNotifier.value = Consumable(routeInformationProvider.value);
+  void setChildValue(RouteInformation routeInformation) {
+    _childValueNotifier.value = Consumable(routeInformation);
   }
 
   void dispose() {
-    routeInformationProvider.removeListener(_onRouteInformationChanged);
     _childValueNotifier.dispose();
   }
 }

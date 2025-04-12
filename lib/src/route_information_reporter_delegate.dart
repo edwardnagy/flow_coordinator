@@ -24,26 +24,23 @@ The context used was: $context
 }
 
 class RootRouteInformationReporterDelegate
-    extends RouteInformationReporterDelegate {
-  RootRouteInformationReporterDelegate({
-    required this.routeInformationProvider,
-  });
-
-  final RouteInformationProvider routeInformationProvider;
+    extends RouteInformationReporterDelegate with ChangeNotifier {
+  RouteInformation? get reportedRouteInformation => _reportedRouteInformation;
+  RouteInformation? _reportedRouteInformation;
 
   /// The route information pending to be reported.
   RouteInformation? _pendingRouteInformation;
 
-  // TODO: Add logging for the reported route information.
   void _reportRouteInformation() {
     assert(
       _pendingRouteInformation != null,
       'Route information reporting task was scheduled but no route information '
       'is pending.',
     );
-    routeInformationProvider
-        .routerReportsNewRouteInformation(_pendingRouteInformation!);
+    final routeInformation = _pendingRouteInformation!;
     _pendingRouteInformation = null;
+    _reportedRouteInformation = routeInformation;
+    notifyListeners();
   }
 
   @override
