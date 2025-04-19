@@ -68,11 +68,6 @@ class _BooksFlowCoordinatorState extends State<BooksFlowCoordinator>
   void onCreateBook() {
     FlowCoordinator.of<BooksFlowListener>(context).onCreateBook();
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return flowRouter(context);
-  }
 }
 
 class _Pages {

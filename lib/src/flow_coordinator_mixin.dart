@@ -145,6 +145,11 @@ mixin FlowCoordinatorMixin<T extends StatefulWidget> on State<T> {
       },
     );
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return flowRouter(context);
+  }
 }
 
 class _ChildFlowRouteInformationProvider

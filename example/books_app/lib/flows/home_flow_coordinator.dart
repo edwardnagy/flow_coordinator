@@ -81,11 +81,6 @@ final class _HomeFlowCoordinatorState extends State<HomeFlowCoordinator>
   void onCreateBook() {
     flowNavigator.push(_Pages.bookCreationPage());
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return flowRouter(context);
-  }
 }
 
 class _Pages {
