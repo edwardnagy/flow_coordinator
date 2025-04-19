@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../data/book_category.dart';
 import '../screens/book_details_screen.dart';
-import '../screens/books_list_screen.dart';
+import '../screens/book_list_screen.dart';
 
 abstract interface class BooksFlowListener<T extends StatefulWidget>
     implements FlowCoordinatorMixin<T> {
@@ -20,7 +20,7 @@ class BooksFlowCoordinator extends StatefulWidget {
 
 class _BooksFlowCoordinatorState extends State<BooksFlowCoordinator>
     with FlowCoordinatorMixin<BooksFlowCoordinator>
-    implements BooksListScreenListener<BooksFlowCoordinator> {
+    implements BookListScreenListener<BooksFlowCoordinator> {
   @override
   List<Page> get initialPages => [_Pages.booksListPage(selectedCategory: null)];
 
@@ -85,7 +85,7 @@ class _Pages {
               queryParameters: selectedCategory?.toQueryParameters(),
             ),
           ),
-          child: BooksListScreen(selectedCategory: selectedCategory),
+          child: BookListScreen(selectedCategory: selectedCategory),
         ),
       );
 

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../data/book_category.dart';
 import '../data/book_repository.dart';
 
-abstract interface class BooksListScreenListener<T extends StatefulWidget>
+abstract interface class BookListScreenListener<T extends StatefulWidget>
     implements FlowCoordinatorMixin<T> {
   void onCategorySelected(BookCategory category);
 
@@ -13,16 +13,16 @@ abstract interface class BooksListScreenListener<T extends StatefulWidget>
   void onCreateBook();
 }
 
-class BooksListScreen extends StatefulWidget {
-  const BooksListScreen({super.key, required this.selectedCategory});
+class BookListScreen extends StatefulWidget {
+  const BookListScreen({super.key, required this.selectedCategory});
 
   final BookCategory? selectedCategory;
 
   @override
-  State<BooksListScreen> createState() => _BooksListScreenState();
+  State<BookListScreen> createState() => _BookListScreenState();
 }
 
-class _BooksListScreenState extends State<BooksListScreen>
+class _BookListScreenState extends State<BookListScreen>
     with SingleTickerProviderStateMixin {
   static const _categories = BookCategory.values;
 
@@ -34,7 +34,7 @@ class _BooksListScreenState extends State<BooksListScreen>
     }
     final newCategory = _categories[_tabController.index];
     if (newCategory != widget.selectedCategory) {
-      FlowCoordinator.of<BooksListScreenListener>(context)
+      FlowCoordinator.of<BookListScreenListener>(context)
           .onCategorySelected(newCategory);
     }
   }
@@ -88,7 +88,7 @@ class _BooksListScreenState extends State<BooksListScreen>
               title: Text(book.title),
               subtitle: Text(book.authorName),
               onTap: () {
-                FlowCoordinator.of<BooksListScreenListener>(context)
+                FlowCoordinator.of<BookListScreenListener>(context)
                     .onBookSelected(bookID: book.id, category: book.category);
                 controller.closeView(searchQuery);
               },
@@ -161,7 +161,7 @@ class _BooksListScreenState extends State<BooksListScreen>
                           title: Text(book.title),
                           subtitle: Text(book.authorName),
                           onTap: () {
-                            FlowCoordinator.of<BooksListScreenListener>(
+                            FlowCoordinator.of<BookListScreenListener>(
                               context,
                             ).onBookSelected(
                               bookID: book.id,
@@ -180,7 +180,7 @@ class _BooksListScreenState extends State<BooksListScreen>
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          FlowCoordinator.of<BooksListScreenListener>(context).onCreateBook();
+          FlowCoordinator.of<BookListScreenListener>(context).onCreateBook();
         },
         label: const Text('Add Book'),
         icon: const Icon(Icons.add),
