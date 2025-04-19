@@ -40,12 +40,14 @@ mixin FlowCoordinatorMixin<T extends StatefulWidget> on State<T> {
 
   /// Handles incoming route information for this flow.
   ///
-  /// New route information may come from the parent flow, the system, or via
-  /// [setNewRouteInformation].
-  ///
-  /// This method allows new pages to be pushed or set using [flowNavigator].
   /// The returned [RouteInformation], if non-null, will be forwarded to nested
   /// flows.
+  ///
+  /// This method allows new pages to be pushed or set using [flowNavigator].
+  ///
+  /// The [routeInformation] parameter contains the new route information that
+  /// may come from the parent flow, the system, or via
+  /// [setNewRouteInformation].
   ///
   /// Consider using a [SynchronousFuture] if the result can be computed
   /// synchronously to avoid waiting for the next microtask to schedule the
