@@ -13,7 +13,7 @@ extension RouteInformationUtils on RouteInformation {
   ///   If omitted, states are considered equal if they are identical.
   bool matchesUrlPattern(
     RouteInformation pattern, {
-    bool Function(Object? state, Object? schemaState)? stateMatcher,
+    bool Function(Object? state, Object? patternState)? stateMatcher,
   }) {
     final isPathMatching =
         pattern.uri.pathSegments.length <= uri.pathSegments.length &&

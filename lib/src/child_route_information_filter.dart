@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 
 import 'consumable.dart';
 import 'flow_route_information_provider.dart';
+import 'route_information_utils.dart';
 
 typedef RouteInformationPredicate = bool Function(
   RouteInformation routeInformation,
@@ -13,7 +14,8 @@ typedef RouteInformationPredicate = bool Function(
 ///
 /// The [FlowRouteInformationProvider] inserted in the widget tree
 /// maintains the same route information as the parent, but it
-/// manages child-specific route updates separately.
+/// manages child-specific route updates separately based on the
+/// [shouldForwardChildUpdates] predicate.
 class ChildRouteInformationFilter extends StatefulWidget {
   /// Creates a [ChildRouteInformationFilter].
   ///
@@ -24,6 +26,23 @@ class ChildRouteInformationFilter extends StatefulWidget {
     required this.child,
     required this.shouldForwardChildUpdates,
   });
+
+  /// Creates a [ChildRouteInformationFilter] that forwards child route updates
+  /// only if the child route information matches the specified [pattern].
+  /// See [RouteInformationUtils.matchesUrlPattern] for details.
+  factory ChildRouteInformationFilter.pattern({
+    Key? key,
+    required RouteInformation pattern,
+    required Widget child,
+    bool Function(Object? state, Object? patternState)? stateMatcher,
+  }) {
+    return ChildRouteInformationFilter(
+      key: key,
+      shouldForwardChildUpdates: (routeInformation) => routeInformation
+          .matchesUrlPattern(pattern, stateMatcher: stateMatcher),
+      child: child,
+    );
+  }
 
   /// The widget subtree that receives filtered route updates.
   final Widget child;

@@ -1,6 +1,7 @@
 // TODO: Add documentation for the library (like go_router has).
 library;
 
+export 'src/child_route_information_filter.dart';
 export 'src/flow_coordinator.dart';
 export 'src/flow_coordinator_mixin.dart';
 export 'src/flow_coordinator_router.dart';

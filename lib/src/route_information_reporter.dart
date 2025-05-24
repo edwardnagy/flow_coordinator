@@ -4,8 +4,8 @@ import 'flow_route_status_scope.dart';
 import 'route_information_combiner.dart';
 import 'route_information_reporter_delegate.dart';
 
-// TODO: Add documentation. Specify that FlowRouteStatusScope is needed for this
-// to work.
+/// Should not be used directly because it relies on [FlowRouteStatusScope] to
+/// be set up correctly.
 class RouteInformationReporter extends StatefulWidget {
   const RouteInformationReporter({
     super.key,

@@ -3,7 +3,9 @@ import 'package:flutter/widgets.dart';
 import 'child_route_information_filter.dart';
 import 'flow_route_status_scope.dart';
 import 'route_information_reporter.dart';
-import 'route_information_utils.dart';
+
+// Public API
+export 'child_route_information_filter.dart' show RouteInformationPredicate;
 
 /// A widget that associates [RouteInformation] with the provided [child]
 /// subtree.
@@ -12,7 +14,8 @@ import 'route_information_utils.dart';
 /// - Reports the [routeInformation] to the parent flow or the platform when the
 /// widget is in the top route.
 /// - Forwards child route updates to the child only if the
-/// [shouldForwardChildUpdates] predicate returns `true`.
+/// [shouldForwardChildUpdates] predicate returns `true`
+/// (see [ChildRouteInformationFilter] for more details).
 class FlowRouteSubtree extends StatelessWidget {
   /// Creates a [FlowRouteSubtree].
   const FlowRouteSubtree({
@@ -35,10 +38,10 @@ class FlowRouteSubtree extends StatelessWidget {
   /// It's called with the most recently consumed route information by the
   /// parent flow.
   ///
-  /// By default, [RouteInformationUtils.matchesUrlPattern] is used with the
-  /// [routeInformation] as the pattern.
-  final bool Function(RouteInformation parentConsumedRouteInformation)?
-      shouldForwardChildUpdates;
+  /// If `null`, the child route information updates are forwarded to the
+  /// child subtree only if they match the provided [routeInformation].
+  /// See [ChildRouteInformationFilter.pattern] for more details.
+  final RouteInformationPredicate? shouldForwardChildUpdates;
 
   /// Whether the [routeInformation] should be reported to parent flows (or the
   /// platform) and back button events should be transmitted to the child
@@ -47,6 +50,8 @@ class FlowRouteSubtree extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final shouldForwardChildUpdates = this.shouldForwardChildUpdates;
+
     final route = ModalRoute.of(context);
 
     return FlowRouteStatusScope(
@@ -58,12 +63,15 @@ class FlowRouteSubtree extends StatelessWidget {
               (FlowRouteStatusScope.maybeOf(context)?.isTopRoute ?? true),
       child: RouteInformationReporter(
         routeInformation: routeInformation,
-        child: ChildRouteInformationFilter(
-          shouldForwardChildUpdates: shouldForwardChildUpdates ??
-              (routeInformation) =>
-                  routeInformation.matchesUrlPattern(this.routeInformation),
-          child: child,
-        ),
+        child: shouldForwardChildUpdates != null
+            ? ChildRouteInformationFilter(
+                shouldForwardChildUpdates: shouldForwardChildUpdates,
+                child: child,
+              )
+            : ChildRouteInformationFilter.pattern(
+                pattern: routeInformation,
+                child: child,
+              ),
       ),
     );
   }

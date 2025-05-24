@@ -23,7 +23,8 @@ class _FlowBackButtonDispatcherBuilderState
 
   bool _isEnabled(BuildContext context) =>
       (FlowRouteStatusScope.maybeOf(context)?.isActive ?? true) &&
-      (FlowRouteStatusScope.maybeOf(context)?.isTopRoute ?? true);
+      (FlowRouteStatusScope.maybeOf(context)?.isTopRoute ?? true) &&
+      (ModalRoute.of(context)?.isCurrent ?? true);
 
   @override
   void didChangeDependencies() {
