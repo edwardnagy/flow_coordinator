@@ -23,34 +23,32 @@ class ChildRouteInformationFilter extends StatefulWidget {
   /// forwards route updates based on [shouldForwardChildUpdates].
   const ChildRouteInformationFilter({
     super.key,
-    required this.child,
     required this.shouldForwardChildUpdates,
+    required this.child,
   });
 
   /// Creates a [ChildRouteInformationFilter] that forwards child route updates
   /// only if the child route information matches the specified [pattern].
   /// See [RouteInformationUtils.matchesUrlPattern] for details.
-  factory ChildRouteInformationFilter.pattern({
+  ChildRouteInformationFilter.pattern({
     Key? key,
     required RouteInformation pattern,
-    required Widget child,
     bool Function(Object? state, Object? patternState)? stateMatcher,
-  }) {
-    return ChildRouteInformationFilter(
-      key: key,
-      shouldForwardChildUpdates: (routeInformation) => routeInformation
-          .matchesUrlPattern(pattern, stateMatcher: stateMatcher),
-      child: child,
-    );
-  }
-
-  /// The widget subtree that receives filtered route updates.
-  final Widget child;
+    required Widget child,
+  }) : this(
+          key: key,
+          shouldForwardChildUpdates: (routeInformation) => routeInformation
+              .matchesUrlPattern(pattern, stateMatcher: stateMatcher),
+          child: child,
+        );
 
   /// Whether the most recently consumed route information from the parent flow
   /// matches the condition to forward child route information updates to the
   /// child flow.
   final RouteInformationPredicate shouldForwardChildUpdates;
+
+  /// The widget subtree that receives filtered route updates.
+  final Widget child;
 
   @override
   State<ChildRouteInformationFilter> createState() =>

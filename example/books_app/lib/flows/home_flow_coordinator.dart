@@ -15,7 +15,7 @@ class HomeFlowCoordinator extends StatefulWidget {
   State<HomeFlowCoordinator> createState() => _HomeFlowCoordinatorState();
 }
 
-final class _HomeFlowCoordinatorState extends State<HomeFlowCoordinator>
+class _HomeFlowCoordinatorState extends State<HomeFlowCoordinator>
     with FlowCoordinatorMixin<HomeFlowCoordinator>
     implements
         HomeScreenListener<HomeFlowCoordinator>,
@@ -97,17 +97,17 @@ class _Pages {
       child: HomeScreen(
         selectedTab: currentTab,
         tabBuilder: (context, tab) => switch (tab) {
-          HomeTab.books => FlowRouteSubtree(
+          HomeTab.books => FlowSubtree(
               routeInformation: RouteInformation(uri: Uri(path: 'books')),
               isActive: currentTab == HomeTab.books,
               child: const BooksFlowCoordinator(),
             ),
-          HomeTab.search => FlowRouteSubtree(
+          HomeTab.search => FlowSubtree(
               routeInformation: RouteInformation(uri: Uri(path: 'search')),
               isActive: currentTab == HomeTab.search,
               child: const Placeholder(),
             ),
-          HomeTab.settings => FlowRouteSubtree(
+          HomeTab.settings => FlowSubtree(
               routeInformation: RouteInformation(uri: Uri(path: 'settings')),
               isActive: currentTab == HomeTab.settings,
               child: const Placeholder(),
@@ -119,7 +119,7 @@ class _Pages {
 
   static Page bookCreationPage() => DialogPage(
         key: const ValueKey('bookCreationPage'),
-        child: FlowRouteSubtree(
+        child: FlowSubtree(
           routeInformation: RouteInformation(uri: Uri(path: 'create-book')),
           child: const BookCreationScreen(),
         ),

@@ -5,16 +5,18 @@ import 'consumable.dart';
 import 'flow_route_information_provider.dart';
 import 'identity_route_information_parser.dart';
 import 'route_information_reporter_delegate.dart';
+import 'third_party/effective_initial_uri.dart';
 
 class FlowCoordinatorRouter implements RouterConfig<RouteInformation> {
   FlowCoordinatorRouter({
-    required this.homeBuilder,
     BackButtonDispatcher? backButtonDispatcher,
     RouteInformationProvider? routeInformationProvider,
     this.routeInformationParser = const IdentityRouteInformationParser(),
     Uri? initialUri,
     Object? initialState,
     bool overridePlatformDefaultLocation = false,
+    this.routeInformationReportingEnabled = false,
+    required this.homeBuilder,
   })  : assert(
           !overridePlatformDefaultLocation || initialUri != null,
           'initialUri must be set to override the platform default location.',
@@ -24,7 +26,7 @@ class FlowCoordinatorRouter implements RouterConfig<RouteInformation> {
         routeInformationProvider = routeInformationProvider ??
             PlatformRouteInformationProvider(
               initialRouteInformation: RouteInformation(
-                uri: _effectiveInitialUri(
+                uri: effectiveInitialUri(
                   overridePlatformDefaultLocation:
                       overridePlatformDefaultLocation,
                   initialUri: initialUri,
@@ -32,8 +34,6 @@ class FlowCoordinatorRouter implements RouterConfig<RouteInformation> {
                 state: initialState,
               ),
             );
-
-  final WidgetBuilder homeBuilder;
 
   @override
   final BackButtonDispatcher backButtonDispatcher;
@@ -47,37 +47,15 @@ class FlowCoordinatorRouter implements RouterConfig<RouteInformation> {
   @override
   RouterDelegate<RouteInformation> get routerDelegate => _routerDelegate;
   late final _RootFlowRouterDelegate _routerDelegate = _RootFlowRouterDelegate(
-    homeBuilder: homeBuilder,
     initialRouteInformation: routeInformationProvider.value,
+    reportingEnabled: routeInformationReportingEnabled,
+    homeBuilder: homeBuilder,
   );
 
-  static Uri _effectiveInitialUri({
-    required bool overridePlatformDefaultLocation,
-    required Uri? initialUri,
-  }) {
-    if (overridePlatformDefaultLocation) {
-      // initialUri must not be null as asserted in the constructor.
-      return initialUri!;
-    }
+  /// Whether route information reporting is enabled.
+  final bool routeInformationReportingEnabled;
 
-    var platformDefaultUri = Uri.parse(
-      WidgetsBinding.instance.platformDispatcher.defaultRouteName,
-    );
-    if (platformDefaultUri.hasEmptyPath) {
-      platformDefaultUri = Uri(
-        path: '/',
-        queryParameters: platformDefaultUri.queryParameters,
-      );
-    }
-
-    if (initialUri == null) {
-      return platformDefaultUri;
-    } else if (platformDefaultUri == Uri.parse('/')) {
-      return initialUri;
-    } else {
-      return platformDefaultUri;
-    }
-  }
+  final WidgetBuilder homeBuilder;
 
   void dispose() {
     _routerDelegate.dispose();
@@ -87,16 +65,18 @@ class FlowCoordinatorRouter implements RouterConfig<RouteInformation> {
 class _RootFlowRouterDelegate extends RouterDelegate<RouteInformation>
     with ChangeNotifier {
   _RootFlowRouterDelegate({
-    required this.homeBuilder,
     required RouteInformation initialRouteInformation,
+    required this.reportingEnabled,
+    required this.homeBuilder,
   }) : _rootFlowRouteInformationProvider = _RootFlowRouteInformationProvider(
           initialRouteInformation: initialRouteInformation,
         ) {
     _routeInformationReporterDelegate.addListener(_onRouteInformationReported);
   }
 
-  final WidgetBuilder homeBuilder;
   final _RootFlowRouteInformationProvider _rootFlowRouteInformationProvider;
+  final bool reportingEnabled;
+  final WidgetBuilder homeBuilder;
 
   final _routeInformationReporterDelegate =
       RootRouteInformationReporterDelegate();
@@ -104,6 +84,9 @@ class _RootFlowRouterDelegate extends RouterDelegate<RouteInformation>
   RouteInformation? _currentRouteInformation;
 
   void _onRouteInformationReported() {
+    if (!reportingEnabled) {
+      return;
+    }
     final routeInformation =
         _routeInformationReporterDelegate.reportedRouteInformation;
     final isNewRouteInformation =

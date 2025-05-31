@@ -16,6 +16,7 @@ class App extends StatefulWidget {
 
 class _AppState extends State<App> {
   final _router = FlowCoordinatorRouter(
+    routeInformationReportingEnabled: true,
     homeBuilder: (context) => const HomeFlowCoordinator(),
   );
 
