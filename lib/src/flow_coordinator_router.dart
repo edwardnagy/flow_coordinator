@@ -5,7 +5,6 @@ import 'consumable.dart';
 import 'flow_route_information_provider.dart';
 import 'identity_route_information_parser.dart';
 import 'route_information_reporter_delegate.dart';
-import 'third_party/effective_initial_uri.dart';
 
 class FlowCoordinatorRouter implements RouterConfig<RouteInformation> {
   FlowCoordinatorRouter({
@@ -14,23 +13,14 @@ class FlowCoordinatorRouter implements RouterConfig<RouteInformation> {
     this.routeInformationParser = const IdentityRouteInformationParser(),
     Uri? initialUri,
     Object? initialState,
-    bool overridePlatformDefaultLocation = false,
     this.routeInformationReportingEnabled = false,
     required this.homeBuilder,
-  })  : assert(
-          !overridePlatformDefaultLocation || initialUri != null,
-          'initialUri must be set to override the platform default location.',
-        ),
-        backButtonDispatcher =
+  })  : backButtonDispatcher =
             backButtonDispatcher ?? RootBackButtonDispatcher(),
         routeInformationProvider = routeInformationProvider ??
             PlatformRouteInformationProvider(
               initialRouteInformation: RouteInformation(
-                uri: effectiveInitialUri(
-                  overridePlatformDefaultLocation:
-                      overridePlatformDefaultLocation,
-                  initialUri: initialUri,
-                ),
+                uri: _effectiveInitialUri(initialUri: initialUri),
                 state: initialState,
               ),
             );
@@ -56,6 +46,20 @@ class FlowCoordinatorRouter implements RouterConfig<RouteInformation> {
   final bool routeInformationReportingEnabled;
 
   final WidgetBuilder homeBuilder;
+
+  static Uri _effectiveInitialUri({
+    required Uri? initialUri,
+  }) {
+    final platformDefaultRouteName =
+        WidgetsBinding.instance.platformDispatcher.defaultRouteName;
+    final platformUri = platformDefaultRouteName == Navigator.defaultRouteName
+        ? null
+        : Uri.parse(platformDefaultRouteName);
+
+    final effectiveUri =
+        platformUri ?? initialUri ?? Uri.parse(Navigator.defaultRouteName);
+    return effectiveUri;
+  }
 
   void dispose() {
     _routerDelegate.dispose();
