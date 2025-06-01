@@ -27,8 +27,8 @@ extension RouteInformationUtils on RouteInformation {
     );
     final isFragmentMatching =
         pattern.uri.fragment.isEmpty || pattern.uri.fragment == uri.fragment;
-    final isStateMatching =
-        stateMatcher?.call(state, pattern.state) ?? state == pattern.state;
+    final isStateMatching = stateMatcher?.call(state, pattern.state) ??
+        (pattern.state == null || state == pattern.state);
 
     return isPathMatching &&
         isQueryMatching &&
