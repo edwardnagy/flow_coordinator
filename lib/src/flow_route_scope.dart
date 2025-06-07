@@ -7,12 +7,17 @@ import 'route_information_reporter.dart';
 // Public API
 export 'child_route_information_filter.dart' show RouteInformationPredicate;
 
-/// Wraps a subtree containing a flow coordinator, filtering and reporting route
-/// information between the child and parent flows. Also controls whether the
-/// child subtree is active and receives back button events.
-class FlowSubtree extends StatelessWidget {
-  /// Creates a [FlowSubtree].
-  const FlowSubtree({
+/// Used to wrap a route within a flow to achieve one or more of the following:
+/// - Filter route information updates between child and parent flows based on
+/// the [shouldForwardChildUpdates], [routeInformation] and [isActive] 
+/// properties.
+/// - Report the [routeInformation] to the parent flow when the route 
+/// [isActive] and is the top route in the navigation stack.
+/// - Control whether the child subtree receives back button events via the
+/// [isActive] property.
+class FlowRouteScope extends StatelessWidget {
+  /// Creates a [FlowRouteScope].
+  const FlowRouteScope({
     super.key,
     this.routeInformation,
     this.shouldForwardChildUpdates,

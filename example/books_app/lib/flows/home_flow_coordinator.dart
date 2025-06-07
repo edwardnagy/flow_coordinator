@@ -97,17 +97,17 @@ class _Pages {
       child: HomeScreen(
         selectedTab: currentTab,
         tabBuilder: (context, tab) => switch (tab) {
-          HomeTab.books => FlowSubtree(
+          HomeTab.books => FlowRouteScope(
               routeInformation: RouteInformation(uri: Uri(path: 'books')),
               isActive: currentTab == HomeTab.books,
               child: const BooksFlowCoordinator(),
             ),
-          HomeTab.search => FlowSubtree(
+          HomeTab.search => FlowRouteScope(
               routeInformation: RouteInformation(uri: Uri(path: 'search')),
               isActive: currentTab == HomeTab.search,
               child: const Placeholder(),
             ),
-          HomeTab.settings => FlowSubtree(
+          HomeTab.settings => FlowRouteScope(
               routeInformation: RouteInformation(uri: Uri(path: 'settings')),
               isActive: currentTab == HomeTab.settings,
               child: const Placeholder(),
@@ -119,7 +119,7 @@ class _Pages {
 
   static Page bookCreationPage() => DialogPage(
         key: const ValueKey('bookCreationPage'),
-        child: FlowSubtree(
+        child: FlowRouteScope(
           routeInformation: RouteInformation(uri: Uri(path: 'create-book')),
           child: const BookCreationScreen(),
         ),

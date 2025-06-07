@@ -74,7 +74,7 @@ class _Pages {
   static Page booksListPage({required BookCategory? selectedCategory}) =>
       MaterialPage(
         key: const ValueKey('booksListPage'),
-        child: FlowSubtree(
+        child: FlowRouteScope(
           routeInformation: RouteInformation(
             uri: Uri(
               queryParameters: selectedCategory?.toQueryParameters(),
@@ -90,7 +90,7 @@ class _Pages {
   }) =>
       MaterialPage(
         key: ValueKey('bookDetailPage_$bookID'),
-        child: FlowSubtree(
+        child: FlowRouteScope(
           routeInformation: RouteInformation(
             uri: Uri(
               pathSegments: [bookID],
