@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 
 import 'flow_navigator.dart';
 
-final class FlowRouterDelegate extends RouterDelegate<RouteInformation>
+final class FlowRouterDelegate extends RouterDelegate
     with ChangeNotifier, PopNavigatorRouterDelegateMixin
     implements FlowNavigator {
   FlowRouterDelegate({
@@ -17,13 +17,13 @@ final class FlowRouterDelegate extends RouterDelegate<RouteInformation>
   @override
   final GlobalKey<NavigatorState>? navigatorKey = GlobalKey();
 
-  void setParentFlowNavigator(FlowNavigator? parentFlowNavigator) {
-    _parentFlowNavigator = parentFlowNavigator;
-  }
+  void setParentFlowNavigator(
+    FlowNavigator? parentFlowNavigator,
+  ) =>
+      _parentFlowNavigator = parentFlowNavigator;
 
   @override
-  Future<void> setNewRoutePath(RouteInformation configuration) =>
-      SynchronousFuture(null);
+  Future<void> setNewRoutePath(configuration) => SynchronousFuture(null);
 
   @override
   void push(Page page) {
@@ -44,25 +44,14 @@ final class FlowRouterDelegate extends RouterDelegate<RouteInformation>
   }
 
   @override
-  bool canPop() {
-    final canPopInternally = this.canPopInternally();
-    if (canPopInternally) {
-      return true;
-    }
-    final canParentPop = _parentFlowNavigator?.canPop();
-    if (canParentPop == true) {
-      return true;
-    }
-    return false;
-  }
+  bool canPop() =>
+      canPopInternally() || (_parentFlowNavigator?.canPop() ?? false);
 
   @override
-  bool canPopInternally() {
-    return navigatorKey?.currentState?.canPop() ?? false;
-  }
+  bool canPopInternally() => navigatorKey?.currentState?.canPop() ?? false;
 
   @override
-  Future<bool> maybePop<S extends Object?>([S? result]) async {
+  Future<bool> maybePop<T extends Object?>([T? result]) async {
     final internalPopResult = await maybePopInternally(result);
     if (internalPopResult) {
       return true;
@@ -75,12 +64,11 @@ final class FlowRouterDelegate extends RouterDelegate<RouteInformation>
   }
 
   @override
-  Future<bool> maybePopInternally<S extends Object?>([S? result]) {
-    return navigatorKey?.currentState?.maybePop(result) ?? Future.value(false);
-  }
+  Future<bool> maybePopInternally<T extends Object?>([T? result]) =>
+      navigatorKey?.currentState?.maybePop(result) ?? Future.value(false);
 
   @override
-  void pop<S extends Object?>([S? result]) {
+  void pop<T extends Object?>([T? result]) {
     final parentFlowNavigator = _parentFlowNavigator;
     if (canPopInternally() || parentFlowNavigator == null) {
       popInternally(result);
@@ -90,9 +78,8 @@ final class FlowRouterDelegate extends RouterDelegate<RouteInformation>
   }
 
   @override
-  void popInternally<S extends Object?>([S? result]) {
-    navigatorKey?.currentState?.pop(result);
-  }
+  void popInternally<T extends Object?>([T? result]) =>
+      navigatorKey?.currentState?.pop(result);
 
   @override
   Widget build(BuildContext context) {

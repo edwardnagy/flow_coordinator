@@ -4,12 +4,13 @@ import 'package:flutter/widgets.dart';
 import 'consumable.dart';
 import 'flow_back_button_dispatcher_builder.dart';
 import 'flow_navigator.dart';
-import 'flow_navigator_scope.dart';
 import 'flow_route_information_provider.dart';
 import 'flow_router_delegate.dart';
 import 'route_information_combiner.dart';
 
 // Public API
+
+export 'flow_navigator.dart' show FlowNavigator;
 export 'route_information_combiner.dart' show RouteInformationCombiner;
 
 /// Manages navigation and route information within a flow-based navigation
@@ -131,6 +132,7 @@ mixin FlowCoordinatorMixin<T extends StatefulWidget> on State<T> {
   }
 
   /// Builds the router widget for this flow.
+  @nonVirtual
   Widget flowRouter(BuildContext context) {
     return FlowBackButtonDispatcherBuilder(
       builder: (context, backButtonDispatcher) {

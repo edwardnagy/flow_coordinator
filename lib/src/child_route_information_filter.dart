@@ -3,19 +3,17 @@ import 'package:flutter/widgets.dart';
 
 import 'consumable.dart';
 import 'flow_route_information_provider.dart';
-import 'route_information_utils.dart';
 
 typedef RouteInformationPredicate = bool Function(
   RouteInformation routeInformation,
 );
 
-/// A widget that filters and forwards route updates to nested flows
-/// when the parent route matches a specified condition.
+/// A widget that forwards route updates to nested flows only when the parent
+/// route matches a specified condition.
 ///
-/// The [FlowRouteInformationProvider] inserted in the widget tree
-/// maintains the same route information as the parent, but it
-/// manages child-specific route updates separately based on the
-/// [shouldForwardChildUpdates] predicate.
+/// The [FlowRouteInformationProvider] inserted in the widget tree maintains the
+/// same route information as the parent, but it manages child-specific route
+/// updates separately based on the [shouldForwardChildUpdates] predicate.
 class ChildRouteInformationFilter extends StatefulWidget {
   /// Creates a [ChildRouteInformationFilter].
   ///
@@ -29,7 +27,7 @@ class ChildRouteInformationFilter extends StatefulWidget {
 
   /// Creates a [ChildRouteInformationFilter] that forwards child route updates
   /// only if the child route information matches the specified [pattern].
-  /// See [RouteInformationUtils.matchesUrlPattern] for details.
+  /// See [RouteInformationMatcher.matchesUrlPattern] for details.
   ChildRouteInformationFilter.pattern({
     Key? key,
     required RouteInformation pattern,
@@ -164,5 +162,44 @@ class _FilterFlowRouteInformationProvider
         .removeListener(_updateChildValueIfParentMatchesCriteria);
     _consumedValueNotifier.dispose();
     _childValueNotifier.dispose();
+  }
+}
+
+extension RouteInformationMatcher on RouteInformation {
+  /// Determines whether this route matches the given [pattern].
+  ///
+  /// A match occurs if:
+  /// - The path segments in [pattern] appear in this URI in the same order,
+  /// starting from the beginning of the path.
+  /// - All query parameters in [pattern] are present and match those in this
+  /// URI.
+  /// - The fragment in [pattern] is either empty or matches this URI's
+  /// fragment.
+  /// - The state matches the pattern’s state, using [stateMatcher] if provided.
+  /// If omitted, states are considered equal if they are identical, or if
+  /// the pattern's state is `null`.
+  bool matchesUrlPattern(
+    RouteInformation pattern, {
+    bool Function(Object? state, Object? patternState)? stateMatcher,
+  }) {
+    final isPathMatching =
+        pattern.uri.pathSegments.length <= uri.pathSegments.length &&
+            pattern.uri.pathSegments.asMap().entries.every(
+                  (patternEntry) =>
+                      patternEntry.value == uri.pathSegments[patternEntry.key],
+                );
+    final isQueryMatching = pattern.uri.queryParameters.entries.every(
+      (patternEntry) =>
+          uri.queryParameters[patternEntry.key] == patternEntry.value,
+    );
+    final isFragmentMatching =
+        pattern.uri.fragment.isEmpty || pattern.uri.fragment == uri.fragment;
+    final isStateMatching = stateMatcher?.call(state, pattern.state) ??
+        (pattern.state == null || state == pattern.state);
+
+    return isPathMatching &&
+        isQueryMatching &&
+        isFragmentMatching &&
+        isStateMatching;
   }
 }

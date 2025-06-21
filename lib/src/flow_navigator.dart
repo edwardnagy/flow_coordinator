@@ -1,7 +1,5 @@
 import 'package:flutter/widgets.dart';
 
-import 'flow_navigator_scope.dart';
-
 // TODO: Add documentation
 abstract interface class FlowNavigator {
   /// Returns the nearest [FlowNavigator] that encloses the given [context].
@@ -73,4 +71,19 @@ The context used was: $context
   ///
   /// Behaves like [Navigator.pop].
   void popInternally<T extends Object?>([T? result]);
+}
+
+class FlowNavigatorScope extends InheritedWidget {
+  const FlowNavigatorScope({
+    super.key,
+    required this.flowNavigator,
+    required super.child,
+  });
+
+  final FlowNavigator flowNavigator;
+
+  @override
+  bool updateShouldNotify(FlowNavigatorScope oldWidget) {
+    return flowNavigator != oldWidget.flowNavigator;
+  }
 }
