@@ -8,7 +8,7 @@ import 'flow_route_information_provider.dart';
 import 'flow_router_delegate.dart';
 import 'route_information_combiner.dart';
 
-// Public API
+// Public APIs
 
 export 'flow_navigator.dart' show FlowNavigator;
 export 'route_information_combiner.dart' show RouteInformationCombiner;
