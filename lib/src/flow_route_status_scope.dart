@@ -12,9 +12,8 @@ class FlowRouteStatusScope extends InheritedWidget {
   /// events.
   final bool isActive;
 
-  /// Whether the route is the top route in the navigator. This is `null` if
-  /// it cannot be determined.
-  final bool? isTopRoute;
+  /// Whether the route is the top route in the navigator.
+  final bool isTopRoute;
 
   static FlowRouteStatusScope? maybeOf(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<FlowRouteStatusScope>();

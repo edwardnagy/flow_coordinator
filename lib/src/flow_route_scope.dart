@@ -38,7 +38,8 @@ class FlowRouteScope extends StatelessWidget {
   /// parent flow.
   ///
   /// If `null`, updates are forwarded only when they match [routeInformation].
-  /// See [ChildRouteInformationFilter.pattern] for matching details.
+  /// See [_RouteInformationMatcher.matchesUrlPattern] for the matching
+  /// criteria.
   final RouteInformationPredicate? shouldForwardChildUpdates;
 
   /// Whether the subtree contains the currently active flow.
@@ -52,40 +53,66 @@ class FlowRouteScope extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final routeInformation = this.routeInformation;
-    final shouldForwardChildUpdates = this.shouldForwardChildUpdates;
 
-    var widget = child;
+    final routeStatusScope = FlowRouteStatusScope.maybeOf(context);
+    final isRouteActive =
+        isActive && (routeStatusScope == null || routeStatusScope.isActive);
+    final isTopRoute = (ModalRoute.of(context)?.isCurrent ?? false) &&
+        (routeStatusScope == null || routeStatusScope.isTopRoute);
 
-    if (shouldForwardChildUpdates != null) {
-      widget = ChildRouteInformationFilter(
-        shouldForwardChildUpdates: shouldForwardChildUpdates,
-        child: widget,
-      );
-    } else if (routeInformation != null) {
-      widget = ChildRouteInformationFilter.pattern(
-        pattern: routeInformation,
-        child: widget,
-      );
-    }
-
-    if (routeInformation != null) {
-      widget = RouteInformationReporter(
+    return FlowRouteStatusScope(
+      isActive: isRouteActive,
+      isTopRoute: isTopRoute,
+      child: RouteInformationReporter(
         routeInformation: routeInformation,
-        child: widget,
-      );
-    }
-
-    final route = ModalRoute.of(context);
-    widget = FlowRouteStatusScope(
-      isActive:
-          isActive && (FlowRouteStatusScope.maybeOf(context)?.isActive ?? true),
-      isTopRoute: route == null
-          ? null
-          : route.isCurrent &&
-              (FlowRouteStatusScope.maybeOf(context)?.isTopRoute ?? true),
-      child: widget,
+        child: ChildRouteInformationFilter(
+          parentValueMatcher: shouldForwardChildUpdates ??
+              (routeInformation == null
+                  ? null
+                  : (parentValue) =>
+                      parentValue.matchesUrlPattern(routeInformation)),
+          child: child,
+        ),
+      ),
     );
+  }
+}
 
-    return widget;
+extension _RouteInformationMatcher on RouteInformation {
+  /// Determines whether this route matches the given [pattern].
+  ///
+  /// A match occurs if:
+  /// - The path segments in [pattern] appear in this URI in the same order,
+  /// starting from the beginning of the path.
+  /// - All query parameters in [pattern] are present and match those in this
+  /// URI.
+  /// - The fragment in [pattern] is either empty or matches this URI's
+  /// fragment.
+  /// - The state matches the pattern’s state, using [stateMatcher] if provided.
+  /// If omitted, states are considered equal if they are identical, or if
+  /// the pattern's state is `null`.
+  bool matchesUrlPattern(
+    RouteInformation pattern, {
+    bool Function(Object? state, Object? patternState)? stateMatcher,
+  }) {
+    final isPathMatching =
+        pattern.uri.pathSegments.length <= uri.pathSegments.length &&
+            pattern.uri.pathSegments.asMap().entries.every(
+                  (patternEntry) =>
+                      patternEntry.value == uri.pathSegments[patternEntry.key],
+                );
+    final isQueryMatching = pattern.uri.queryParameters.entries.every(
+      (patternEntry) =>
+          uri.queryParameters[patternEntry.key] == patternEntry.value,
+    );
+    final isFragmentMatching =
+        pattern.uri.fragment.isEmpty || pattern.uri.fragment == uri.fragment;
+    final isStateMatching = stateMatcher?.call(state, pattern.state) ??
+        (pattern.state == null || state == pattern.state);
+
+    return isPathMatching &&
+        isQueryMatching &&
+        isFragmentMatching &&
+        isStateMatching;
   }
 }
