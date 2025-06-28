@@ -13,12 +13,12 @@ import 'route_information_reporter_delegate.dart';
 class RouteInformationReporter extends StatefulWidget {
   const RouteInformationReporter({
     super.key,
-    required this.child,
     required this.routeInformation,
+    required this.child,
   });
 
-  final Widget child;
   final RouteInformation? routeInformation;
+  final Widget child;
 
   @override
   State<RouteInformationReporter> createState() =>
