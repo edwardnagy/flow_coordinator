@@ -2,14 +2,9 @@ import 'package:flow_coordinator/flow_coordinator.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../data/book_category.dart';
+import '../data/models/book_category.dart';
 import '../screens/book_details_screen.dart';
 import '../screens/book_list_screen.dart';
-
-abstract interface class BooksFlowListener<T extends StatefulWidget>
-    implements FlowCoordinatorMixin<T> {
-  void onCreateBook();
-}
 
 class BooksFlowCoordinator extends StatefulWidget {
   const BooksFlowCoordinator({super.key});
@@ -62,11 +57,6 @@ class _BooksFlowCoordinatorState extends State<BooksFlowCoordinator>
     flowNavigator.push(
       _Pages.bookDetailPage(category: category, bookID: bookID),
     );
-  }
-
-  @override
-  void onCreateBook() {
-    FlowCoordinator.of<BooksFlowListener>(context).onCreateBook();
   }
 }
 

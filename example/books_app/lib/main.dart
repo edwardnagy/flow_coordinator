@@ -1,7 +1,7 @@
 import 'package:flow_coordinator/flow_coordinator.dart';
 import 'package:flutter/material.dart';
 
-import 'flows/home_flow_coordinator.dart';
+import 'flows/root_flow_coordinator.dart';
 
 void main() {
   runApp(const App());
@@ -17,7 +17,7 @@ class App extends StatefulWidget {
 class _AppState extends State<App> {
   final _router = FlowCoordinatorRouter(
     routeInformationReportingEnabled: true,
-    homeBuilder: (context) => const HomeFlowCoordinator(),
+    homeBuilder: (context) => const RootFlowCoordinator(),
   );
 
   @override

@@ -1,6 +1,6 @@
-import 'package:books_app/data/book.dart';
+import 'package:books_app/data/models/book.dart';
 
-import 'book_category.dart';
+import '../models/book_category.dart';
 
 class BookRepository {
   List<Book> getBooksByCategory(BookCategory category) =>

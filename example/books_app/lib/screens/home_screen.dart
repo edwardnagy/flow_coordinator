@@ -12,7 +12,6 @@ abstract interface class HomeScreenListener<T extends StatefulWidget>
 
 enum HomeTab {
   books,
-  search,
   settings,
 }
 
@@ -53,10 +52,6 @@ class HomeScreen extends StatelessWidget {
                   HomeTab.books => const NavigationDestination(
                       icon: Icon(Icons.book),
                       label: 'Books',
-                    ),
-                  HomeTab.search => const NavigationDestination(
-                      icon: Icon(Icons.search),
-                      label: 'Search',
                     ),
                   HomeTab.settings => const NavigationDestination(
                       icon: Icon(Icons.settings),
