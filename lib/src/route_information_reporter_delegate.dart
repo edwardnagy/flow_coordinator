@@ -78,7 +78,7 @@ class ChildRouteInformationReporterDelegate
   final RouteInformationReporterDelegate parent;
   final RouteInformationCombiner routeInformationCombiner;
 
-  late RouteInformation _currentRouteInformation;
+  RouteInformation? _currentRouteInformation;
 
   void setCurrentRouteInformation(RouteInformation routeInformation) {
     _currentRouteInformation = routeInformation;
@@ -88,7 +88,8 @@ class ChildRouteInformationReporterDelegate
   @override
   void childReportsRouteInformation(RouteInformation childRouteInformation) {
     final routeInformation = routeInformationCombiner.combine(
-      currentRouteInformation: _currentRouteInformation,
+      currentRouteInformation:
+          _currentRouteInformation ?? RouteInformation(uri: Uri()),
       childRouteInformation: childRouteInformation,
     );
     parent.childReportsRouteInformation(routeInformation);
