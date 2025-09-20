@@ -60,7 +60,7 @@ class _RootFlowCoordinatorState extends State<RootFlowCoordinator>
       flowNavigator.setPages([_Pages.loginPage()]);
       childRouteInformation = null;
     } else {
-      // Redirect to home
+      // Redirect to home.
       flowNavigator.setPages([_Pages.homePage()]);
       if (routeInformation.uri.pathSegments.firstOrNull == 'login') {
         childRouteInformation = RouteInformation(uri: Uri(path: ''));
