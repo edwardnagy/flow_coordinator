@@ -2,7 +2,6 @@ import 'package:flow_coordinator/flow_coordinator.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../data/models/book_category.dart';
 import '../screens/book_details_screen.dart';
 import '../screens/book_list_screen.dart';
 
@@ -16,88 +15,83 @@ class BooksFlowCoordinator extends StatefulWidget {
 class _BooksFlowCoordinatorState extends State<BooksFlowCoordinator>
     with FlowCoordinatorMixin<BooksFlowCoordinator>
     implements BookListScreenListener<BooksFlowCoordinator> {
+  static const _defaultBookTab = BookTabType.newBooks;
+
   @override
-  List<Page> get initialPages => [_Pages.booksListPage(selectedCategory: null)];
+  List<Page> get initialPages => [_Pages.booksListPage(_defaultBookTab)];
 
   @override
   Future<RouteInformation?> onNewRouteInformation(
     RouteInformation routeInformation,
   ) {
     // Parse the route information.
-    final category = switch (routeInformation.uri.queryParameters['category']) {
-      'fiction' => BookCategory.fiction,
-      'romance' => BookCategory.romance,
-      'biography' => BookCategory.biography,
-      _ => null
-    };
-    final bookID = routeInformation.uri.pathSegments.firstOrNull;
+    final pathSegments = routeInformation.uri.pathSegments;
+    final BookTabType bookTab;
+    String? bookID;
+    switch (pathSegments.firstOrNull) {
+      case null:
+        bookTab = _defaultBookTab;
+      case 'new':
+        bookTab = BookTabType.newBooks;
+      case 'all':
+        bookTab = BookTabType.allBooks;
+      case final id:
+        bookTab = BookTabType.allBooks;
+        bookID = id;
+    }
 
     // Set up the navigation stack.
     flowNavigator.setPages([
-      _Pages.booksListPage(selectedCategory: category),
-      if (bookID != null)
-        _Pages.bookDetailPage(category: category, bookID: bookID),
+      _Pages.booksListPage(bookTab),
+      if (bookID != null) _Pages.bookDetailPage(bookID: bookID),
     ]);
 
     return SynchronousFuture(null);
   }
 
   @override
-  void onCategorySelected(BookCategory category) {
+  void onBookTabChanged(BookTabType tab) {
     flowNavigator.setPages([
-      _Pages.booksListPage(selectedCategory: category),
+      _Pages.booksListPage(tab),
     ]);
   }
 
   @override
-  void onBookSelected({
-    required String bookID,
-    required BookCategory category,
-  }) {
+  void onBookSelected({required String bookID}) {
     flowNavigator.push(
-      _Pages.bookDetailPage(category: category, bookID: bookID),
+      _Pages.bookDetailPage(bookID: bookID),
     );
   }
 }
 
 class _Pages {
-  static Page booksListPage({required BookCategory? selectedCategory}) =>
-      MaterialPage(
+  static Page booksListPage(BookTabType tab) => MaterialPage(
         key: const ValueKey('booksListPage'),
         child: FlowRouteScope(
           routeInformation: RouteInformation(
             uri: Uri(
-              queryParameters: selectedCategory?.toQueryParameters(),
+              pathSegments: [
+                switch (tab) {
+                  BookTabType.newBooks => 'new',
+                  BookTabType.allBooks => 'all',
+                },
+              ],
             ),
           ),
-          child: BookListScreen(selectedCategory: selectedCategory),
+          child: BookListScreen(tab: tab),
         ),
       );
 
   static Page bookDetailPage({
-    required BookCategory? category,
     required String bookID,
   }) =>
       MaterialPage(
         key: ValueKey('bookDetailPage_$bookID'),
         child: FlowRouteScope(
           routeInformation: RouteInformation(
-            uri: Uri(
-              pathSegments: [bookID],
-              queryParameters: category?.toQueryParameters(),
-            ),
+            uri: Uri(pathSegments: [bookID]),
           ),
           child: BookDetailsScreen(bookID: bookID),
         ),
       );
-}
-
-extension on BookCategory {
-  Map<String, String> toQueryParameters() => {
-        'category': switch (this) {
-          BookCategory.fiction => 'fiction',
-          BookCategory.romance => 'romance',
-          BookCategory.biography => 'biography',
-        },
-      };
 }

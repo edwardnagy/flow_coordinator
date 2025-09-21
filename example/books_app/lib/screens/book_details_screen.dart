@@ -15,7 +15,7 @@ class BookDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     Book? book;
     try {
-      book = BookRepository().getBookByID(bookID);
+      book = BookRepository().getBook(bookID: bookID);
     } on StateError {
       book = null;
     }
@@ -41,7 +41,6 @@ class BookDetailsScreen extends StatelessWidget {
           children: [
             Text(book.title),
             Text(book.authorName),
-            Text(book.category.toString()),
           ],
         ),
       ),
