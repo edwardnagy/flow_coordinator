@@ -1,7 +1,5 @@
 import 'package:flow_coordinator/flow_coordinator.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 
 abstract interface class HomeScreenListener<T extends StatefulWidget>
     implements FlowCoordinatorMixin<T> {
@@ -14,8 +12,6 @@ enum HomeTab {
   books,
   settings,
 }
-
-const _keepTabStates = !kIsWeb;
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({
@@ -31,14 +27,22 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     const tabs = HomeTab.values;
     final selectedTab = this.selectedTab ?? tabs.first;
+    final currentIndex = tabs.indexOf(selectedTab);
 
     return Scaffold(
-      // TODO: Replace AdaptiveScaffold because it will be discontinued: https://github.com/flutter/flutter/issues/162965
-      body: AdaptiveScaffold(
-        useDrawer: kIsWeb,
-        transitionDuration: const Duration(milliseconds: 300),
-        selectedIndex: tabs.indexOf(selectedTab),
-        onSelectedIndexChange: (index) {
+      body: IndexedStack(
+        index: currentIndex,
+        children: tabs
+            .map(
+              (tab) => Builder(
+                builder: (context) => tabBuilder(context, tab),
+              ),
+            )
+            .toList(),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: currentIndex,
+        onTap: (index) {
           if (index == tabs.indexOf(selectedTab)) {
             FlowCoordinator.of<HomeScreenListener>(context)
                 .resetNavigationStackForTab(selectedTab);
@@ -47,24 +51,18 @@ class HomeScreen extends StatelessWidget {
                 .onTabSelected(tabs[index]);
           }
         },
-        destinations: tabs
+        items: tabs
             .map((tab) => switch (tab) {
-                  HomeTab.books => const NavigationDestination(
+                  HomeTab.books => const BottomNavigationBarItem(
                       icon: Icon(Icons.book),
                       label: 'Books',
                     ),
-                  HomeTab.settings => const NavigationDestination(
+                  HomeTab.settings => const BottomNavigationBarItem(
                       icon: Icon(Icons.settings),
                       label: 'Settings',
                     ),
                 })
             .toList(),
-        body: (context) => _keepTabStates
-            ? IndexedStack(
-                index: tabs.indexOf(selectedTab),
-                children: tabs.map((tab) => tabBuilder(context, tab)).toList(),
-              )
-            : tabBuilder(context, selectedTab),
       ),
     );
   }
