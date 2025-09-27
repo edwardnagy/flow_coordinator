@@ -41,11 +41,7 @@ class _HomeFlowCoordinatorState extends State<HomeFlowCoordinator>
     final childRouteInformation = RouteInformation(
       uri: Uri(
         pathSegments: routeInformation.uri.pathSegments.skip(1),
-        queryParameters: routeInformation.uri.queryParameters.isEmpty
-            ? null
-            : routeInformation.uri.queryParameters,
       ),
-      state: routeInformation.state,
     );
     return SynchronousFuture(childRouteInformation);
   }
