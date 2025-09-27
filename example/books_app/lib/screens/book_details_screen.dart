@@ -13,9 +13,11 @@ class BookDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bookRepository = BookRepository();
+
     Book? book;
     try {
-      book = BookRepository().getBook(bookID: bookID);
+      book = bookRepository.getBook(bookID: bookID);
     } on StateError {
       book = null;
     }

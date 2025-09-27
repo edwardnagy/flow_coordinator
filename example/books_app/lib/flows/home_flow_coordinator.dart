@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:books_app/data/repositories/book_repository.dart';
 import 'package:flow_coordinator/flow_coordinator.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +19,11 @@ class HomeFlowCoordinator extends StatefulWidget {
 
 class _HomeFlowCoordinatorState extends State<HomeFlowCoordinator>
     with FlowCoordinatorMixin<HomeFlowCoordinator>
-    implements HomeScreenListener<HomeFlowCoordinator> {
+    implements
+        HomeScreenListener<HomeFlowCoordinator>,
+        SettingsScreenListener<HomeFlowCoordinator> {
+  final _bookRepository = BookRepository();
+
   @override
   List<Page> get initialPages => [_Pages.homePage(currentTab: HomeTab.books)];
 
@@ -64,6 +71,22 @@ class _HomeFlowCoordinatorState extends State<HomeFlowCoordinator>
       ),
     );
     setNewRouteInformation(newRouteInformation);
+  }
+
+  @override
+  void openRandomBook() {
+    final books = _bookRepository.getBooks();
+    final randomBookIndex = Random().nextInt(books.length);
+    final randomBook = books[randomBookIndex];
+    final routeInformation = RouteInformation(
+      uri: Uri(
+        pathSegments: [
+          'books',
+          BooksFlowCoordinator.pathForSelectedBook(bookID: randomBook.id),
+        ],
+      ),
+    );
+    setNewRouteInformation(routeInformation);
   }
 }
 

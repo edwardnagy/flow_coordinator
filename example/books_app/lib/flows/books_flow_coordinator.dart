@@ -8,6 +8,8 @@ import '../screens/book_list_screen.dart';
 class BooksFlowCoordinator extends StatefulWidget {
   const BooksFlowCoordinator({super.key});
 
+  static String pathForSelectedBook({required String bookID}) => bookID;
+
   @override
   State<BooksFlowCoordinator> createState() => _BooksFlowCoordinatorState();
 }
@@ -89,7 +91,9 @@ class _Pages {
         key: ValueKey('bookDetailPage_$bookID'),
         child: FlowRouteScope(
           routeInformation: RouteInformation(
-            uri: Uri(pathSegments: [bookID]),
+            uri: Uri(
+              path: BooksFlowCoordinator.pathForSelectedBook(bookID: bookID),
+            ),
           ),
           child: BookDetailsScreen(bookID: bookID),
         ),
