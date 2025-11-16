@@ -4,7 +4,14 @@ A navigation and routing API that organizes screens into *user flows*, using the
 
 ## Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+Use Flow Coordinators in order to:
+- Reuse screens and flows across different parts of your app.
+- Separate complex navigation logic from UI code.
+- Handle deep linking and complex routing scenarios modularly.
+- Guard screens from unauthorized access — for example, redirect to login if the user is not authenticated.
+- Support nested navigators and flows.
+- Support state restoration.
+- Preserve compatibility with the Navigator API.
 
 ## Getting started
 
