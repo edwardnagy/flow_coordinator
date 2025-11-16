@@ -55,7 +55,8 @@ directory.
 
 ### Navigating between screens
 
-Create an interface for your screen's navigation events that implements `FlowCoordinatorMixin<T>`:
+Create an interface for your screen's navigation events. The interface should implement
+`FlowCoordinatorMixin`:
 
 ```dart
 abstract interface class MyScreenListener<T extends StatefulWidget>
@@ -65,8 +66,8 @@ abstract interface class MyScreenListener<T extends StatefulWidget>
 ```
 
 In your screen widget, use `FlowCoordinatorMixin.of<MyScreenListener>(context)`
-to retrieve the nearest Flow Coordinator that implements the listener interface,
-and call the appropriate method when a navigation event occurs:
+to retrieve the nearest Flow Coordinator that implements the listener interface.
+Call the appropriate method when a navigation event occurs:
 
 ```dart
 class MyScreen extends StatelessWidget {
@@ -90,8 +91,11 @@ class MyScreen extends StatelessWidget {
 }
 ```
 
-Implement the `FlowCoordinatorMixin` in your Flow Coordinator and handle
-the navigation event by pushing a new screen onto the flow's navigation stack:
+Define the Flow Coordinator that manages the screen. This needs
+to be a StatefulWidget that mixes in `FlowCoordinatorMixin` and implements the
+listener interface created earlier. Set your screen as `initialPages` of the flow.
+Then, implement the navigation logic of the listener methods using the
+`flowNavigator` to push, pop, or replace pages:
 
 ```dart
 class MyFlowCoordinator extends StatefulWidget {
@@ -113,6 +117,41 @@ class _MyFlowCoordinatorState
   }
 }
 ```
+
+You can set this Flow Coordinator as the root of your app, or push it from another
+Flow Coordinator just like a regular screen.
+
+#### Navigating back
+
+Use `flowNavigator.pop()` from inside a Flow Coordinator,
+or `FlowNavigator.of(context).pop()` from inside a screen,
+to navigate back to the previous screen in the navigation stack. This ensures that
+the correct screen/flow is popped even in case the previous screen is managed by
+a different Flow Coordinator.
+
+```dart
+class MyNextScreen extends StatelessWidget {
+  const MyNextScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('My Next Screen')),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            FlowNavigator.of(context).pop();
+          },
+          child: const Text('Go Back'),
+        ),
+      ),
+    );
+  }
+}
+```
+
+Android back button handling is automatically delegated to the topmost navigator
+— no additional configuration is needed.
 
 ### Handling deep links
 
