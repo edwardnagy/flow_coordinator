@@ -156,6 +156,30 @@ Android back button handling is automatically delegated to the topmost navigator
 
 ### Handling deep links
 
+Override the `FlowCoordinatorMixin.onNewRouteInformation` method of your Flow
+Coordinator to handle incoming deep links:
+
+```dart
+class _MyFlowCoordinatorState
+    with FlowCoordinatorMixin<MyFlowCoordinator> {
+  @override
+  Future<RouteInformation?> onNewRouteInformation(
+      RouteInformation routeInformation) async {
+    if (routeInformation.uri.pathSegments.firstOrNull == 'next') {
+      flowNavigator.push(MaterialPage(child: MyNextScreen()));
+    }
+    return SynchronousFuture(null);
+  }
+}
+```
+
+In case the deep link (or a part of it) should be handled by a child Flow Coordinator,
+return the `RouteInformation` object containing the unhandled part of the deep link.
+The child Flow Coordinator will receive it in its own `onNewRouteInformation` method.
+
+Note, return a `SynchronousFuture` if the deep link can be handled synchronously
+to avoid waiting for the next microtask to schedule the build.
+
 ### Synchronizing the browser URL
 
 ### Nested routing with tabs
