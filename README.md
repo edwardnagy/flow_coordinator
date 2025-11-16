@@ -14,7 +14,7 @@ Use Flow Coordinators to:
 - Restore the app state after termination.
 - Guard screens from unauthorized access — for example, redirect to login if the
 user is not authenticated.
-- Support nested navigators and flows.
+- Support nested routing with tabs.
 - Preserve compatibility with the Navigator API.
 
 ## Getting started
@@ -47,6 +47,7 @@ This section has code examples for the following tasks:
 - [Navigating between screens](#navigating-between-screens)
 - [Handling deep links](#handling-deep-links)
 - [Synchronizing the browser URL](#synchronizing-the-browser-url)
+- [Nested routing with tabs](#nested-routing-with-tabs)
 
 A complete example app that meets all navigation requirements identified by the
 Flutter team in their [Routing API Usability Research](https://github.com/flutter/uxr/blob/master/docs/Flutter-Routing-API-Usability-Research.md)
@@ -156,6 +157,8 @@ Android back button handling is automatically delegated to the topmost navigator
 ### Handling deep links
 
 ### Synchronizing the browser URL
+
+### Nested routing with tabs
 
 ## Additional information
 
