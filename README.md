@@ -1,6 +1,6 @@
 An API to organize navigation and routing into *user flows*, using the Flow Controller (Coordinator) pattern.
 
-![Flow Coordinator Illustration](https://github.com/user-attachments/assets/abd59fa6-8d42-4dbe-92ca-35297711e1a1)
+![Flow Coordinator Illustration](https://raw.githubusercontent.com/edwardnagy/flow_coordinator/refs/heads/main/doc/flow-coordinator-illustration.svg?token=GHSAT0AAAAAADOMVI5ZAO55SHQVNT6QOJI62IZWQEQ)
 
 ## Features
 
