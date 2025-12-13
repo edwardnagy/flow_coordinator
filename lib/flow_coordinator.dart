@@ -1,4 +1,4 @@
-// TODO: Add documentation for the library (like go_router has).
+// A navigation and routing API that organizes screens into user flows.
 library;
 
 export 'src/flow_coordinator.dart';
