@@ -10,14 +10,14 @@ Use Flow Coordinators to:
 - Reuse screens and flows across different parts of your app.
 - Separate complex navigation logic from UI code.
 - Handle deep linking and complex routing scenarios modularly.
-- Synchronize the browser URL with the active route.
+- Update the browser URL to reflect the current route.
 - Restore the app state after termination.
 - Guard screens from unauthorized access — for example, redirect to login if the
 user is not authenticated.
 - Support nested routing with tabs.
 - Preserve compatibility with the Navigator API.
 
-## Getting started
+## Getting Started
 
 To configure your app, set the `routerConfig` parameter of `MaterialApp.router`
 or `CupertinoApp.router` to a `FlowCoordinatorRouter`, and provide a builder for
@@ -44,17 +44,17 @@ class MyApp extends StatelessWidget {
 
 This section has code examples for the following tasks:
 
-- [Navigating between screens](#navigating-between-screens)
-- [Handling deep links](#handling-deep-links)
-- [Synchronizing the browser URL](#synchronizing-the-browser-url)
-- [Nested routing with tabs](#nested-routing-with-tabs)
+- [Navigating Between Screens](#navigating-between-screens)
+- [Deep Link Handling](#deep-link-handling)
+- [Updating the Browser URL](#updating-the-browser-url)
+- [Tabbed Navigation with Nested Routing](#tabbed-navigation-with-nested-routing)
 
 A complete example app that meets all navigation requirements identified by the
 Flutter team in their [Routing API Usability Research](https://github.com/flutter/uxr/blob/master/docs/Flutter-Routing-API-Usability-Research.md)
 as “important yet difficult to implement” is available in the [example](example/)
 directory.
 
-### Navigating between screens
+### Navigating Between Screens
 
 Create an interface for your screen's navigation events. The interface should implement
 `FlowCoordinatorMixin`:
@@ -122,7 +122,7 @@ class _MyFlowCoordinatorState
 You can set this Flow Coordinator as the root of your app, or push it from another
 Flow Coordinator just like a regular screen.
 
-#### Navigating back
+#### Navigating Back
 
 Use `flowNavigator.pop()` from inside a Flow Coordinator,
 or `FlowNavigator.of(context).pop()` from inside a screen,
@@ -154,17 +154,17 @@ class MyNextScreen extends StatelessWidget {
 Android back button handling is automatically delegated to the topmost navigator
 — no additional configuration is needed.
 
-### Handling deep links
+### Deep Link Handling
 
-Override the `FlowCoordinatorMixin.onNewRouteInformation` method of your Flow
-Coordinator to handle incoming deep links:
+Override the `onNewRouteInformation` method of your Flow
+Coordinator's FlowCoordinatorMixin to handle incoming deep links:
 
 ```dart
-class _MyFlowCoordinatorState
-    with FlowCoordinatorMixin<MyFlowCoordinator> {
+class _MyFlowCoordinatorState with FlowCoordinatorMixin<MyFlowCoordinator> {
   @override
   Future<RouteInformation?> onNewRouteInformation(
-      RouteInformation routeInformation) async {
+    RouteInformation routeInformation,
+  ) async {
     if (routeInformation.uri.pathSegments.firstOrNull == 'next') {
       flowNavigator.push(MaterialPage(child: MyNextScreen()));
     }
@@ -173,18 +173,75 @@ class _MyFlowCoordinatorState
 }
 ```
 
-In case the deep link (or a part of it) should be handled by a child Flow Coordinator,
-return the `RouteInformation` object containing the unhandled part of the deep link.
-The child Flow Coordinator will receive it in its own `onNewRouteInformation` method.
-
 Note, return a `SynchronousFuture` if the deep link can be handled synchronously
 to avoid waiting for the next microtask to schedule the build.
 
-### Synchronizing the browser URL
+#### Nested Routing
 
-### Nested routing with tabs
+If part of the deep link should be handled by a child Flow Coordinator,
+build and return a `RouteInformation` object from the `onNewRouteInformation`
+that contains the remaining part of the deep link.
+The child Flow Coordinator will receive it in its own `onNewRouteInformation` method.
 
-## Additional information
+```dart
+class _HomeFlowCoordinatorState with FlowCoordinatorMixin<HomeFlowCoordinator> {
+  @override
+  Future<RouteInformation?> onNewRouteInformation(
+    RouteInformation routeInformation,
+  ) async {
+    RouteInformation? childRouteInformation;
+    switch (routeInformation.uri.pathSegments.firstOrNull) {
+      case 'profile':
+        flowNavigator.setPages([
+          MaterialPage(key: Key('profile'), child: ProfileFlowCoordinator()),
+        ]);
+        childRouteInformation = RouteInformation(
+          uri: Uri(pathSegments: routeInformation.uri.pathSegments.sublist(1)),
+        );
+      case 'settings':
+        flowNavigator.setPages([
+          MaterialPage(key: Key('settings'), child: SettingsScreen()),
+        ]);
+    }
+    return SynchronousFuture(childRouteInformation);
+  }
+}
+```
+
+### Updating the Browser URL
+
+Wrap your screen widgets with `FlowRouteScope` to update the browser URL when navigating
+between screens. Set `routeInformation` to the desired URL for each screen. The browser
+address bar will reflect the URL of the topmost `FlowRouteScope` in
+the navigation stack, even when navigating back using in-app or Android back buttons.
+
+```dart
+class _MyFlowCoordinatorState with FlowCoordinatorMixin<MyFlowCoordinator> {
+  @override
+  Future<RouteInformation?> onNewRouteInformation(
+    RouteInformation routeInformation,
+  ) async {
+    flowNavigator.setPages([
+      FlowRouteScope(
+        // Update URL to '/' when MyScreen is active.
+        routeInformation: RouteInformation(uri: Uri()),
+        child: MyScreen(),
+      ),
+      if (routeInformation.uri.pathSegments.firstOrNull == 'next')
+        // Update URL to '/next' when MyNextScreen is active.
+        FlowRouteScope(
+          routeInformation: RouteInformation(uri: Uri(pathSegments: ['next'])),
+          child: MyNextScreen(),
+        ),
+    ]);
+    return SynchronousFuture(null);
+  }
+}
+```
+
+### Tabbed Navigation with Nested Routing
+
+## Additional Information
 
 TODO: Tell users more about the package: where to find more information, how to
 contribute to the package, how to file issues, what response they can expect
