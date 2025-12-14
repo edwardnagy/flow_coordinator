@@ -189,24 +189,25 @@ class _HomeFlowCoordinatorState with FlowCoordinatorMixin<HomeFlowCoordinator> {
   Future<RouteInformation?> onNewRouteInformation(
     RouteInformation routeInformation,
   ) async {
-    RouteInformation? childRouteInformation;
     switch (routeInformation.uri.pathSegments.firstOrNull) {
       case 'profile':
         flowNavigator.setPages([
           MaterialPage(key: Key('profile'), child: ProfileFlowCoordinator()),
         ]);
-        childRouteInformation = RouteInformation(
-          uri: Uri(pathSegments: routeInformation.uri.pathSegments.sublist(1)),
-        );
       case 'settings':
         flowNavigator.setPages([
           MaterialPage(key: Key('settings'), child: SettingsScreen()),
         ]);
     }
+    final childRouteInformation = RouteInformation(
+      uri: Uri(pathSegments: routeInformation.uri.pathSegments.sublist(1)),
+    );
     return SynchronousFuture(childRouteInformation);
   }
 }
 ```
+<!-- TODO: Specify how the ProfileFlowCoordinator uses the given RouteInformation -->
+<!-- TODO: Consider replacing the ProfileFlowCoordinator with the BookFlowCoordinator. -->
 
 ### Updating the Browser URL
 
@@ -240,6 +241,79 @@ class _MyFlowCoordinatorState with FlowCoordinatorMixin<MyFlowCoordinator> {
 ```
 
 ### Tabbed Navigation with Nested Routing
+
+For layouts where multiple flow coordinators coexist — such as a bottom navigation
+bar with persistent sub-flows — you must use `FlowRouteScope` to explicitly specify
+the route information and active state of each child flow coordinator.
+This has the following effects:
+
+- **Deep Link Filtering:** It controls deep link propagation by
+conditionally forwarding route updates to the child subtree only when they match
+the specified `routeInformation`.
+- **Updating the Browser URL:** When the route is `isActive` and becomes the
+topmost entry in the navigation stack, its `routeInformation` is combined with
+ancestor routes and reported to the platform to update the browser's address bar
+or save state restoration data.
+- **Back Button Handling:** Back button events are only delivered to the child
+subtree if `isActive` is true.
+
+```dart
+enum HomeTab { books, settings }
+
+class _HomeFlowCoordinatorState extends State<HomeFlowCoordinator>
+    with FlowCoordinatorMixin<HomeFlowCoordinator>
+    implements HomeScreenListener<HomeFlowCoordinator> {
+  @override
+  List<Page> get initialPages => [_buildHomePage(HomeTab.books)];
+
+  @override
+  Future<RouteInformation?> onNewRouteInformation(
+    RouteInformation routeInformation,
+  ) async {
+    // 1. Parse the first segment to determine the active tab.
+    final pathSegments = routeInformation.uri.pathSegments;
+    final selectedTab = switch (pathSegments.firstOrNull) {
+      'books' => HomeTab.books,
+      'settings' => HomeTab.settings,
+      _ => HomeTab.books,
+    };
+
+    // 2. Update the navigation stack to show the correct tab.
+    flowNavigator.setPages([_buildHomePage(selectedTab)]);
+
+    // 3. Forward the remaining URI segments to the child flow.
+    final childRoute = RouteInformation(
+      uri: Uri(pathSegments: pathSegments.skip(1).toList()),
+    );
+    return SynchronousFuture(childRoute);
+  }
+
+  void _onTabSelected(HomeTab tab) {
+    flowNavigator.setPages([_buildHomePage(tab)]);
+  }
+
+  Page _buildHomePage(HomeTab currentTab) {
+    return MaterialPage(
+      child: HomeScreen(
+        selectedTab: currentTab,
+        tabBuilder: (context, tab) => switch (tab) {
+          HomeTab.books => FlowRouteScope(
+            // Only the active tab responds to back buttons & reports URLs.
+            isActive: currentTab == HomeTab.books,
+            routeInformation: RouteInformation(uri: Uri(path: 'books')),
+            child: const BooksFlowCoordinator(),
+          ),
+          HomeTab.settings => FlowRouteScope(
+            isActive: currentTab == HomeTab.settings,
+            routeInformation: RouteInformation(uri: Uri(path: 'settings')),
+            child: const SettingsFlowCoordinator(),
+          ),
+        },
+      ),
+    );
+  }
+}
+```
 
 ## Additional Information
 
