@@ -110,11 +110,15 @@ class _MyFlowCoordinatorState extends State<MyFlowCoordinator>
     with FlowCoordinatorMixin
     implements MyScreenListener<MyFlowCoordinator> {
   @override
-  List<Page> get initialPages => [const MaterialPage(child: MyScreen())];
+  List<Page> get initialPages => [
+    const MaterialPage(key: ValueKey('my-screen'), child: MyScreen()),
+  ];
 
   @override
   void onButtonPressed() {
-    flowNavigator.push(MaterialPage(child: MyNextScreen()));
+    flowNavigator.push(
+      MaterialPage(key: ValueKey('my-next-screen'), child: MyNextScreen()),
+    );
   }
 }
 ```
@@ -168,7 +172,9 @@ class _MyFlowCoordinatorState extends State<MyFlowCoordinator>
     RouteInformation routeInformation,
   ) async {
     if (routeInformation.uri.pathSegments.firstOrNull == 'next') {
-      flowNavigator.push(MaterialPage(child: MyNextScreen()));
+      flowNavigator.push(
+        MaterialPage(key: ValueKey('my-next-screen'), child: MyNextScreen()),
+      );
     }
     return SynchronousFuture(null);
   }
@@ -203,11 +209,11 @@ class _HomeFlowCoordinatorState extends State<HomeFlowCoordinator>
     switch (routeInformation.uri.pathSegments.firstOrNull) {
       case 'books':
         flowNavigator.setPages([
-          MaterialPage(key: Key('books'), child: BookFlowCoordinator()),
+          MaterialPage(key: ValueKey('books'), child: BookFlowCoordinator()),
         ]);
       case 'settings':
         flowNavigator.setPages([
-          MaterialPage(key: Key('settings'), child: SettingsScreen()),
+          MaterialPage(key: ValueKey('settings'), child: SettingsScreen()),
         ]);
     }
     final childRouteInformation = RouteInformation(
@@ -226,17 +232,16 @@ class _BookFlowCoordinatorState extends State<BookFlowCoordinator>
   ) async {
     final bookID = routeInformation.uri.pathSegments.firstOrNull;
     flowNavigator.setPages([
-      MaterialPage(key: Key('books-list'), child: BooksListScreen()),
+      MaterialPage(key: ValueKey('books-list'), child: BooksListScreen()),
       if (bookID != null)
         MaterialPage(
-          key: Key('book-$bookID'),
+          key: ValueKey('book-$bookID'),
           child: BookDetailScreen(bookID: bookID),
         ),
     ]);
     return SynchronousFuture(null);
   }
 }
-
 ```
 
 ### Updating the Browser URL
@@ -255,16 +260,24 @@ class _MyFlowCoordinatorState extends State<MyFlowCoordinator>
     RouteInformation routeInformation,
   ) async {
     flowNavigator.setPages([
-      FlowRouteScope(
-        // Update URL to '/' when MyScreen is active.
-        routeInformation: RouteInformation(uri: Uri()),
-        child: MyScreen(),
+      MaterialPage(
+        key: ValueKey('my-screen'),
+        child: FlowRouteScope(
+          // Update URL to '/' when MyScreen is active.
+          routeInformation: RouteInformation(uri: Uri()),
+          child: MyScreen(),
+        ),
       ),
       if (routeInformation.uri.pathSegments.firstOrNull == 'next')
-        FlowRouteScope(
-          // Update URL to '/next' when MyNextScreen is active.
-          routeInformation: RouteInformation(uri: Uri(pathSegments: ['next'])),
-          child: MyNextScreen(),
+        MaterialPage(
+          key: ValueKey('my-next-screen'),
+          FlowRouteScope(
+            // Update URL to '/next' when MyNextScreen is active.
+            routeInformation: RouteInformation(
+              uri: Uri(pathSegments: ['next']),
+            ),
+            child: MyNextScreen(),
+          ),
         ),
     ]);
     return SynchronousFuture(null);
@@ -346,3 +359,11 @@ class _HomeFlowCoordinatorState extends State<HomeFlowCoordinator>
   }
 }
 ```
+
+## Common Issues and Solutions
+
+### Navigation Animations Not Working
+
+Ensure that each Page you push to the `flowNavigator` has a unique LocalKey. This
+allows the Navigator widget used under the hood to correctly identify pages and
+apply navigation animations.
