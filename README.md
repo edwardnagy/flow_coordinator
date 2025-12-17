@@ -179,20 +179,29 @@ to avoid waiting for the next microtask to schedule the build.
 #### Nested Routing
 
 If part of the deep link should be handled by a child Flow Coordinator,
-build and return a `RouteInformation` object from the `onNewRouteInformation`
-that contains the remaining part of the deep link.
-The child Flow Coordinator will receive it in its own `onNewRouteInformation` method.
+return a `RouteInformation` object from the `onNewRouteInformation` that
+contains the remaining part of the deep link. The child Flow Coordinator will
+receive it in its own `onNewRouteInformation` method.
+
+In the example below, the `HomeFlowCoordinator` routes to either the
+`BookFlowCoordinator` or the `SettingsScreen` based on the first path segment.
+It then forwards the remaining path segments to the child Flow Coordinator
+by returning a new `RouteInformation` object. The `BookFlowCoordinator`
+handles the remaining path segments to show either the list of books or
+the details of a specific book.
 
 ```dart
-class _HomeFlowCoordinatorState with FlowCoordinatorMixin<HomeFlowCoordinator> {
+/// State of the HomeFlowCoordinator StatefulWidget.
+class _HomeFlowCoordinatorState extends State<HomeFlowCoordinator>
+    with FlowCoordinatorMixin {
   @override
   Future<RouteInformation?> onNewRouteInformation(
     RouteInformation routeInformation,
   ) async {
     switch (routeInformation.uri.pathSegments.firstOrNull) {
-      case 'profile':
+      case 'books':
         flowNavigator.setPages([
-          MaterialPage(key: Key('profile'), child: ProfileFlowCoordinator()),
+          MaterialPage(key: Key('books'), child: BookFlowCoordinator()),
         ]);
       case 'settings':
         flowNavigator.setPages([
@@ -205,9 +214,28 @@ class _HomeFlowCoordinatorState with FlowCoordinatorMixin<HomeFlowCoordinator> {
     return SynchronousFuture(childRouteInformation);
   }
 }
+
+/// State of the BookFlowCoordinator plain StatefulWidget.
+class _BookFlowCoordinatorState extends State<BookFlowCoordinator>
+    with FlowCoordinatorMixin {
+  @override
+  Future<RouteInformation?> onNewRouteInformation(
+    RouteInformation routeInformation,
+  ) async {
+    final bookID = routeInformation.uri.pathSegments.firstOrNull;
+    flowNavigator.setPages([
+      MaterialPage(key: Key('books-list'), child: BooksListScreen()),
+      if (bookID != null)
+        MaterialPage(
+          key: Key('book-$bookID'),
+          child: BookDetailScreen(bookID: bookID),
+        ),
+    ]);
+    return SynchronousFuture(null);
+  }
+}
+
 ```
-<!-- TODO: Specify how the ProfileFlowCoordinator uses the given RouteInformation -->
-<!-- TODO: Consider replacing the ProfileFlowCoordinator with the BookFlowCoordinator. -->
 
 ### Updating the Browser URL
 
