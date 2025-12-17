@@ -106,8 +106,8 @@ class MyFlowCoordinator extends StatefulWidget {
   State<MyFlowCoordinator> createState() => _MyFlowCoordinatorState();
 }
 
-class _MyFlowCoordinatorState
-    with FlowCoordinatorMixin<MyFlowCoordinator>
+class _MyFlowCoordinatorState extends State<MyFlowCoordinator>
+    with FlowCoordinatorMixin
     implements MyScreenListener<MyFlowCoordinator> {
   @override
   List<Page> get initialPages => [const MaterialPage(child: MyScreen())];
@@ -160,7 +160,9 @@ Override the `onNewRouteInformation` method of your Flow
 Coordinator's FlowCoordinatorMixin to handle incoming deep links:
 
 ```dart
-class _MyFlowCoordinatorState with FlowCoordinatorMixin<MyFlowCoordinator> {
+/// State of the MyFlowCoordinator plain StatefulWidget.
+class _MyFlowCoordinatorState extends State<MyFlowCoordinator>
+    with FlowCoordinatorMixin {
   @override
   Future<RouteInformation?> onNewRouteInformation(
     RouteInformation routeInformation,
@@ -245,7 +247,9 @@ address bar will reflect the URL of the topmost `FlowRouteScope` in
 the navigation stack, even when navigating back using in-app or Android back buttons.
 
 ```dart
-class _MyFlowCoordinatorState with FlowCoordinatorMixin<MyFlowCoordinator> {
+/// State of the MyFlowCoordinator plain StatefulWidget.
+class _MyFlowCoordinatorState extends State<MyFlowCoordinator>
+    with FlowCoordinatorMixin {
   @override
   Future<RouteInformation?> onNewRouteInformation(
     RouteInformation routeInformation,
@@ -288,8 +292,9 @@ subtree if `isActive` is true.
 ```dart
 enum HomeTab { books, settings }
 
+/// State of the HomeFlowCoordinator StatefulWidget.
 class _HomeFlowCoordinatorState extends State<HomeFlowCoordinator>
-    with FlowCoordinatorMixin<HomeFlowCoordinator>
+    with FlowCoordinatorMixin
     implements HomeScreenListener<HomeFlowCoordinator> {
   @override
   List<Page> get initialPages => [_buildHomePage(HomeTab.books)];
