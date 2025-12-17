@@ -274,18 +274,17 @@ class _MyFlowCoordinatorState extends State<MyFlowCoordinator>
 
 ### Tabbed Navigation with Nested Routing
 
-For layouts where multiple flow coordinators coexist — such as a bottom navigation
-bar with persistent sub-flows — you must use `FlowRouteScope` to explicitly specify
+For layouts where multiple flow coordinators coexist — such as a navigation bar
+with persistent sub-flows — you must use `FlowRouteScope` to explicitly specify
 the route information and active state of each child flow coordinator.
 This has the following effects:
 
 - **Deep Link Filtering:** It controls deep link propagation by
 conditionally forwarding route updates to the child subtree only when they match
 the specified `routeInformation`.
-- **Updating the Browser URL:** When the route is `isActive` and becomes the
-topmost entry in the navigation stack, its `routeInformation` is combined with
-ancestor routes and reported to the platform to update the browser's address bar
-or save state restoration data.
+- **Updating the Browser URL:** When the route is `isActive`, its
+`routeInformation` is combined with ancestor routes and reported to the platform
+to update the browser's address bar or save state restoration data.
 - **Back Button Handling:** Back button events are only delivered to the child
 subtree if `isActive` is true.
 
@@ -339,7 +338,7 @@ class _HomeFlowCoordinatorState extends State<HomeFlowCoordinator>
           HomeTab.settings => FlowRouteScope(
             isActive: currentTab == HomeTab.settings,
             routeInformation: RouteInformation(uri: Uri(path: 'settings')),
-            child: const SettingsFlowCoordinator(),
+            child: const SettingsScreen(),
           ),
         },
       ),
