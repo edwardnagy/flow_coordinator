@@ -16,7 +16,7 @@ class RootFlowCoordinator extends StatefulWidget {
 }
 
 class _RootFlowCoordinatorState extends State<RootFlowCoordinator>
-    with FlowCoordinatorMixin<RootFlowCoordinator> {
+    with FlowCoordinatorMixin {
   final _authRepository = AuthenticationRepository();
   StreamSubscription<bool>? _authSubscription;
 

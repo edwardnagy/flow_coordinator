@@ -18,7 +18,7 @@ class HomeFlowCoordinator extends StatefulWidget {
 }
 
 class _HomeFlowCoordinatorState extends State<HomeFlowCoordinator>
-    with FlowCoordinatorMixin<HomeFlowCoordinator>
+    with FlowCoordinatorMixin
     implements
         HomeScreenListener<HomeFlowCoordinator>,
         SettingsScreenListener<HomeFlowCoordinator> {

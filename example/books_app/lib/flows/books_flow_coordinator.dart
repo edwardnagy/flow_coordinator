@@ -15,7 +15,7 @@ class BooksFlowCoordinator extends StatefulWidget {
 }
 
 class _BooksFlowCoordinatorState extends State<BooksFlowCoordinator>
-    with FlowCoordinatorMixin<BooksFlowCoordinator>
+    with FlowCoordinatorMixin
     implements BookListScreenListener<BooksFlowCoordinator> {
   static const _defaultBookTab = BookTabType.newBooks;
 
