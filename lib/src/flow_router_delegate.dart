@@ -8,7 +8,10 @@ final class FlowRouterDelegate extends RouterDelegate
     implements FlowNavigator {
   FlowRouterDelegate({
     required List<Page> initialPages,
+    required this.debugLabel,
   }) : _pages = [...initialPages];
+
+  final String debugLabel;
 
   List<Page> _pages;
 
@@ -83,6 +86,8 @@ final class FlowRouterDelegate extends RouterDelegate
 
   @override
   Widget build(BuildContext context) {
+    assert(_pages.isNotEmpty, '$debugLabel: The pages list cannot be empty.');
+
     return Navigator(
       key: navigatorKey,
       pages: _pages,

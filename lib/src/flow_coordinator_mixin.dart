@@ -22,7 +22,10 @@ export 'route_information_combiner.dart' show RouteInformationCombiner;
 mixin FlowCoordinatorMixin<T extends StatefulWidget> on State<T> {
   FlowRouteInformationProvider? _parentRouteInformationProvider;
 
-  late final _routerDelegate = FlowRouterDelegate(initialPages: initialPages);
+  late final _routerDelegate = FlowRouterDelegate(
+    initialPages: initialPages,
+    debugLabel: '$runtimeType._routerDelegate',
+  );
 
   late final _routeInformationProvider = _ChildFlowRouteInformationProvider();
 
