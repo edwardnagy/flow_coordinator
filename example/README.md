@@ -12,3 +12,5 @@ or home screen is displayed. Unauthenticated deep links redirect to login.
 the books flow and settings as separate tabs.
 - **Stack Skipping**: Selecting a random book from the settings screen navigates
 directly to that book in the books flow, bypassing the books list.
+- **Browser URL Synchronization**: The browser's URL reflects the current navigation
+state and updates as the user navigates.
