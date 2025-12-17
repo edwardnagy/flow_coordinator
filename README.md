@@ -261,8 +261,8 @@ class _MyFlowCoordinatorState extends State<MyFlowCoordinator>
         child: MyScreen(),
       ),
       if (routeInformation.uri.pathSegments.firstOrNull == 'next')
-        // Update URL to '/next' when MyNextScreen is active.
         FlowRouteScope(
+          // Update URL to '/next' when MyNextScreen is active.
           routeInformation: RouteInformation(uri: Uri(pathSegments: ['next'])),
           child: MyNextScreen(),
         ),
