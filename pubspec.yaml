@@ -3,6 +3,12 @@ description: A navigation and routing API that organizes screens into user flows
 version: 0.0.1
 repository: https://github.com/edwardnagy/flow_coordinator
 issue_tracker: https://github.com/edwardnagy/flow_coordinator/issues
+topics:
+  - navigation
+  - routing
+  - deep-linking
+  - flow-controller
+  - coordinator
 
 environment:
   sdk: ^3.0.0
