@@ -84,31 +84,30 @@ class _BookListScreenState extends State<BookListScreen>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: _tabs.map(
-          (tab) {
-            final books = _bookRepository.getBooks(
-              includeOnlyNew: switch (tab) {
-                BookTabType.newBooks => true,
-                BookTabType.allBooks => false,
-              },
-            );
+        children: _tabs.map((tab) {
+          final books = _bookRepository.getBooks(
+            includeOnlyNew: switch (tab) {
+              BookTabType.newBooks => true,
+              BookTabType.allBooks => false,
+            },
+          );
 
-            return ListView.builder(
-              itemCount: books.length,
-              itemBuilder: (context, index) {
-                final book = books[index];
-                return ListTile(
-                  title: Text(book.title),
-                  subtitle: Text(book.authorName),
-                  onTap: () {
-                    FlowCoordinator.of<BookListScreenListener>(context)
-                        .onBookSelected(bookID: book.id);
-                  },
-                );
-              },
-            );
-          },
-        ).toList(),
+          return ListView.builder(
+            itemCount: books.length,
+            itemBuilder: (context, index) {
+              final book = books[index];
+              return ListTile(
+                title: Text(book.title),
+                subtitle: Text(book.authorName),
+                onTap: () {
+                  FlowCoordinator.of<BookListScreenListener>(
+                    context,
+                  ).onBookSelected(bookID: book.id);
+                },
+              );
+            },
+          );
+        }).toList(),
       ),
     );
   }

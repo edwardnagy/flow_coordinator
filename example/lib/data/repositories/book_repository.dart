@@ -1,4 +1,4 @@
-import 'package:books_app/data/models/book.dart';
+import '../models/book.dart';
 
 class BookRepository {
   List<Book> getBooks({bool includeOnlyNew = false}) {

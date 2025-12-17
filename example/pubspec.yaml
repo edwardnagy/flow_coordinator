@@ -1,21 +1,21 @@
 name: books_app
-description: "A sample app that showcases common navigation scenarios."
+description: "An example Books App demonstrating the capabilities of the package."
 publish_to: "none"
 version: 0.1.0
 
 environment:
-  sdk: ^3.5.4
+  sdk: ^3.10.3
 
 dependencies:
   flutter:
     sdk: flutter
   flow_coordinator:
-    path: ../..
+    path: ..
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
+  flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true

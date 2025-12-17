@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:books_app/data/repositories/book_repository.dart';
+import '../data/repositories/book_repository.dart';
 import 'package:flow_coordinator/flow_coordinator.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -46,18 +46,14 @@ class _HomeFlowCoordinatorState extends State<HomeFlowCoordinator>
 
     // Return the route information for the nested flows.
     final childRouteInformation = RouteInformation(
-      uri: Uri(
-        pathSegments: routeInformation.uri.pathSegments.skip(1),
-      ),
+      uri: Uri(pathSegments: routeInformation.uri.pathSegments.skip(1)),
     );
     return SynchronousFuture(childRouteInformation);
   }
 
   @override
   void onTabSelected(HomeTab tab) {
-    flowNavigator.setPages([
-      _Pages.homePage(currentTab: tab),
-    ]);
+    flowNavigator.setPages([_Pages.homePage(currentTab: tab)]);
   }
 
   @override
@@ -92,28 +88,26 @@ class _HomeFlowCoordinatorState extends State<HomeFlowCoordinator>
 
 class _Pages {
   static Page notFoundPage() => const MaterialPage(
-        key: ValueKey('notFoundPage'),
-        child: NotFoundScreen(),
-      );
+    key: ValueKey('notFoundPage'),
+    child: NotFoundScreen(),
+  );
 
-  static Page homePage({
-    required HomeTab? currentTab,
-  }) {
+  static Page homePage({required HomeTab? currentTab}) {
     return MaterialPage(
       key: const ValueKey('homePage'),
       child: HomeScreen(
         selectedTab: currentTab,
         tabBuilder: (context, tab) => switch (tab) {
           HomeTab.books => FlowRouteScope(
-              routeInformation: RouteInformation(uri: Uri(path: 'books')),
-              isActive: currentTab == HomeTab.books,
-              child: const BooksFlowCoordinator(),
-            ),
+            routeInformation: RouteInformation(uri: Uri(path: 'books')),
+            isActive: currentTab == HomeTab.books,
+            child: const BooksFlowCoordinator(),
+          ),
           HomeTab.settings => FlowRouteScope(
-              routeInformation: RouteInformation(uri: Uri(path: 'settings')),
-              isActive: currentTab == HomeTab.settings,
-              child: const SettingsScreen(),
-            ),
+            routeInformation: RouteInformation(uri: Uri(path: 'settings')),
+            isActive: currentTab == HomeTab.settings,
+            child: const SettingsScreen(),
+          ),
         },
       ),
     );

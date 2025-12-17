@@ -28,11 +28,11 @@ class _RootFlowCoordinatorState extends State<RootFlowCoordinator>
       isAuthenticated: _authRepository.isAuthenticated,
     );
     // Handle changes to the authentication state.
-    _authSubscription = _authRepository.authenticationStateStream.listen(
-      (isAuthenticated) {
-        _onAuthenticationStateChanged(isAuthenticated: isAuthenticated);
-      },
-    );
+    _authSubscription = _authRepository.authenticationStateStream.listen((
+      isAuthenticated,
+    ) {
+      _onAuthenticationStateChanged(isAuthenticated: isAuthenticated);
+    });
   }
 
   @override
@@ -74,18 +74,18 @@ class _RootFlowCoordinatorState extends State<RootFlowCoordinator>
 
 class _Pages {
   static Page loginPage() => MaterialPage(
-        key: const ValueKey('loginPage'),
-        child: FlowRouteScope(
-          routeInformation: RouteInformation(uri: Uri(path: 'login')),
-          child: const LoginScreen(),
-        ),
-      );
+    key: const ValueKey('loginPage'),
+    child: FlowRouteScope(
+      routeInformation: RouteInformation(uri: Uri(path: 'login')),
+      child: const LoginScreen(),
+    ),
+  );
 
   static Page homePage() => MaterialPage(
-        key: const ValueKey('homePage'),
-        child: FlowRouteScope(
-          routeInformation: RouteInformation(uri: Uri(path: '')),
-          child: const HomeFlowCoordinator(),
-        ),
-      );
+    key: const ValueKey('homePage'),
+    child: FlowRouteScope(
+      routeInformation: RouteInformation(uri: Uri(path: '')),
+      child: const HomeFlowCoordinator(),
+    ),
+  );
 }

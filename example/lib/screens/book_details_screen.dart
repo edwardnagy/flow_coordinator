@@ -4,10 +4,7 @@ import '../data/models/book.dart';
 import '../data/repositories/book_repository.dart';
 
 class BookDetailsScreen extends StatelessWidget {
-  const BookDetailsScreen({
-    super.key,
-    required this.bookID,
-  });
+  const BookDetailsScreen({super.key, required this.bookID});
 
   final String bookID;
 
@@ -24,26 +21,17 @@ class BookDetailsScreen extends StatelessWidget {
 
     if (book == null) {
       return Scaffold(
-        appBar: AppBar(
-          title: const Text('Book not found'),
-        ),
-        body: const Center(
-          child: Text('The book was not found.'),
-        ),
+        appBar: AppBar(title: const Text('Book not found')),
+        body: const Center(child: Text('The book was not found.')),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(book.title),
-      ),
+      appBar: AppBar(title: Text(book.title)),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(book.title),
-            Text(book.authorName),
-          ],
+          children: [Text(book.title), Text(book.authorName)],
         ),
       ),
     );

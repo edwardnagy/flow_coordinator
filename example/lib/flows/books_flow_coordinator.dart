@@ -53,49 +53,42 @@ class _BooksFlowCoordinatorState extends State<BooksFlowCoordinator>
 
   @override
   void onBookTabChanged(BookTabType tab) {
-    flowNavigator.setPages([
-      _Pages.booksListPage(tab),
-    ]);
+    flowNavigator.setPages([_Pages.booksListPage(tab)]);
   }
 
   @override
   void onBookSelected({required String bookID}) {
-    flowNavigator.push(
-      _Pages.bookDetailPage(bookID: bookID),
-    );
+    flowNavigator.push(_Pages.bookDetailPage(bookID: bookID));
   }
 }
 
 class _Pages {
   static Page booksListPage(BookTabType tab) => MaterialPage(
-        key: const ValueKey('booksListPage'),
-        child: FlowRouteScope(
-          routeInformation: RouteInformation(
-            uri: Uri(
-              pathSegments: [
-                switch (tab) {
-                  BookTabType.newBooks => 'new',
-                  BookTabType.allBooks => 'all',
-                },
-              ],
-            ),
-          ),
-          child: BookListScreen(tab: tab),
+    key: const ValueKey('booksListPage'),
+    child: FlowRouteScope(
+      routeInformation: RouteInformation(
+        uri: Uri(
+          pathSegments: [
+            switch (tab) {
+              BookTabType.newBooks => 'new',
+              BookTabType.allBooks => 'all',
+            },
+          ],
         ),
-      );
+      ),
+      child: BookListScreen(tab: tab),
+    ),
+  );
 
-  static Page bookDetailPage({
-    required String bookID,
-  }) =>
-      MaterialPage(
-        key: ValueKey('bookDetailPage_$bookID'),
-        child: FlowRouteScope(
-          routeInformation: RouteInformation(
-            uri: Uri(
-              path: BooksFlowCoordinator.pathForSelectedBook(bookID: bookID),
-            ),
-          ),
-          child: BookDetailsScreen(bookID: bookID),
+  static Page bookDetailPage({required String bookID}) => MaterialPage(
+    key: ValueKey('bookDetailPage_$bookID'),
+    child: FlowRouteScope(
+      routeInformation: RouteInformation(
+        uri: Uri(
+          path: BooksFlowCoordinator.pathForSelectedBook(bookID: bookID),
         ),
-      );
+      ),
+      child: BookDetailsScreen(bookID: bookID),
+    ),
+  );
 }

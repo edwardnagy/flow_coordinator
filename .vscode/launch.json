@@ -3,7 +3,7 @@
     "configurations": [
         {
             "name": "books_app",
-            "cwd": "example/books_app",
+            "cwd": "example",
             "request": "launch",
             "type": "dart"
         },

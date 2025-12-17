@@ -8,17 +8,10 @@ abstract interface class HomeScreenListener<T extends StatefulWidget>
   void resetNavigationStackForTab(HomeTab tab);
 }
 
-enum HomeTab {
-  books,
-  settings,
-}
+enum HomeTab { books, settings }
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({
-    super.key,
-    this.selectedTab,
-    required this.tabBuilder,
-  });
+  const HomeScreen({super.key, this.selectedTab, required this.tabBuilder});
 
   final HomeTab? selectedTab;
   final Widget Function(BuildContext context, HomeTab tab) tabBuilder;
@@ -34,9 +27,7 @@ class HomeScreen extends StatelessWidget {
         index: currentIndex,
         children: tabs
             .map(
-              (tab) => Builder(
-                builder: (context) => tabBuilder(context, tab),
-              ),
+              (tab) => Builder(builder: (context) => tabBuilder(context, tab)),
             )
             .toList(),
       ),
@@ -44,24 +35,28 @@ class HomeScreen extends StatelessWidget {
         currentIndex: currentIndex,
         onTap: (index) {
           if (index == tabs.indexOf(selectedTab)) {
-            FlowCoordinator.of<HomeScreenListener>(context)
-                .resetNavigationStackForTab(selectedTab);
+            FlowCoordinator.of<HomeScreenListener>(
+              context,
+            ).resetNavigationStackForTab(selectedTab);
           } else {
-            FlowCoordinator.of<HomeScreenListener>(context)
-                .onTabSelected(tabs[index]);
+            FlowCoordinator.of<HomeScreenListener>(
+              context,
+            ).onTabSelected(tabs[index]);
           }
         },
         items: tabs
-            .map((tab) => switch (tab) {
-                  HomeTab.books => const BottomNavigationBarItem(
-                      icon: Icon(Icons.book),
-                      label: 'Books',
-                    ),
-                  HomeTab.settings => const BottomNavigationBarItem(
-                      icon: Icon(Icons.settings),
-                      label: 'Settings',
-                    ),
-                })
+            .map(
+              (tab) => switch (tab) {
+                HomeTab.books => const BottomNavigationBarItem(
+                  icon: Icon(Icons.book),
+                  label: 'Books',
+                ),
+                HomeTab.settings => const BottomNavigationBarItem(
+                  icon: Icon(Icons.settings),
+                  label: 'Settings',
+                ),
+              },
+            )
             .toList(),
       ),
     );

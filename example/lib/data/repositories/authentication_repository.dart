@@ -28,10 +28,7 @@ class AuthenticationRepository {
   /// Get the current authentication state synchronously.
   bool get isAuthenticated => _isAuthenticated;
 
-  void login({
-    required String username,
-    required String password,
-  }) {
+  void login({required String username, required String password}) {
     _isAuthenticated = true;
     _authenticationStateController.add(_isAuthenticated);
   }

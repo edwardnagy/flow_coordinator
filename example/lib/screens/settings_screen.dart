@@ -14,25 +14,21 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
+      appBar: AppBar(title: const Text('Settings')),
       body: ListView(
         children: [
           ListTile(
             leading: const Icon(Icons.open_in_browser),
             title: const Text('Open random book'),
             onTap: () {
-              FlowCoordinator.of<SettingsScreenListener>(context)
-                  .openRandomBook();
+              FlowCoordinator.of<SettingsScreenListener>(
+                context,
+              ).openRandomBook();
             },
           ),
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text(
-              'Log out',
-              style: TextStyle(color: Colors.red),
-            ),
+            title: const Text('Log out', style: TextStyle(color: Colors.red)),
             onTap: () {
               AuthenticationRepository.instance.logout();
             },
