@@ -42,11 +42,11 @@ The context used was: $context
   /// Replaces the current page (top of the stack) with the given [page].
   void replaceCurrentPage(Page page);
 
-  /// Returns whether this navigator or any of its ancestor navigators from the
-  /// widget tree can pop.
+  /// Whether this navigator or any of its ancestor navigators from the widget
+  /// tree can pop.
   bool canPop();
 
-  /// Returns whether this navigator can pop.
+  /// Whether this navigator can pop.
   ///
   /// Behaves like [Navigator.canPop].
   bool canPopInternally();
