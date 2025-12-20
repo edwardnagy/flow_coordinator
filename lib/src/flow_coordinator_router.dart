@@ -107,6 +107,11 @@ class _RootFlowRouterDelegate extends RouterDelegate<RouteInformation>
             routeInformation?.state != _currentRouteInformation?.state;
     if (isNewRouteInformation) {
       _currentRouteInformation = routeInformation;
+      if (kDebugMode) {
+        debugPrint(
+          'FlowCoordinatorRouter: Route information reported: ${routeInformation?.uri}',
+        );
+      }
       notifyListeners();
     }
   }
@@ -114,6 +119,11 @@ class _RootFlowRouterDelegate extends RouterDelegate<RouteInformation>
   @override
   Future<void> setNewRoutePath(RouteInformation configuration) {
     _currentRouteInformation = configuration;
+    if (kDebugMode) {
+      debugPrint(
+        'FlowCoordinatorRouter: New route path set: ${configuration.uri}',
+      );
+    }
     _rootFlowRouteInformationProvider.setChildValue(configuration);
     return SynchronousFuture(null);
   }
@@ -121,7 +131,6 @@ class _RootFlowRouterDelegate extends RouterDelegate<RouteInformation>
   @override
   Future<bool> popRoute() => SynchronousFuture(false);
 
-  // TODO: Add logging for the reported route information.
   @override
   RouteInformation? get currentConfiguration => _currentRouteInformation;
 
