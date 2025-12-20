@@ -24,7 +24,9 @@ mixin FlowCoordinatorMixin<T extends StatefulWidget> on State<T> {
 
   late final _routerDelegate = FlowRouterDelegate(
     initialPages: initialPages,
-    debugLabel: '$runtimeType._routerDelegate',
+    contextDescriptionProvider: () => context
+        .describeWidget('The flow coordinator being built was')
+        .toString(),
   );
 
   late final _routeInformationProvider = _ChildFlowRouteInformationProvider();
