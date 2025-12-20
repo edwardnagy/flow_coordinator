@@ -7,15 +7,16 @@ abstract class RouteInformationReporterDelegate {
     final scope = context
         .dependOnInheritedWidgetOfExactType<RouteInformationReporterScope>();
     if (scope == null) {
-      throw FlutterError(
-        '''
-FlowRouteInformationReporter.of() called with a context that does not contain a FlowRouteInformationReporterScope.
-
-This happens if the routerConfig of WidgetsApp/MaterialApp/CupertinoApp is not set to FlowCoordinator.routerConfig.
-
-The context used was: $context
-''', // TODO: Double-check the error message
-      );
+      throw FlutterError.fromParts([
+        ErrorSummary('No RouteInformationReporterScope found.'),
+        ErrorHint(
+          'Make sure the WidgetsApp/MaterialApp/CupertinoApp is set up with a '
+          'FlowCoordinatorRouter.',
+        ),
+        ...context.describeMissingAncestor(
+          expectedAncestorType: RouteInformationReporterScope,
+        ),
+      ]);
     }
     return scope.value;
   }

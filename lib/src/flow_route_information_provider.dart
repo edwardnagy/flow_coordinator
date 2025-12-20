@@ -8,16 +8,15 @@ abstract class FlowRouteInformationProvider {
     final scope = context.dependOnInheritedWidgetOfExactType<
         FlowRouteInformationProviderScope>();
     if (scope == null) {
-      throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary(
-          'FlowRouteInformationProvider.of() called with a context that does '
-          'not contain a FlowRouteInformationProviderScope.',
-        ),
+      throw FlutterError.fromParts([
+        ErrorSummary('No FlowRouteInformationProviderScope found.'),
         ErrorHint(
           'Make sure the MaterialApp/CupertinoApp/WidgetsApp widget of your '
           'app is set up with a FlowCoordinatorRouter.',
         ),
-        context.describeElement('The context used was'),
+        ...context.describeMissingAncestor(
+          expectedAncestorType: FlowRouteInformationProviderScope,
+        ),
       ]);
     }
     return scope.value;
