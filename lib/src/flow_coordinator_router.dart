@@ -6,7 +6,59 @@ import 'flow_route_information_provider.dart';
 import 'identity_route_information_parser.dart';
 import 'route_information_reporter_delegate.dart';
 
+/// A router configuration for flow-based navigation in Flutter applications.
+///
+/// This class implements [RouterConfig] to provide a routing system that
+/// organizes screens into user flows using the Flow Coordinator pattern.
+///
+/// Use [FlowCoordinatorRouter] as the `routerConfig` parameter of
+/// [MaterialApp.router] or [CupertinoApp.router] to configure your app's
+/// navigation:
+///
+/// ```dart
+/// final _router = FlowCoordinatorRouter(
+///   routeInformationReportingEnabled: true,
+///   homeBuilder: (context) => const MyFlowCoordinator(),
+/// );
+///
+/// class MyApp extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp.router(routerConfig: _router);
+///   }
+/// }
+/// ```
+///
+/// See also:
+///  * [FlowCoordinatorMixin], which manages navigation within individual flows.
+///  * [FlowRouteScope], which controls route information reporting and filtering.
 class FlowCoordinatorRouter implements RouterConfig<RouteInformation> {
+  /// Creates a [FlowCoordinatorRouter].
+  ///
+  /// The [homeBuilder] parameter is required and provides the root flow
+  /// coordinator for the application.
+  ///
+  /// The [backButtonDispatcher] parameter controls how back button events are
+  /// dispatched. If not provided, a [RootBackButtonDispatcher] is used by
+  /// default.
+  ///
+  /// The [routeInformationProvider] parameter provides route information to the
+  /// router. If not provided, a [PlatformRouteInformationProvider] is created
+  /// with the [initialUri] and [initialState].
+  ///
+  /// The [routeInformationParser] parameter is used to parse route information.
+  /// Defaults to [IdentityRouteInformationParser] which passes route
+  /// information through unchanged.
+  ///
+  /// The [initialUri] parameter specifies the initial route when the app starts.
+  /// If not provided, the platform's default route is used.
+  ///
+  /// The [initialState] parameter specifies the initial state associated with
+  /// the initial route.
+  ///
+  /// The [routeInformationReportingEnabled] parameter controls whether route
+  /// information updates are reported to the platform (e.g., to update the
+  /// browser URL). Defaults to `false`.
   FlowCoordinatorRouter({
     BackButtonDispatcher? backButtonDispatcher,
     RouteInformationProvider? routeInformationProvider,
@@ -43,8 +95,20 @@ class FlowCoordinatorRouter implements RouterConfig<RouteInformation> {
   );
 
   /// Whether route information reporting is enabled.
+  ///
+  /// When `true`, route information updates from nested flows are reported
+  /// to the platform. This enables features like updating the browser URL
+  /// in web applications or saving state restoration data.
+  ///
+  /// When `false`, route information updates are not reported, which can
+  /// improve performance if these features are not needed.
   final bool routeInformationReportingEnabled;
 
+  /// A builder function that creates the root flow coordinator widget.
+  ///
+  /// This function is called to build the root of the navigation tree.
+  /// The returned widget should typically be a [StatefulWidget] that uses
+  /// [FlowCoordinatorMixin] to manage navigation within the flow.
   final WidgetBuilder homeBuilder;
 
   static Uri _effectiveInitialUri({
@@ -61,6 +125,12 @@ class FlowCoordinatorRouter implements RouterConfig<RouteInformation> {
     return effectiveUri;
   }
 
+  /// Disposes of this router and releases its resources.
+  ///
+  /// This method should be called when the router is no longer needed,
+  /// typically in the [State.dispose] method of the widget that created it.
+  ///
+  /// After calling [dispose], this router should not be used anymore.
   void dispose() {
     _routerDelegate.dispose();
   }
