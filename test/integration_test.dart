@@ -1,6 +1,10 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flow_coordinator/flow_coordinator.dart';
+import 'package:flow_coordinator/src/flow_coordinator.dart';
+import 'package:flow_coordinator/src/flow_coordinator_mixin.dart';
+import 'package:flow_coordinator/src/flow_coordinator_router.dart';
+import 'package:flow_coordinator/src/flow_navigator.dart';
+import 'package:flow_coordinator/src/flow_route_scope.dart';
 
 // Integration test that exercises the full flow coordinator stack
 class RootFlowCoordinator extends StatefulWidget {

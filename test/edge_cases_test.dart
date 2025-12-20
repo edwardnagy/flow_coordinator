@@ -1,6 +1,12 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flow_coordinator/flow_coordinator.dart';
+import 'package:flow_coordinator/src/consumable.dart';
+import 'package:flow_coordinator/src/flow_coordinator.dart';
+import 'package:flow_coordinator/src/flow_coordinator_mixin.dart';
+import 'package:flow_coordinator/src/flow_coordinator_router.dart';
+import 'package:flow_coordinator/src/flow_router_delegate.dart';
+import 'package:flow_coordinator/src/route_information_reporter_delegate.dart';
+import 'package:flow_coordinator/src/route_information_combiner.dart';
 
 /// Additional tests for edge cases and scenarios not covered by main test files
 void main() {

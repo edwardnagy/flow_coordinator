@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flow_coordinator/flow_coordinator.dart';
+import 'package:flow_coordinator/src/flow_coordinator_router.dart';
+import 'package:flow_coordinator/src/identity_route_information_parser.dart';
 
 void main() {
   group('FlowCoordinatorRouter', () {
