@@ -51,8 +51,7 @@ class FlowCoordinatorRouter implements RouterConfig<RouteInformation> {
   /// saving state restoration data.
   final bool routeInformationReportingEnabled;
 
-  /// Builds the initial widget of your app, typically the root flow
-  /// coordinator.
+  /// Builds the initial widget of the app, typically the root flow coordinator.
   final WidgetBuilder homeBuilder;
 
   static Uri _effectiveInitialUri({
