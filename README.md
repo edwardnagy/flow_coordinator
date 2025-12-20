@@ -3,6 +3,17 @@ Flow Controller (Coordinator) pattern.
 
 ![Flow Coordinator Illustration](https://github.com/user-attachments/assets/b356c195-48a8-4f36-9415-8d9344f5324d)
 
+## What Is a User Flow?
+
+Think of a user flow as the ordered set of screens and choices that complete a
+goal. A flow coordinator owns those navigation rules, including any sub-flows
+inside it. Common scenarios:
+
+- Checkout: shopping cart -> address & delivery options -> payment -> review ->
+confirmation.
+- Password reset: request link -> verify code -> set new password -> success.
+- Profile setup: create account -> upload avatar -> pick preferences -> done.
+
 ## Features
 
 Use Flow Coordinators to:
