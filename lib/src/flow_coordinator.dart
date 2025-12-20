@@ -2,6 +2,16 @@ import 'package:flutter/widgets.dart';
 
 import 'flow_coordinator_mixin.dart';
 
+/// Provides access to the nearest [FlowCoordinatorMixin] in the widget tree.
+///
+/// This sealed class cannot be instantiated or extended. It serves as a
+/// namespace for the static [of] method, which screens use to find and
+/// interact with their managing flow coordinator.
+///
+/// See also:
+///
+/// * [FlowCoordinatorMixin], which flow coordinators mix in to manage
+///   navigation and routing.
 sealed class FlowCoordinator {
   const FlowCoordinator._();
 
