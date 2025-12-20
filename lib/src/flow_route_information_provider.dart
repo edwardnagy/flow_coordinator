@@ -10,39 +10,13 @@ abstract class FlowRouteInformationProvider {
     if (scope == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary(
-          'FlowRouteInformationProvider.of() called with a context that does not contain a '
-          'FlowRouteInformationProviderScope.',
-        ),
-        ErrorDescription(
-          'No FlowRouteInformationProviderScope ancestor could be found starting from the context '
-          'that was passed to FlowRouteInformationProvider.of(). This usually happens when the '
-          'context used comes from a widget that is not a descendant of a FlowCoordinator.',
+          'FlowRouteInformationProvider.of() called with a context that does '
+          'not contain a FlowRouteInformationProviderScope.',
         ),
         ErrorHint(
-          'Make sure the WidgetsApp/MaterialApp/CupertinoApp is set up with FlowCoordinatorRouter, '
-          'and that the widget calling FlowRouteInformationProvider.of() is within the widget tree '
-          'of a FlowCoordinator.',
+          'Make sure the MaterialApp/CupertinoApp/WidgetsApp widget of your '
+          'app is set up with a FlowCoordinatorRouter.',
         ),
-        ErrorHint(
-          'If you are trying to call FlowRouteInformationProvider.of() from within '
-          'a FlowCoordinator\'s build method, use a Builder widget to get a context '
-          'that is a child of the FlowCoordinator:\n\n'
-          '  @override\n'
-          '  Widget build(BuildContext context) {\n'
-          '    return Builder(\n'
-          '      builder: (context) {\n'
-          '        final provider = FlowRouteInformationProvider.of(context);\n'
-          '        ...\n'
-          '      },\n'
-          '    );\n'
-          '  }',
-        ),
-        ErrorHint(
-          'Alternatively, split your build method into smaller widgets so that '
-          'you get a new BuildContext that is below the FlowCoordinator in the '
-          'widget tree.',
-        ),
-        context.describeElement('The context used was'),
       ]);
     }
     return scope.value;
