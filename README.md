@@ -247,8 +247,8 @@ class _BookFlowCoordinatorState extends State<BookFlowCoordinator>
 ### Updating the Browser URL
 
 Wrap your screen widgets with `FlowRouteScope` to update the browser URL when navigating
-between screens. Set `routeInformation` to the desired URL for each screen. The browser
-address bar will reflect the URL of the topmost `FlowRouteScope` in
+between screens. Set `routeInformation` to the desired URL for each screen. The
+browser's address bar will reflect the URL of the topmost `FlowRouteScope` in
 the navigation stack, even when navigating back using in-app or Android back buttons.
 
 ```dart
