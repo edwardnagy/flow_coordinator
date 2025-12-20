@@ -7,15 +7,6 @@ import 'package:flutter/widgets.dart';
 /// route information. The [RouteInformationCombiner] is responsible for merging
 /// the child's route information with the current flow's route information to
 /// produce a complete route that represents the full navigation hierarchy.
-///
-/// Use [RouteInformationCombiner.of] to retrieve the nearest combiner from the
-/// widget tree. The default implementation is [DefaultRouteInformationCombiner],
-/// which concatenates path segments, merges query parameters (with child
-/// parameters overriding parent parameters), and uses the child's fragment.
-///
-/// You can provide a custom combiner by overriding the
-/// [FlowCoordinatorMixin.routeInformationCombiner] property in your flow
-/// coordinator.
 abstract interface class RouteInformationCombiner {
   static RouteInformationCombiner of(BuildContext context) {
     final scope = context
@@ -43,8 +34,7 @@ abstract interface class RouteInformationCombiner {
   });
 }
 
-/// Default implementation of [RouteInformationCombiner] that combines route
-/// information by concatenating path segments and merging query parameters.
+/// Default implementation of [RouteInformationCombiner].
 ///
 /// This combiner performs the following operations:
 /// - **Path segments**: Concatenates the current flow's path segments with the
