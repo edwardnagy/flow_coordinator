@@ -13,6 +13,50 @@ import 'route_information_combiner.dart';
 export 'flow_navigator.dart' show FlowNavigator;
 export 'route_information_combiner.dart' show RouteInformationCombiner;
 
+/// A mixin that provides navigation and routing capabilities to flow
+/// coordinators.
+///
+/// Flow coordinators organize screens into logical user flows and manage the
+/// navigation rules between those screens. This mixin handles the integration
+/// with Flutter's routing system and manages the communication between parent
+/// and child flows.
+///
+/// ## Usage
+///
+/// To create a flow coordinator, create a [StatefulWidget] and mix
+/// [FlowCoordinatorMixin] into its [State]:
+///
+/// ```dart
+/// class MyFlowCoordinator extends StatefulWidget {
+///   const MyFlowCoordinator({super.key});
+///
+///   @override
+///   State<MyFlowCoordinator> createState() => _MyFlowCoordinatorState();
+/// }
+///
+/// class _MyFlowCoordinatorState extends State<MyFlowCoordinator>
+///     with FlowCoordinatorMixin {
+///   @override
+///   List<Page> get initialPages => [
+///     MaterialPage(child: MyFirstScreen()),
+///   ];
+/// }
+/// ```
+///
+/// ## Key Features
+///
+/// * **Navigation Management**: Use [flowNavigator] to push, pop, and manage
+///   pages within the flow.
+/// * **Route Handling**: Override [onNewRouteInformation] to handle deep links
+///  from the parent flow or the platform.
+/// * **Nested Flows**: Child flows can be integrated into the current flow as
+///   any other screen, by wrapping them in a [Page] and adding them to the
+///   navigation stack using [flowNavigator].
+/// * **Route Combining**: [routeInformationCombiner] allows customization of
+///   how route information from nested flows is combined into the current flow
+///   before being sent to the parent flow or the platform.
+/// * **Programmatic Navigation**: Use [setNewRouteInformation] to
+///   programmatically set new route information for the flow.
 mixin FlowCoordinatorMixin<T extends StatefulWidget> on State<T> {
   FlowRouteInformationProvider? _parentRouteInformationProvider;
 
