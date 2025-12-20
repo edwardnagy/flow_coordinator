@@ -5,9 +5,12 @@ abstract interface class RouteInformationCombiner {
     final scope = context
         .dependOnInheritedWidgetOfExactType<RouteInformationCombinerScope>();
     if (scope == null) {
-      throw FlutterError('''
-RouteInformationCombiner.of() called with a context that does not contain a RouteInformationCombinerScope.
-''');
+      throw FlutterError.fromParts([
+        ErrorSummary('No RouteInformationCombinerScope found.'),
+        ...context.describeMissingAncestor(
+          expectedAncestorType: RouteInformationCombinerScope,
+        ),
+      ]);
     }
     return scope.value;
   }
