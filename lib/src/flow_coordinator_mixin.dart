@@ -13,12 +13,6 @@ import 'route_information_combiner.dart';
 export 'flow_navigator.dart' show FlowNavigator;
 export 'route_information_combiner.dart' show RouteInformationCombiner;
 
-/// Manages navigation and route information within a flow-based navigation
-/// structure.
-///
-/// This stateful widget acts as a coordinator for handling route updates,
-/// managing route information propagation, and ensuring correct navigation
-/// behavior within a flow-based navigation hierarchy.
 mixin FlowCoordinatorMixin<T extends StatefulWidget> on State<T> {
   FlowRouteInformationProvider? _parentRouteInformationProvider;
 
