@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
 
 ## Usage
 
-This section has code examples for the following tasks:
+This section has code examples for the following navigation scenarios:
 
 - [Navigating Between Screens](#navigating-between-screens)
 - [Deep Link Handling](#deep-link-handling)
