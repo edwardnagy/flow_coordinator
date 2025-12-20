@@ -1,6 +1,59 @@
 import 'package:flutter/widgets.dart';
 
-// TODO: Add documentation
+/// An interface for navigating between pages within a flow-based navigation
+/// structure.
+///
+/// The [FlowNavigator] provides methods to manage a navigation stack within
+/// a flow coordinator. It allows pushing pages, popping pages, and replacing
+/// pages in the navigation history.
+///
+/// Use [FlowNavigator.of] to retrieve the nearest [FlowNavigator] from the
+/// widget tree, typically from within a screen widget. Use the `flowNavigator`
+/// property from [FlowCoordinatorMixin] to access the navigator from within
+/// a flow coordinator.
+///
+/// ## Navigation Methods
+///
+/// The [FlowNavigator] offers several methods for navigation:
+///
+/// - [push]: Adds a new page to the top of the navigation stack.
+/// - [pop]: Removes the top page from the navigation stack.
+/// - [replaceCurrentPage]: Replaces the current page with a new one.
+/// - [setPages]: Sets the entire navigation stack to a specific list of pages.
+///
+/// ## Example Usage
+///
+/// From within a screen:
+///
+/// ```dart
+/// // Navigate back
+/// FlowNavigator.of(context).pop();
+/// ```
+///
+/// From within a flow coordinator that mixes in [FlowCoordinatorMixin]:
+///
+/// ```dart
+/// // Push a new page
+/// flowNavigator.push(
+///   MaterialPage(
+///     key: ValueKey('details'),
+///     child: DetailsScreen(),
+///   ),
+/// );
+///
+/// // Set the entire navigation stack
+/// flowNavigator.setPages([
+///   MaterialPage(key: ValueKey('home'), child: HomeScreen()),
+///   MaterialPage(key: ValueKey('details'), child: DetailsScreen()),
+/// ]);
+/// ```
+///
+/// See also:
+///
+/// * [FlowCoordinatorMixin], which provides access to a [FlowNavigator] via
+///   the `flowNavigator` property.
+/// * [FlowRouteScope], which controls route information reporting and back
+///   button handling for routes within a flow.
 abstract interface class FlowNavigator {
   /// Returns the nearest [FlowNavigator] that encloses the given [context].
   ///
