@@ -6,7 +6,9 @@ import 'flow_route_information_provider.dart';
 import 'identity_route_information_parser.dart';
 import 'route_information_reporter_delegate.dart';
 
+/// Router configuration for Flow Coordinators.
 class FlowCoordinatorRouter implements RouterConfig<RouteInformation> {
+  /// Creates a [FlowCoordinatorRouter].
   FlowCoordinatorRouter({
     BackButtonDispatcher? backButtonDispatcher,
     RouteInformationProvider? routeInformationProvider,
@@ -42,9 +44,15 @@ class FlowCoordinatorRouter implements RouterConfig<RouteInformation> {
     homeBuilder: homeBuilder,
   );
 
-  /// Whether route information reporting is enabled.
+  /// Whether route information updates from nested flows are reported
+  /// to the platform.
+  ///
+  /// This enables features like updating the browser URL in web applications or
+  /// saving state restoration data.
   final bool routeInformationReportingEnabled;
 
+  /// Builds the initial widget of your app, typically the root flow
+  /// coordinator.
   final WidgetBuilder homeBuilder;
 
   static Uri _effectiveInitialUri({
@@ -61,6 +69,7 @@ class FlowCoordinatorRouter implements RouterConfig<RouteInformation> {
     return effectiveUri;
   }
 
+  /// Disposes any resources created by this object.
   void dispose() {
     _routerDelegate.dispose();
   }
