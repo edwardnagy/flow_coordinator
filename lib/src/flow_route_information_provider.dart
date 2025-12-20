@@ -8,39 +8,35 @@ abstract class FlowRouteInformationProvider {
     final scope = context.dependOnInheritedWidgetOfExactType<
         FlowRouteInformationProviderScope>();
     if (scope == null) {
-      throw FlutterError(
-        '''
-FlowRouteInformationProvider.of() called with a context that does not contain a FlowRouteInformationProviderScope.
-Make sure the WidgetsApp/MaterialApp/CupertinoApp is set up with FlowCoordinatorRouter.
-The context used was: $context
-''',
-      );
-      // TODO: Consider using something like this:
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary(
-          'StreamChat.of() called with a context that does not contain a '
-          'StreamChat.',
+          'FlowRouteInformationProvider.of() called with a context that does not contain a '
+          'FlowRouteInformationProviderScope.',
         ),
         ErrorDescription(
-          'No StreamChat ancestor could be found starting from the context '
-          'that was passed to StreamChat.of(). This usually happens when the '
-          'context used comes from the widget that creates the StreamChat '
-          'itself.',
+          'No FlowRouteInformationProviderScope ancestor could be found starting from the context '
+          'that was passed to FlowRouteInformationProvider.of(). This usually happens when the '
+          'context used comes from a widget that is not a descendant of a FlowCoordinator.',
+        ),
+        ErrorHint(
+          'Make sure the WidgetsApp/MaterialApp/CupertinoApp is set up with FlowCoordinatorRouter, '
+          'and that the widget calling FlowRouteInformationProvider.of() is within the widget tree '
+          'of a FlowCoordinator.',
         ),
         ErrorHint(
           'To fix this, ensure that you are using a context that is a descendant '
-          'of the StreamChat. You can use a Builder to get a new context that '
-          'is under the StreamChat:\n\n'
+          'of a FlowCoordinator. You can use a Builder to get a new context that '
+          'is under the FlowCoordinator:\n\n'
           '  Builder(\n'
           '    builder: (context) {\n'
-          '      final chatState = StreamChat.of(context);\n'
+          '      final provider = FlowRouteInformationProvider.of(context);\n'
           '      ...\n'
           '    },\n'
           '  )',
         ),
         ErrorHint(
           'Alternatively, split your build method into smaller widgets so that '
-          'you get a new BuildContext that is below the StreamChat in the '
+          'you get a new BuildContext that is below the FlowCoordinator in the '
           'widget tree.',
         ),
         context.describeElement('The context used was'),
