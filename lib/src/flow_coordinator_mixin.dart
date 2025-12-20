@@ -46,7 +46,8 @@ export 'route_information_combiner.dart' show RouteInformationCombiner;
 /// ## Key Features
 ///
 /// * **Navigation Management**: Use [flowNavigator] to push, pop, and manage
-/// pages within the flow.
+/// pages within the flow. The initial state of the flow is defined by 
+/// overriding [initialPages].
 ///
 /// * **Deep Linking**: Override [onNewRouteInformation] to handle deep links
 /// from the parent flow or the platform.
