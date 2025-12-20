@@ -2,7 +2,13 @@ import 'package:flutter/widgets.dart';
 
 import 'flow_coordinator_mixin.dart';
 
-sealed class FlowCoordinator {
+/// Provides access to the nearest [FlowCoordinatorMixin] in the widget tree.
+///
+/// See also:
+///
+/// * [FlowCoordinatorMixin], which flow coordinators mix in to manage
+///   navigation and routing.
+abstract class FlowCoordinator {
   const FlowCoordinator._();
 
   /// Finds the nearest [FlowCoordinatorMixin] of type [T] in the widget tree.
