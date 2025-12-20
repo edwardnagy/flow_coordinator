@@ -6,7 +6,7 @@ import 'flow_route_information_provider.dart';
 import 'identity_route_information_parser.dart';
 import 'route_information_reporter_delegate.dart';
 
-/// Router configuration for Flow Coordinators.
+/// The router configuration for the app to use Flow Coordinators.
 class FlowCoordinatorRouter implements RouterConfig<RouteInformation> {
   /// Creates a [FlowCoordinatorRouter].
   FlowCoordinatorRouter({
