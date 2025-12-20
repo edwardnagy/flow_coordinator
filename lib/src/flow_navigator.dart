@@ -1,6 +1,13 @@
 import 'package:flutter/widgets.dart';
+import 'flow_coordinator_mixin.dart';
 
-// TODO: Add documentation
+/// The [FlowNavigator] provides methods to manage a navigation stack within
+/// a flow coordinator (pushing, popping, and replacing pages).
+///
+/// Use [FlowNavigator.of] to retrieve the nearest [FlowNavigator] from the
+/// widget tree, typically from within a screen widget. Use the `flowNavigator`
+/// property from [FlowCoordinatorMixin] to access the navigator from within
+/// a flow coordinator.
 abstract interface class FlowNavigator {
   /// Returns the nearest [FlowNavigator] that encloses the given [context].
   ///
