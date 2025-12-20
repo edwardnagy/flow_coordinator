@@ -8,13 +8,16 @@ import 'route_information_reporter.dart';
 
 export 'child_route_information_filter.dart' show RouteInformationPredicate;
 
-/// Used to wrap a route within a flow to achieve one or more of the following:
-/// - Filter route information updates between child and parent flows based on
-/// the [shouldForwardChildUpdates] or [routeInformation] properties.
-/// - Report the [routeInformation] to the parent flow when the route
-/// [isActive] and is the top route in the navigation stack.
-/// - Control whether the child subtree receives back button events via the
-/// [isActive] property.
+/// A widget that wraps routes within flows to control route information and
+/// back button behavior.
+///
+/// This widget enables:
+/// - Filtering route information updates between child and parent flows based
+///   on the [shouldForwardChildUpdates] or [routeInformation] properties.
+/// - Reporting the [routeInformation] to the parent flow when the route
+///   [isActive] and is the top route in the navigation stack.
+/// - Controlling whether the child subtree receives back button events via the
+///   [isActive] property.
 class FlowRouteScope extends StatelessWidget {
   /// Creates a [FlowRouteScope].
   const FlowRouteScope({
