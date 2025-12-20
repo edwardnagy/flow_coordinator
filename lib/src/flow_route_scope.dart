@@ -10,8 +10,7 @@ export 'child_route_information_filter.dart' show RouteInformationPredicate;
 
 /// Used to wrap a route within a flow to achieve one or more of the following:
 /// - Filter route information updates between child and parent flows based on
-/// the [shouldForwardChildUpdates], [routeInformation] and [isActive]
-/// properties.
+/// the [shouldForwardChildUpdates] or [routeInformation] properties.
 /// - Report the [routeInformation] to the parent flow when the route
 /// [isActive] and is the top route in the navigation stack.
 /// - Control whether the child subtree receives back button events via the
