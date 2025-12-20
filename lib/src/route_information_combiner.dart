@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+// TODO: Add documentation.
 abstract interface class RouteInformationCombiner {
   static RouteInformationCombiner of(BuildContext context) {
     final scope = context
@@ -21,6 +22,7 @@ abstract interface class RouteInformationCombiner {
   });
 }
 
+// TODO: Add documentation.
 class DefaultRouteInformationCombiner implements RouteInformationCombiner {
   const DefaultRouteInformationCombiner();
 
