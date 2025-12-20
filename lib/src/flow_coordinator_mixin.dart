@@ -13,6 +13,73 @@ import 'route_information_combiner.dart';
 export 'flow_navigator.dart' show FlowNavigator;
 export 'route_information_combiner.dart' show RouteInformationCombiner;
 
+/// A mixin that provides navigation and routing capabilities to flow
+/// coordinators.
+///
+/// Flow coordinators organize screens into logical user flows and manage the
+/// navigation rules between those screens. This mixin handles the integration
+/// with Flutter's routing system and manages the communication between parent
+/// and child flows.
+///
+/// ## Usage
+///
+/// To create a flow coordinator, create a [StatefulWidget] and mix
+/// [FlowCoordinatorMixin] into its [State]:
+///
+/// ```dart
+/// class MyFlowCoordinator extends StatefulWidget {
+///   const MyFlowCoordinator({super.key});
+///
+///   @override
+///   State<MyFlowCoordinator> createState() => _MyFlowCoordinatorState();
+/// }
+///
+/// class _MyFlowCoordinatorState extends State<MyFlowCoordinator>
+///     with FlowCoordinatorMixin {
+///   @override
+///   List<Page> get initialPages => [
+///     MaterialPage(child: MyFirstScreen()),
+///   ];
+///
+///   @override
+///   Future<RouteInformation?> onNewRouteInformation(
+///     RouteInformation routeInformation,
+///   ) {
+///     // Parse the route and update the navigation stack using flowNavigator
+///     flowNavigator.setPages([...]);
+///     // Return route information to forward to nested flows
+///     return SynchronousFuture(null);
+///   }
+/// }
+/// ```
+///
+/// ## Key Features
+///
+/// * **Navigation Management**: Use [flowNavigator] to push, pop, and manage
+///   pages within the flow.
+/// * **Route Handling**: Override [onNewRouteInformation] to handle incoming
+///   routes from parent flows or deep links.
+/// * **Nested Flows**: Supports hierarchical flow structures where child flows
+///   can be nested within parent flows.
+/// * **Route Combining**: Configure how child route information is merged with
+///   the current flow's route using [routeInformationCombiner].
+/// * **Programmatic Navigation**: Use [setNewRouteInformation] to trigger
+///   navigation changes programmatically.
+///
+/// ## Lifecycle
+///
+/// The mixin automatically manages the lifecycle of the flow coordinator:
+/// * Connects to parent flow coordinators in [didChangeDependencies]
+/// * Handles initial route setup
+/// * Cleans up resources in [dispose]
+///
+/// See also:
+///
+/// * [FlowNavigator], which provides methods to manage the navigation stack.
+/// * [RouteInformationCombiner], which defines how route information from
+///   nested flows is combined.
+/// * [FlowCoordinator.of], which finds the nearest flow coordinator in the
+///   widget tree.
 mixin FlowCoordinatorMixin<T extends StatefulWidget> on State<T> {
   FlowRouteInformationProvider? _parentRouteInformationProvider;
 
