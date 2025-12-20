@@ -24,15 +24,18 @@ abstract class FlowRouteInformationProvider {
           'of a FlowCoordinator.',
         ),
         ErrorHint(
-          'To fix this, ensure that you are using a context that is a descendant '
-          'of a FlowCoordinator. You can use a Builder to get a new context that '
-          'is under the FlowCoordinator:\n\n'
-          '  Builder(\n'
-          '    builder: (context) {\n'
-          '      final provider = FlowRouteInformationProvider.of(context);\n'
-          '      ...\n'
-          '    },\n'
-          '  )',
+          'If you are trying to call FlowRouteInformationProvider.of() from within '
+          'a FlowCoordinator\'s build method, use a Builder widget to get a context '
+          'that is a child of the FlowCoordinator:\n\n'
+          '  @override\n'
+          '  Widget build(BuildContext context) {\n'
+          '    return Builder(\n'
+          '      builder: (context) {\n'
+          '        final provider = FlowRouteInformationProvider.of(context);\n'
+          '        ...\n'
+          '      },\n'
+          '    );\n'
+          '  }',
         ),
         ErrorHint(
           'Alternatively, split your build method into smaller widgets so that '
