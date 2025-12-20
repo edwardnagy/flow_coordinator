@@ -46,17 +46,21 @@ export 'route_information_combiner.dart' show RouteInformationCombiner;
 /// ## Key Features
 ///
 /// * **Navigation Management**: Use [flowNavigator] to push, pop, and manage
-///   pages within the flow.
-/// * **Route Handling**: Override [onNewRouteInformation] to handle deep links
-///  from the parent flow or the platform.
+/// pages within the flow.
+///
+/// * **Deep Linking**: Override [onNewRouteInformation] to handle deep links
+/// from the parent flow or the platform.
+///
 /// * **Nested Flows**: Child flows can be integrated into the current flow as
-///   any other screen, by wrapping them in a [Page] and adding them to the
-///   navigation stack using [flowNavigator].
-/// * **Route Combining**: [routeInformationCombiner] allows customization of
-///   how route information from nested flows is combined into the current flow
-///   before being sent to the parent flow or the platform.
+/// any other screen, by wrapping them in a [Page] and adding them to the
+/// navigation stack using [flowNavigator].
+///
+/// * **Combined Reporting of Route Information**: [routeInformationCombiner]
+/// allows customization of  how route information from nested flows is combined
+/// into the current flow before being sent to the parent flow or the platform.
+///
 /// * **Programmatic Navigation**: Use [setNewRouteInformation] to
-///   programmatically set new route information for the flow.
+/// programmatically set a new deep link for the flow.
 mixin FlowCoordinatorMixin<T extends StatefulWidget> on State<T> {
   FlowRouteInformationProvider? _parentRouteInformationProvider;
 
