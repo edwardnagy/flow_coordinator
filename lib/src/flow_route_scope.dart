@@ -8,8 +8,8 @@ import 'route_information_reporter.dart';
 
 export 'child_route_information_filter.dart' show RouteInformationPredicate;
 
-/// A widget that wraps routes within flows to control route information and
-/// back button behavior.
+/// A widget that wraps screen widgets within flows to control route information
+/// and back button behavior.
 ///
 /// This widget enables:
 /// - Filtering route information updates between child and parent flows based
