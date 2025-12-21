@@ -5,7 +5,9 @@ import 'package:flow_coordinator/src/flow_coordinator_mixin.dart';
 
 // Test flow coordinator implementation
 class TestFlowCoordinator extends StatefulWidget {
-  const TestFlowCoordinator({super.key});
+  const TestFlowCoordinator({super.key, this.child});
+  
+  final Widget? child;
 
   @override
   State<TestFlowCoordinator> createState() => TestFlowCoordinatorState();
@@ -15,63 +17,39 @@ class TestFlowCoordinatorState extends State<TestFlowCoordinator>
     with FlowCoordinatorMixin {
   @override
   List<Page> get initialPages => [
-        const MaterialPage(child: SizedBox()),
+        MaterialPage(child: widget.child ?? const SizedBox()),
       ];
+  
+  @override
+  Widget build(BuildContext context) {
+    return flowRouter(context);
+  }
 }
 
 void main() {
   group('FlowCoordinator.of', () {
     testWidgets('finds nearest FlowCoordinatorMixin in widget tree', (tester) async {
       TestFlowCoordinatorState? foundState;
+      BuildContext? innerContext;
 
-      await tester.pumpWidget(
-        const Directionality(
-          textDirection: TextDirection.ltr,
-          child: TestFlowCoordinator(),
-        ),
-      );
-
+      // Build a TestFlowCoordinator with an inner widget that will look up the coordinator
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: TestFlowCoordinator(
-            key: GlobalKey(),
+            child: Builder(
+              builder: (context) {
+                innerContext = context;
+                return const SizedBox();
+              },
+            ),
           ),
         ),
       );
 
-      // Build a widget that tries to find the flow coordinator
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: TestFlowCoordinator(
-            key: GlobalKey<TestFlowCoordinatorState>(),
-          ),
-        ),
-      );
-
-      final context = tester.element(find.byType(TestFlowCoordinator));
-      
-      // Access from within the flow coordinator's build tree
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Builder(
-            builder: (outerContext) {
-              return TestFlowCoordinator(
-                key: GlobalKey<TestFlowCoordinatorState>(),
-              );
-            },
-          ),
-        ),
-      );
-
-      final flowCoordinatorElement = tester.element(find.byType(TestFlowCoordinator));
-      final stateContext = tester.state<TestFlowCoordinatorState>(
-        find.byType(TestFlowCoordinator),
-      ).context;
-
-      foundState = FlowCoordinator.of<TestFlowCoordinatorState>(stateContext);
+      // From the inner widget's context, look up the TestFlowCoordinatorState
+      expect(innerContext, isNotNull);
+      foundState = FlowCoordinator.of<TestFlowCoordinatorState>(innerContext!);
 
       expect(foundState, isNotNull);
       expect(foundState, isA<TestFlowCoordinatorState>());
