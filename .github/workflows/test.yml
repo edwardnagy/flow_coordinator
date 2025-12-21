@@ -3,7 +3,6 @@ name: Test
 on:
   push:
     branches:
-      - master
       - main
   pull_request:
   schedule:
@@ -62,6 +61,31 @@ jobs:
         # Only run coverage on stable with latest dependencies for main package
         if: matrix.channel == 'stable' && matrix.dependencies == 'get' && matrix.package == '.'
         run: flutter test --coverage
+        working-directory: ${{ matrix.package }}
+
+      - name: Verify 100% test coverage
+        if: matrix.channel == 'stable' && matrix.dependencies == 'get' && matrix.package == '.'
+        run: |
+          # Install lcov for coverage reporting
+          sudo apt-get update
+          sudo apt-get install -y lcov
+          
+          # Generate coverage report
+          lcov --summary coverage/lcov.info > coverage_summary.txt 2>&1
+          
+          # Extract line coverage percentage
+          line_coverage=$(grep "lines......:" coverage_summary.txt | grep -oP '\d+\.\d+')
+          
+          echo "Line coverage: ${line_coverage}%"
+          
+          # Check if coverage is 100%
+          if (( $(echo "$line_coverage < 100.0" | bc -l) )); then
+            echo "❌ Test coverage is ${line_coverage}%. Required: 100%"
+            cat coverage_summary.txt
+            exit 1
+          else
+            echo "✅ Test coverage is 100%"
+          fi
         working-directory: ${{ matrix.package }}
 
       - name: Upload coverage to Codecov
