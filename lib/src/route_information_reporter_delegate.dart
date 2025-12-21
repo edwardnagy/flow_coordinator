@@ -41,7 +41,10 @@ class RootRouteInformationReporterDelegate
     final routeInformation = _pendingRouteInformation!;
     _pendingRouteInformation = null;
     _reportedRouteInformation = routeInformation;
-    notifyListeners();
+    // Do not notify if there are no listeners or the object has been disposed.
+    if (hasListeners) {
+      notifyListeners();
+    }
   }
 
   @override

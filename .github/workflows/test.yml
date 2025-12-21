@@ -1,0 +1,93 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        package:
+          - .
+          - example
+        channel:
+          - stable
+          - beta
+        dependencies:
+          - get
+          - downgrade
+        exclude:
+          # Only run downgrade on stable
+          - channel: beta
+            dependencies: downgrade
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ matrix.channel }}
+          cache: ${{ matrix.channel == 'stable' }}
+
+      - name: Install dependencies
+        run: flutter pub ${{ matrix.dependencies }}
+        working-directory: ${{ matrix.package }}
+
+      - name: Check format
+        # Check dart format only on stable with latest dependencies
+        if: matrix.channel == 'stable' && matrix.dependencies == 'get'
+        run: dart format --set-exit-if-changed .
+        working-directory: ${{ matrix.package }}
+
+      - name: Analyze
+        run: flutter analyze
+        working-directory: ${{ matrix.package }}
+
+      - name: Run tests
+        # Only run tests for main package (example has no tests)
+        if: matrix.package == '.'
+        run: flutter test
+        working-directory: ${{ matrix.package }}
+
+      - name: Run tests with coverage
+        # Only run coverage on stable with latest dependencies for main package
+        if: matrix.channel == 'stable' && matrix.dependencies == 'get' && matrix.package == '.'
+        run: flutter test --coverage
+        working-directory: ${{ matrix.package }}
+
+      - name: Verify 100% test coverage
+        if: matrix.channel == 'stable' && matrix.dependencies == 'get' && matrix.package == '.'
+        run: |
+          # Install lcov for coverage reporting
+          sudo apt-get update
+          sudo apt-get install -y lcov
+          
+          # Generate coverage report
+          lcov --summary coverage/lcov.info > coverage_summary.txt 2>&1
+          
+          # Extract line coverage percentage
+          line_coverage=$(grep "lines......:" coverage_summary.txt | grep -oP '\d+\.\d+')
+          
+          echo "Line coverage: ${line_coverage}%"
+          
+          # Check if coverage is 100%
+          if (( $(echo "$line_coverage < 100.0" | bc -l) )); then
+            echo "❌ Test coverage is ${line_coverage}%. Required: 100%"
+            cat coverage_summary.txt
+            exit 1
+          else
+            echo "✅ Test coverage is 100%"
+          fi
+        working-directory: ${{ matrix.package }}
+
+      - name: Upload coverage to Codecov
+        if: matrix.channel == 'stable' && matrix.dependencies == 'get' && matrix.package == '.'
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage/lcov.info
+          fail_ci_if_error: false
