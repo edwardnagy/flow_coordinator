@@ -241,7 +241,9 @@ void main() {
                 builder: (context) {
                   final routeStatusScope =
                       FlowRouteStatusScope.maybeOf(context);
-                  return Text('isTopRoute: ${routeStatusScope?.isTopRoute}');
+                  // Verify that isTopRoute is actually computed and available
+                  final isTop = routeStatusScope?.isTopRoute ?? false;
+                  return Text('isTopRoute: $isTop');
                 },
               ),
             ),
@@ -255,8 +257,9 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Should show that the route is top route
-      expect(find.textContaining('isTopRoute:'), findsOneWidget);
+      // Should show that the route is top route (true because it's the only route)
+      expect(find.text('isTopRoute: true'), findsOneWidget);
+
 
       router.dispose();
     });

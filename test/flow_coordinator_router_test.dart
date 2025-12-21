@@ -398,7 +398,6 @@ void main() {
       );
 
       var notificationCount = 0;
-      final initialCount = notificationCount;
 
       router.routerDelegate.addListener(() {
         notificationCount++;
@@ -408,12 +407,12 @@ void main() {
         MaterialApp.router(routerConfig: router),
       );
 
-      tester.binding.scheduleWarmUpFrame();
+      await tester.pumpAndSettle();
 
-      // The listener should be notified when route information is reported
-      // Note: Depending on the internal implementation, notifications may occur
-      // during initial setup or when route information changes
-      expect(notificationCount, greaterThanOrEqualTo(initialCount));
+      // The RouteInformationReporter should have reported the route information
+      // which triggers _onRouteInformationReported and notifyListeners()
+      // This happens during the initial build
+      expect(notificationCount, greaterThan(0));
 
       router.dispose();
     });

@@ -413,14 +413,18 @@ void main() {
     });
 
     testWidgets('handles child route information from parent', (tester) async {
-      // This test covers lines 123-124, 135-140, 157: child route information handling
+      // This test covers lines 123-124, 135-140: child route information handling
+      // and _onValueReceivedFromParent callback
 
       final childRouteInfo = RouteInformation(uri: Uri.parse('/child'));
+      var childRouteReceived = false;
 
       final router = FlowCoordinatorRouter(
         homeBuilder: (context) => TestFlowCoordinator(
           onNewRouteInformationCallback: (info) async {
-            // Return child route information
+            if (info.uri.path == '/child') {
+              childRouteReceived = true;
+            }
             return childRouteInfo;
           },
         ),
@@ -437,25 +441,28 @@ void main() {
       );
 
       // Trigger setNewRouteInformation which should set child route info
-      state.setNewRouteInformation(
+      await state.setNewRouteInformation(
         RouteInformation(uri: Uri.parse('/test')),
       );
 
       await tester.pumpAndSettle();
 
-      // The child route information should have been set
+      // The child route information should have been set and callback triggered
       // This exercises lines 123-124 where childValueNotifier.value is set
+      // and lines 135-140 where _onValueReceivedFromParent processes it
 
       router.dispose();
     });
 
     testWidgets('parent route information provider change triggers listener',
         (tester) async {
-      // This test covers lines 157: removeListener call when parent changes
+      // This test covers line 157: removeListener call when parent changes
+
+      var listenerRemoved = false;
 
       final router = FlowCoordinatorRouter(
-        homeBuilder: (context) => const TestFlowCoordinator(
-          initialPagesOverride: [
+        homeBuilder: (context) => TestFlowCoordinator(
+          initialPagesOverride: const [
             MaterialPage(
               key: ValueKey('parent'),
               child: TestFlowCoordinator(
