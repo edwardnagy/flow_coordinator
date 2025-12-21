@@ -461,15 +461,18 @@ void main() {
         (tester) async {
       // This test covers line 157: removeListener call when parent changes
 
-      final router = FlowCoordinatorRouter(
+      // Create first router with nested coordinators
+      var router = FlowCoordinatorRouter(
         homeBuilder: (context) => const TestFlowCoordinator(
+          key: ValueKey('parent1'),
           initialPagesOverride: [
             MaterialPage(
-              key: ValueKey('parent'),
+              key: ValueKey('page1'),
               child: TestFlowCoordinator(
+                key: ValueKey('child'),
                 initialPagesOverride: [
                   MaterialPage(
-                    key: ValueKey('child'),
+                    key: ValueKey('childPage'),
                     child: SizedBox(),
                   ),
                 ],
@@ -482,14 +485,46 @@ void main() {
       await tester.pumpWidget(
         MaterialApp.router(routerConfig: router),
       );
+      await tester.pump();
 
-      // Trigger a rebuild that changes the parent provider
+      // Get child state which has a parent provider
+      final childState = tester.state<TestFlowCoordinatorState>(
+        find.byKey(const ValueKey('child')),
+      );
+      
+      // Verify child has a parent provider
+      expect(childState.parentRouteInformationProvider, isNotNull);
+
+      // Recreate router with different structure to change parent
+      router = FlowCoordinatorRouter(
+        homeBuilder: (context) => const TestFlowCoordinator(
+          key: ValueKey('parent2'),
+          initialPagesOverride: [
+            MaterialPage(
+              key: ValueKey('page2'),
+              child: TestFlowCoordinator(
+                key: ValueKey('child'),
+                initialPagesOverride: [
+                  MaterialPage(
+                    key: ValueKey('childPage'),
+                    child: SizedBox(),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+
+      // Rebuild with new router - this will trigger didChangeDependencies
+      // and change the parent provider, exercising line 157
       await tester.pumpWidget(
         MaterialApp.router(routerConfig: router),
       );
+      await tester.pump();
 
-      // The listener should have been properly managed
-      expect(find.byType(TestFlowCoordinator), findsWidgets);
+      // Verify the child still exists after parent change
+      expect(find.byKey(const ValueKey('child')), findsOneWidget);
 
       router.dispose();
     });

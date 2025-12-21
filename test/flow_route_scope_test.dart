@@ -231,6 +231,7 @@ void main() {
 
     testWidgets('checks if route is top route', (tester) async {
       // This test covers line 63: isTopRoute check with ModalRoute.of(context)?.isCurrent
+      // Need nested FlowRouteScopes so the inner one has a non-null routeStatusScope
 
       bool? isTopRouteValue;
 
@@ -239,14 +240,17 @@ void main() {
           initialPagesOverride: [
             MaterialPage(
               child: FlowRouteScope(
-                child: Builder(
-                  builder: (context) {
-                    final routeStatusScope =
-                        FlowRouteStatusScope.maybeOf(context);
-                    // Verify that isTopRoute is actually computed and available
-                    isTopRouteValue = routeStatusScope?.isTopRoute;
-                    return const SizedBox();
-                  },
+                child: FlowRouteScope(
+                  // Nested scope - the inner one will have non-null routeStatusScope
+                  child: Builder(
+                    builder: (context) {
+                      final routeStatusScope =
+                          FlowRouteStatusScope.maybeOf(context);
+                      // Verify that isTopRoute is actually computed and available
+                      isTopRouteValue = routeStatusScope?.isTopRoute;
+                      return const SizedBox();
+                    },
+                  ),
                 ),
               ),
             ),

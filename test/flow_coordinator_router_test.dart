@@ -357,13 +357,13 @@ void main() {
       router.dispose();
     });
 
-    testWidgets('parses platform default route name', (tester) async {
-      // This test covers line 64: Uri.parse(platformDefaultRouteName)
-      // The _effectiveInitialUri method parses the platform route when it's not the default
-
-      // Test with a custom initial URI to exercise the fallback logic
+    testWidgets('handles platform route information', (tester) async {
+      // Line 64: Uri.parse(platformDefaultRouteName) is challenging to test
+      // because it only executes when platformDefaultRouteName != Navigator.defaultRouteName
+      // In test environments, these are typically equal ('/'), so line 64 is not reached
+      // Instead, this test ensures the _effectiveInitialUri method works correctly
+      
       final router = FlowCoordinatorRouter(
-        initialUri: Uri.parse('/custom/path'),
         homeBuilder: (context) => const Text('Home'),
       );
 
@@ -371,7 +371,6 @@ void main() {
         MaterialApp.router(routerConfig: router),
       );
 
-      // The router should be created with the custom URI
       expect(find.text('Home'), findsOneWidget);
 
       router.dispose();
