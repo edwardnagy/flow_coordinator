@@ -357,7 +357,7 @@ void main() {
       router.dispose();
     });
 
-    test('parses platform default route name', () {
+    testWidgets('parses platform default route name', (tester) async {
       // This test covers line 64: Uri.parse(platformDefaultRouteName)
       // The _effectiveInitialUri method parses the platform route when it's not the default
 
@@ -367,8 +367,12 @@ void main() {
         homeBuilder: (context) => const Text('Home'),
       );
 
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: router),
+      );
+
       // The router should be created with the custom URI
-      expect(router, isNotNull);
+      expect(find.text('Home'), findsOneWidget);
 
       router.dispose();
     });

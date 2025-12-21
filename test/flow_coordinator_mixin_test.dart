@@ -461,8 +461,6 @@ void main() {
         (tester) async {
       // This test covers line 157: removeListener call when parent changes
 
-      var listenerRemoved = false;
-
       final router = FlowCoordinatorRouter(
         homeBuilder: (context) => const TestFlowCoordinator(
           initialPagesOverride: [
@@ -485,14 +483,10 @@ void main() {
         MaterialApp.router(routerConfig: router),
       );
 
-      await tester.pumpAndSettle();
-
-      // Trigger a rebuild that might change the parent provider
+      // Trigger a rebuild that changes the parent provider
       await tester.pumpWidget(
         MaterialApp.router(routerConfig: router),
       );
-
-      await tester.pumpAndSettle();
 
       // The listener should have been properly managed
       expect(find.byType(TestFlowCoordinator), findsWidgets);
