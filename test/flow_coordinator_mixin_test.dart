@@ -46,7 +46,8 @@ class TestFlowCoordinatorState extends State<TestFlowCoordinator>
 }
 
 // Minimal implementation to test the base mixin behavior
-class _MinimalFlowCoordinatorMixin with FlowCoordinatorMixin {
+class _MinimalFlowCoordinatorState extends State<StatefulWidget>
+    with FlowCoordinatorMixin {
   // Don't override initialPages to test the default implementation
   // This allows us to test line 79: List<Page> get initialPages => []
 }
@@ -396,7 +397,7 @@ void main() {
     test('initialPages returns empty list by default', () {
       // This test covers line 79: List<Page> get initialPages => [];
       // Create a minimal mixin instance to test the default implementation
-      final mixin = _MinimalFlowCoordinatorMixin();
+      final mixin = _MinimalFlowCoordinatorState();
       expect(mixin.initialPages, isEmpty);
     });
 
@@ -404,13 +405,16 @@ void main() {
       // This test covers lines 135-140: _onValueReceivedFromParent callback
       // and line 157: removeListener when parent provider changes
 
-      bool callbackTriggered = false;
+      var callbackTriggered = false;
 
       final router = FlowCoordinatorRouter(
         homeBuilder: (context) => TestFlowCoordinator(
+          key: const ValueKey('parent'),
+          onNewRouteInformationCallback: (info) async {
+            return SynchronousFuture(info);
+          },
           initialPagesOverride: [
             MaterialPage(
-              key: const ValueKey('parent'),
               child: TestFlowCoordinator(
                 onNewRouteInformationCallback: (info) async {
                   callbackTriggered = true;
@@ -418,7 +422,6 @@ void main() {
                 },
                 initialPagesOverride: const [
                   MaterialPage(
-                    key: ValueKey('child'),
                     child: SizedBox(),
                   ),
                 ],
@@ -440,11 +443,13 @@ void main() {
       );
 
       // Set route information on parent, which should propagate to child
-      await parentState.setNewRouteInformation(
+      parentState.setNewRouteInformation(
         RouteInformation(uri: Uri.parse('/test')),
       );
 
       await tester.pumpAndSettle();
+
+      expect(callbackTriggered, isTrue);
 
       // The callback should have been triggered via _onValueReceivedFromParent
       // This exercises lines 135-140
@@ -459,8 +464,8 @@ void main() {
       var listenerRemoved = false;
 
       final router = FlowCoordinatorRouter(
-        homeBuilder: (context) => TestFlowCoordinator(
-          initialPagesOverride: const [
+        homeBuilder: (context) => const TestFlowCoordinator(
+          initialPagesOverride: [
             MaterialPage(
               key: ValueKey('parent'),
               child: TestFlowCoordinator(

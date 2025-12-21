@@ -1,6 +1,6 @@
 import 'package:flow_coordinator/src/flow_coordinator_router.dart';
+import 'package:flow_coordinator/src/flow_route_scope.dart';
 import 'package:flow_coordinator/src/identity_route_information_parser.dart';
-import 'package:flow_coordinator/src/route_information_reporter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -386,7 +386,7 @@ void main() {
           return TestFlowCoordinator(
             initialPagesOverride: [
               MaterialPage(
-                child: RouteInformationReporter(
+                child: FlowRouteScope(
                   routeInformation: RouteInformation(uri: Uri.parse('/home')),
                   child: const SizedBox(),
                 ),
@@ -406,7 +406,7 @@ void main() {
         MaterialApp.router(routerConfig: router),
       );
 
-      await tester.pumpAndSettle();
+      tester.binding.scheduleWarmUpFrame();
 
       // The RouteInformationReporter should have reported the route information
       // which triggers _onRouteInformationReported and notifyListeners()

@@ -232,19 +232,22 @@ void main() {
     testWidgets('checks if route is top route', (tester) async {
       // This test covers line 63: isTopRoute check with ModalRoute.of(context)?.isCurrent
 
+      bool? isTopRouteValue;
+
       final router = FlowCoordinatorRouter(
         homeBuilder: (context) => TestFlowCoordinator(
           initialPagesOverride: [
             MaterialPage(
-              key: const ValueKey('page1'),
-              child: Builder(
-                builder: (context) {
-                  final routeStatusScope =
-                      FlowRouteStatusScope.maybeOf(context);
-                  // Verify that isTopRoute is actually computed and available
-                  final isTop = routeStatusScope?.isTopRoute ?? false;
-                  return Text('isTopRoute: $isTop');
-                },
+              child: FlowRouteScope(
+                child: Builder(
+                  builder: (context) {
+                    final routeStatusScope =
+                        FlowRouteStatusScope.maybeOf(context);
+                    // Verify that isTopRoute is actually computed and available
+                    isTopRouteValue = routeStatusScope?.isTopRoute;
+                    return const SizedBox();
+                  },
+                ),
               ),
             ),
           ],
@@ -255,11 +258,8 @@ void main() {
         MaterialApp.router(routerConfig: router),
       );
 
-      await tester.pumpAndSettle();
-
       // Should show that the route is top route (true because it's the only route)
-      expect(find.text('isTopRoute: true'), findsOneWidget);
-
+      expect(isTopRouteValue, isTrue);
 
       router.dispose();
     });
