@@ -1,0 +1,72 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
+  schedule:
+    # runs the CI everyday at 10AM UTC
+    - cron: "0 10 * * *"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        package:
+          - .
+          - example
+        channel:
+          - stable
+          - beta
+        dependencies:
+          - get
+          - downgrade
+        exclude:
+          # Only run downgrade on stable
+          - channel: beta
+            dependencies: downgrade
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ matrix.channel }}
+          cache: ${{ matrix.channel == 'stable' }}
+
+      - name: Install dependencies
+        run: flutter pub ${{ matrix.dependencies }}
+        working-directory: ${{ matrix.package }}
+
+      - name: Check format
+        # Check dart format only on stable with latest dependencies
+        if: matrix.channel == 'stable' && matrix.dependencies == 'get'
+        run: dart format --set-exit-if-changed .
+        working-directory: ${{ matrix.package }}
+
+      - name: Analyze
+        run: flutter analyze
+        working-directory: ${{ matrix.package }}
+
+      - name: Run tests
+        # Only run tests for main package (example has no tests)
+        if: matrix.package == '.'
+        run: flutter test
+        working-directory: ${{ matrix.package }}
+
+      - name: Run tests with coverage
+        # Only run coverage on stable with latest dependencies for main package
+        if: matrix.channel == 'stable' && matrix.dependencies == 'get' && matrix.package == '.'
+        run: flutter test --coverage
+        working-directory: ${{ matrix.package }}
+
+      - name: Upload coverage to Codecov
+        if: matrix.channel == 'stable' && matrix.dependencies == 'get' && matrix.package == '.'
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage/lcov.info
+          fail_ci_if_error: false
