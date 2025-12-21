@@ -289,5 +289,69 @@ void main() {
 
       router.dispose();
     });
+
+    testWidgets('handles null state', (tester) async {
+      final router = FlowCoordinatorRouter(
+        initialState: null,
+        homeBuilder: (context) => const Text('Home'),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: router),
+      );
+
+      expect(find.text('Home'), findsOneWidget);
+
+      router.dispose();
+    });
+
+    testWidgets('handles complex initial state', (tester) async {
+      final router = FlowCoordinatorRouter(
+        initialState: {
+          'nested': {
+            'value': [1, 2, 3],
+          },
+        },
+        homeBuilder: (context) => const Text('Home'),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: router),
+      );
+
+      expect(find.text('Home'), findsOneWidget);
+
+      router.dispose();
+    });
+
+    testWidgets('handles URI with query parameters', (tester) async {
+      final router = FlowCoordinatorRouter(
+        initialUri: Uri.parse('/path?key1=value1&key2=value2'),
+        homeBuilder: (context) => const Text('Home'),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: router),
+      );
+
+      expect(find.text('Home'), findsOneWidget);
+
+      router.dispose();
+    });
+
+    testWidgets('handles URI with fragment', (tester) async {
+      final router = FlowCoordinatorRouter(
+        initialUri: Uri.parse('/path#section'),
+        homeBuilder: (context) => const Text('Home'),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: router),
+      );
+
+      expect(find.text('Home'), findsOneWidget);
+
+      router.dispose();
+    });
   });
 }

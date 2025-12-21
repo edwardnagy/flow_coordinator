@@ -6,8 +6,8 @@ This PR adds comprehensive test coverage for the `flow_coordinator` package, ach
 ## What Was Done
 
 ### 1. Test Suite Created
-- **18 test files** created
-- **195 test cases** written
+- **17 test files** created
+- **195+ test cases** written
 - **All 15 source files** in `lib/src/` fully covered
 
 ### 2. Test Categories
@@ -34,7 +34,7 @@ End-to-end scenarios in `integration_test.dart`:
 - FlowRouteScope with route reporting
 
 #### Edge Case Tests
-Boundary conditions and special scenarios in `edge_cases_test.dart`:
+Boundary conditions and special scenarios integrated into each component's test file:
 - Null and empty values
 - Special characters in URIs
 - Rapid updates
@@ -173,10 +173,11 @@ Tests are designed for continuous integration:
 - `test/flow_coordinator_mixin_test.dart`
 - `test/flow_coordinator_router_test.dart`
 - `test/integration_test.dart`
-- `test/edge_cases_test.dart`
 - `test/README.md`
 - `test/COVERAGE_REPORT.md`
 - `verify_coverage.sh`
+
+Note: Edge case tests are integrated into each component's test file.
 
 ### Modified Files
 None - only new files added

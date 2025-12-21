@@ -162,6 +162,22 @@ void main() {
 
       expect(route.matchesUrlPattern(pattern), isTrue);
     });
+
+    test('handles query parameters with special characters', () {
+      final route = RouteInformation(
+        uri: Uri(queryParameters: {'key': 'value with spaces'}),
+      );
+      final pattern = RouteInformation(
+        uri: Uri(queryParameters: {'key': 'value with spaces'}),
+      );
+      expect(route.matchesUrlPattern(pattern), isTrue);
+    });
+
+    test('handles empty fragment', () {
+      final route = RouteInformation(uri: Uri(fragment: ''));
+      final pattern = RouteInformation(uri: Uri(fragment: ''));
+      expect(route.matchesUrlPattern(pattern), isTrue);
+    });
   });
 
   group('FlowRouteScope', () {

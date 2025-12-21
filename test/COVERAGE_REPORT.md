@@ -78,14 +78,12 @@ This test suite provides comprehensive test coverage for the `flow_coordinator` 
     - Tests FlowCoordinatorRouter configuration
     - Covers all RouterConfig properties, different app types, initialization
 
-### Integration & Edge Cases
+### Integration Tests
 16. **integration_test.dart** - 6 tests
     - End-to-end integration tests
     - Complete navigation flows, deep linking, nested coordinators
 
-17. **edge_cases_test.dart** - 13 tests
-    - Edge case and boundary condition tests
-    - Null values, empty collections, special characters, rapid updates
+**Note:** Edge case tests are integrated into each component's test file rather than maintained separately, ensuring comprehensive coverage of boundary conditions alongside normal test cases.
 
 ## Test Coverage by Source File
 

@@ -332,5 +332,59 @@ void main() {
 
       expect(find.byType(TestFlowCoordinator), findsWidgets);
     });
+
+    testWidgets('handles rapid route information updates', (tester) async {
+      var updateCount = 0;
+
+      final router = FlowCoordinatorRouter(
+        homeBuilder: (context) => TestFlowCoordinator(
+          onNewRouteInformationCallback: (info) {
+            updateCount++;
+            return Future.value(null);
+          },
+        ),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: router),
+      );
+
+      await tester.pumpAndSettle();
+
+      final state = tester.state<TestFlowCoordinatorState>(
+        find.byType(TestFlowCoordinator),
+      );
+
+      // Send multiple rapid updates
+      for (var i = 0; i < 5; i++) {
+        state.setNewRouteInformation(
+          RouteInformation(uri: Uri.parse('/route$i')),
+        );
+      }
+
+      await tester.pumpAndSettle();
+
+      expect(updateCount, greaterThanOrEqualTo(5));
+
+      router.dispose();
+    });
+
+    testWidgets('handles empty page list gracefully with assertion',
+        (tester) async {
+      final router = FlowCoordinatorRouter(
+        homeBuilder: (context) => const TestFlowCoordinator(
+          initialPagesOverride: [],
+        ),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: router),
+      );
+
+      // Should trigger assertion in build
+      expect(tester.takeException(), isA<AssertionError>());
+
+      router.dispose();
+    });
   });
 }

@@ -243,5 +243,15 @@ void main() {
 
       expect(rebuildCount, 1);
     });
+
+    testWidgets('handles empty URIs', (tester) async {
+      const combiner = DefaultRouteInformationCombiner();
+      final result = combiner.combine(
+        currentRouteInformation: RouteInformation(uri: Uri()),
+        childRouteInformation: RouteInformation(uri: Uri()),
+      );
+      expect(result.uri.pathSegments, isEmpty);
+      expect(result.uri.queryParameters, isEmpty);
+    });
   });
 }

@@ -317,5 +317,51 @@ void main() {
 
       delegate.dispose();
     });
+
+    testWidgets('handles multiple simultaneous reports', (tester) async {
+      final delegate = RootRouteInformationReporterDelegate();
+
+      // Schedule multiple reports in the same frame
+      delegate.childReportsRouteInformation(
+        RouteInformation(uri: Uri.parse('/first')),
+      );
+      delegate.childReportsRouteInformation(
+        RouteInformation(uri: Uri.parse('/second')),
+      );
+      delegate.childReportsRouteInformation(
+        RouteInformation(uri: Uri.parse('/third')),
+      );
+
+      tester.binding.scheduleWarmUpFrame();
+
+      // Should report the last one
+      expect(delegate.reportedRouteInformation!.uri.path, equals('/third'));
+
+      delegate.dispose();
+    });
+
+    testWidgets('prefixes various URI formats correctly', (tester) async {
+      final delegate = RootRouteInformationReporterDelegate();
+
+      final testCases = [
+        ('test', '/test'),
+        ('test/path', '/test/path'),
+        ('/test', '/test'),
+        ('', '/'),
+      ];
+
+      for (final (input, expected) in testCases) {
+        delegate.childReportsRouteInformation(
+          RouteInformation(uri: Uri.parse(input)),
+        );
+        tester.binding.scheduleWarmUpFrame();
+        expect(
+          delegate.reportedRouteInformation!.uri.toString(),
+          equals(expected),
+        );
+      }
+
+      delegate.dispose();
+    });
   });
 }

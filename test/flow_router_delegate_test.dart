@@ -295,5 +295,77 @@ void main() {
 
       delegate.dispose();
     });
+
+    testWidgets('pop with null result', (tester) async {
+      final delegate = FlowRouterDelegate(
+        initialPages: [
+          const MaterialPage(key: ValueKey('p1'), child: SizedBox()),
+          const MaterialPage(key: ValueKey('p2'), child: SizedBox()),
+        ],
+        contextDescriptionProvider: () => 'Test',
+      );
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Builder(builder: delegate.build),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      delegate.pop<String>();
+      await tester.pumpAndSettle();
+
+      delegate.dispose();
+    });
+
+    testWidgets('popInternally with result', (tester) async {
+      final delegate = FlowRouterDelegate(
+        initialPages: [
+          const MaterialPage(key: ValueKey('p1'), child: SizedBox()),
+          const MaterialPage(key: ValueKey('p2'), child: SizedBox()),
+        ],
+        contextDescriptionProvider: () => 'Test',
+      );
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Builder(builder: delegate.build),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      delegate.popInternally<String>('result');
+      await tester.pumpAndSettle();
+
+      delegate.dispose();
+    });
+
+    testWidgets('maybePopInternally with result', (tester) async {
+      final delegate = FlowRouterDelegate(
+        initialPages: [
+          const MaterialPage(key: ValueKey('p1'), child: SizedBox()),
+          const MaterialPage(key: ValueKey('p2'), child: SizedBox()),
+        ],
+        contextDescriptionProvider: () => 'Test',
+      );
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Builder(builder: delegate.build),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      final result = await delegate.maybePopInternally<String>('result');
+      expect(result, isTrue);
+
+      delegate.dispose();
+    });
   });
 }

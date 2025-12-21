@@ -54,5 +54,20 @@ void main() {
       expect(consumable.consumeOrNull(), isNull);
       expect(consumable.consumeOrNull(), isNull);
     });
+
+    test('works with null value', () {
+      final consumable = Consumable<String?>(null);
+      expect(consumable.consumeOrNull(), isNull);
+      expect(consumable.consumeOrNull(), isNull);
+    });
+
+    test('works with complex nested types', () {
+      final value = {
+        'list': [1, 2, 3],
+        'map': {'nested': 'value'},
+      };
+      final consumable = Consumable(value);
+      expect(consumable.consumeOrNull(), equals(value));
+    });
   });
 }

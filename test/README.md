@@ -52,6 +52,8 @@ The tests are organized to mirror the source code structure:
 - `flow_coordinator_router_test.dart` - Tests for FlowCoordinatorRouter configuration
 - `integration_test.dart` - End-to-end integration tests
 
+Each test file includes edge case tests integrated with the main test suites.
+
 ## Coverage Goals
 
 The test suite aims to achieve:
@@ -79,11 +81,18 @@ Tests that use Flutter's widget testing framework to test widgets and their inte
 ### Integration Tests
 `integration_test.dart` contains end-to-end tests that exercise the complete flow coordinator stack.
 
+### Edge Cases
+Edge case tests are integrated into each component's test file, covering:
+- Null and empty values
+- Special characters and complex data structures
+- Boundary conditions
+- Rapid updates and concurrent operations
+
 ## Testing Approach
 
 1. **Positive Cases**: Tests verify that functionality works as expected with valid inputs
 2. **Negative Cases**: Tests verify proper error handling with invalid inputs
-3. **Edge Cases**: Tests cover boundary conditions and special cases
+3. **Edge Cases**: Tests cover boundary conditions and special cases (integrated in each test file)
 4. **State Management**: Tests verify that state changes propagate correctly
 5. **Lifecycle**: Tests verify proper initialization and disposal
 6. **Integration**: Tests verify that components work together correctly
