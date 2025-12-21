@@ -353,5 +353,74 @@ void main() {
 
       router.dispose();
     });
+
+    testWidgets('uses platform default route when available', (tester) async {
+      // This test covers line 64: platformUri handling
+      // The platform default route name is checked in the constructor
+      
+      final router = FlowCoordinatorRouter(
+        homeBuilder: (context) => const Text('Home'),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: router),
+      );
+
+      expect(find.text('Home'), findsOneWidget);
+
+      router.dispose();
+    });
+
+    testWidgets('notifies listeners on route information change',
+        (tester) async {
+      // This test covers lines 108-109: notifyListeners when route changes
+      
+      final router = FlowCoordinatorRouter(
+        homeBuilder: (context) => const Text('Home'),
+      );
+
+      var notificationCount = 0;
+      router.addListener(() {
+        notificationCount++;
+      });
+
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: router),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Change route information
+      await router.setNewRoutePath(
+        RouteInformation(uri: Uri.parse('/new-path')),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Should have notified listeners
+      expect(notificationCount, greaterThan(0));
+
+      router.dispose();
+    });
+
+    testWidgets('popRoute returns false', (tester) async {
+      // This test covers lines 120-121: popRoute implementation
+      
+      final router = FlowCoordinatorRouter(
+        homeBuilder: (context) => const Text('Home'),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: router),
+      );
+
+      await tester.pumpAndSettle();
+
+      // popRoute should return false (handled by child coordinators)
+      final result = await router.popRoute();
+      expect(result, isFalse);
+
+      router.dispose();
+    });
   });
 }

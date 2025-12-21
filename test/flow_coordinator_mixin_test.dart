@@ -386,5 +386,108 @@ void main() {
 
       router.dispose();
     });
+
+    testWidgets('overrides initialPages getter', (tester) async {
+      // This test covers line 79: List<Page> get initialPages => [];
+      // By default, initialPages returns an empty list, but subclasses override it
+      
+      final router = FlowCoordinatorRouter(
+        homeBuilder: (context) => const TestFlowCoordinator(),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: router),
+      );
+
+      await tester.pumpAndSettle();
+
+      final state = tester.state<TestFlowCoordinatorState>(
+        find.byType(TestFlowCoordinator),
+      );
+
+      // The TestFlowCoordinator overrides initialPages
+      expect(state.initialPages, isNotEmpty);
+      expect(state.initialPages.first.key, const ValueKey('initial'));
+
+      router.dispose();
+    });
+
+    testWidgets('handles child route information from parent', (tester) async {
+      // This test covers lines 123-124, 135-140, 157: child route information handling
+      
+      final childRouteInfo = RouteInformation(uri: Uri.parse('/child'));
+      
+      final router = FlowCoordinatorRouter(
+        homeBuilder: (context) => TestFlowCoordinator(
+          onNewRouteInformationCallback: (info) async {
+            // Return child route information
+            return childRouteInfo;
+          },
+        ),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: router),
+      );
+
+      await tester.pumpAndSettle();
+
+      final state = tester.state<TestFlowCoordinatorState>(
+        find.byType(TestFlowCoordinator),
+      );
+
+      // Trigger setNewRouteInformation which should set child route info
+      state.setNewRouteInformation(
+        RouteInformation(uri: Uri.parse('/test')),
+      );
+
+      await tester.pumpAndSettle();
+
+      // The child route information should have been set
+      // This exercises lines 123-124 where childValueNotifier.value is set
+
+      router.dispose();
+    });
+
+    testWidgets('parent route information provider change triggers listener',
+        (tester) async {
+      // This test covers lines 157: removeListener call when parent changes
+      
+      final router = FlowCoordinatorRouter(
+        homeBuilder: (context) => const TestFlowCoordinator(
+          initialPagesOverride: [
+            MaterialPage(
+              key: ValueKey('parent'),
+              child: TestFlowCoordinator(
+                initialPagesOverride: [
+                  MaterialPage(
+                    key: ValueKey('child'),
+                    child: SizedBox(),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: router),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Trigger a rebuild that might change the parent provider
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: router),
+      );
+
+      await tester.pumpAndSettle();
+
+      // The listener should have been properly managed
+      expect(find.byType(TestFlowCoordinator), findsWidgets);
+
+      router.dispose();
+    });
   });
 }

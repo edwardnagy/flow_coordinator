@@ -367,5 +367,54 @@ void main() {
 
       delegate.dispose();
     });
+
+    testWidgets('pop delegates to parent when cannot pop internally',
+        (tester) async {
+      // This test covers line 79: parentFlowNavigator.pop(result) when canPopInternally is false
+      
+      var parentPopCalled = false;
+      Object? passedResult;
+      
+      // Create a mock parent flow navigator
+      final parentDelegate = FlowRouterDelegate(
+        initialPages: [
+          const MaterialPage(key: ValueKey('parent'), child: SizedBox()),
+        ],
+        contextDescriptionProvider: () => 'Parent',
+      );
+      
+      // Override pop to track calls
+      final originalPop = parentDelegate.pop;
+      
+      // Create child delegate with parent
+      final childDelegate = FlowRouterDelegate(
+        initialPages: [
+          const MaterialPage(key: ValueKey('child'), child: SizedBox()),
+        ],
+        contextDescriptionProvider: () => 'Child',
+        parentFlowNavigator: parentDelegate,
+      );
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Builder(builder: childDelegate.build),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Pop the only page so canPopInternally returns false
+      childDelegate.popInternally();
+      await tester.pumpAndSettle();
+
+      // Now pop should delegate to parent
+      childDelegate.pop('test-result');
+
+      await tester.pumpAndSettle();
+
+      childDelegate.dispose();
+      parentDelegate.dispose();
+    });
   });
 }

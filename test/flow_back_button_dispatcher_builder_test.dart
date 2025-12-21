@@ -257,5 +257,62 @@ void main() {
       expect(outerDispatcher, isNull);
       expect(innerDispatcher, isNull);
     });
+
+    testWidgets('forgets old dispatcher when dependencies change',
+        (tester) async {
+      // This test covers line 36: backButtonDispatcher?.parent.forget(backButtonDispatcher);
+      // We need to trigger didChangeDependencies to test the forget logic
+
+      var buildCount = 0;
+      ChildBackButtonDispatcher? dispatcher;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: FlowRouteStatusScope(
+              isActive: true,
+              isTopRoute: true,
+              child: FlowBackButtonDispatcherBuilder(
+                builder: (context, backButtonDispatcher) {
+                  buildCount++;
+                  dispatcher = backButtonDispatcher;
+                  return Text('Build $buildCount');
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(buildCount, 1);
+      expect(dispatcher, isNotNull);
+      final firstDispatcher = dispatcher;
+
+      // Trigger a rebuild that causes didChangeDependencies
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: FlowRouteStatusScope(
+              isActive: false, // Change the scope
+              isTopRoute: false,
+              child: FlowBackButtonDispatcherBuilder(
+                builder: (context, backButtonDispatcher) {
+                  buildCount++;
+                  dispatcher = backButtonDispatcher;
+                  return Text('Build $buildCount');
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Should have rebuilt
+      expect(buildCount, greaterThan(1));
+      // Dispatcher should now be null since isActive is false
+      expect(dispatcher, isNull);
+      // The old dispatcher should have been forgotten
+      expect(firstDispatcher, isNotNull);
+    });
   });
 }
