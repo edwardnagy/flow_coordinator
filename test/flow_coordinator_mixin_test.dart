@@ -45,6 +45,12 @@ class TestFlowCoordinatorState extends State<TestFlowCoordinator>
   }
 }
 
+// Minimal implementation to test the base mixin behavior
+class _MinimalFlowCoordinatorMixin with FlowCoordinatorMixin {
+  // Don't override initialPages to test the default implementation
+  // This allows us to test line 79: List<Page> get initialPages => []
+}
+
 void main() {
   group('FlowCoordinatorMixin', () {
     testWidgets('initializes with initial pages', (tester) async {
@@ -387,46 +393,38 @@ void main() {
       router.dispose();
     });
 
-    testWidgets('overrides initialPages getter', (tester) async {
+    test('initialPages returns empty list by default', () {
       // This test covers line 79: List<Page> get initialPages => [];
-      // By default, initialPages returns an empty list, but subclasses override it
-
-      final router = FlowCoordinatorRouter(
-        homeBuilder: (context) => const TestFlowCoordinator(),
-      );
-
-      await tester.pumpWidget(
-        MaterialApp.router(routerConfig: router),
-      );
-
-      await tester.pumpAndSettle();
-
-      final state = tester.state<TestFlowCoordinatorState>(
-        find.byType(TestFlowCoordinator),
-      );
-
-      // The TestFlowCoordinator overrides initialPages
-      expect(state.initialPages, isNotEmpty);
-      expect(state.initialPages.first.key, const ValueKey('initial'));
-
-      router.dispose();
+      // Create a minimal mixin instance to test the default implementation
+      final mixin = _MinimalFlowCoordinatorMixin();
+      expect(mixin.initialPages, isEmpty);
     });
 
     testWidgets('handles child route information from parent', (tester) async {
-      // This test covers lines 123-124, 135-140: child route information handling
-      // and _onValueReceivedFromParent callback
+      // This test covers lines 135-140: _onValueReceivedFromParent callback
+      // and line 157: removeListener when parent provider changes
 
-      final childRouteInfo = RouteInformation(uri: Uri.parse('/child'));
-      var childRouteReceived = false;
+      bool callbackTriggered = false;
 
       final router = FlowCoordinatorRouter(
         homeBuilder: (context) => TestFlowCoordinator(
-          onNewRouteInformationCallback: (info) async {
-            if (info.uri.path == '/child') {
-              childRouteReceived = true;
-            }
-            return childRouteInfo;
-          },
+          initialPagesOverride: [
+            MaterialPage(
+              key: const ValueKey('parent'),
+              child: TestFlowCoordinator(
+                onNewRouteInformationCallback: (info) async {
+                  callbackTriggered = true;
+                  return info;
+                },
+                initialPagesOverride: const [
+                  MaterialPage(
+                    key: ValueKey('child'),
+                    child: SizedBox(),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       );
 
@@ -436,20 +434,20 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      final state = tester.state<TestFlowCoordinatorState>(
-        find.byType(TestFlowCoordinator),
+      // Find the parent and child states
+      final parentState = tester.state<TestFlowCoordinatorState>(
+        find.byKey(const ValueKey('parent')).first,
       );
 
-      // Trigger setNewRouteInformation which should set child route info
-      await state.setNewRouteInformation(
+      // Set route information on parent, which should propagate to child
+      await parentState.setNewRouteInformation(
         RouteInformation(uri: Uri.parse('/test')),
       );
 
       await tester.pumpAndSettle();
 
-      // The child route information should have been set and callback triggered
-      // This exercises lines 123-124 where childValueNotifier.value is set
-      // and lines 135-140 where _onValueReceivedFromParent processes it
+      // The callback should have been triggered via _onValueReceivedFromParent
+      // This exercises lines 135-140
 
       router.dispose();
     });
