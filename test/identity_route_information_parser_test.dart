@@ -1,6 +1,6 @@
+import 'package:flow_coordinator/src/identity_route_information_parser.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flow_coordinator/src/identity_route_information_parser.dart';
 
 void main() {
   group('IdentityRouteInformationParser', () {
@@ -17,7 +17,8 @@ void main() {
     });
 
     test('parseRouteInformation with complex URI', () async {
-      final uri = Uri.parse('/path/to/resource?param1=value1&param2=value2#fragment');
+      final uri =
+          Uri.parse('/path/to/resource?param1=value1&param2=value2#fragment');
       final routeInfo = RouteInformation(uri: uri, state: {'key': 'value'});
       final result = await parser.parseRouteInformation(routeInfo);
       expect(result, same(routeInfo));

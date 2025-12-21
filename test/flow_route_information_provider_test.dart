@@ -1,8 +1,8 @@
+import 'package:flow_coordinator/src/consumable.dart';
+import 'package:flow_coordinator/src/flow_route_information_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flow_coordinator/src/flow_route_information_provider.dart';
-import 'package:flow_coordinator/src/consumable.dart';
 
 // Mock implementation for testing
 class MockFlowRouteInformationProvider extends FlowRouteInformationProvider {
@@ -37,7 +37,8 @@ class MockChildFlowRouteInformationProvider
 void main() {
   group('FlowRouteInformationProvider.of', () {
     testWidgets('finds provider in widget tree', (tester) async {
-      final childValueNotifier = ValueNotifier<Consumable<RouteInformation>?>(null);
+      final childValueNotifier =
+          ValueNotifier<Consumable<RouteInformation>?>(null);
       final provider = MockFlowRouteInformationProvider(childValueNotifier);
       FlowRouteInformationProvider? found;
 
@@ -94,7 +95,8 @@ void main() {
 
   group('FlowRouteInformationProviderScope', () {
     testWidgets('provides value to descendants', (tester) async {
-      final childValueNotifier = ValueNotifier<Consumable<RouteInformation>?>(null);
+      final childValueNotifier =
+          ValueNotifier<Consumable<RouteInformation>?>(null);
       final provider = MockFlowRouteInformationProvider(childValueNotifier);
 
       await tester.pumpWidget(
@@ -113,23 +115,28 @@ void main() {
       childValueNotifier.dispose();
     });
 
-    testWidgets('updateShouldNotify returns true when value changes', (tester) async {
-      final childValueNotifier1 = ValueNotifier<Consumable<RouteInformation>?>(null);
+    testWidgets('updateShouldNotify returns true when value changes',
+        (tester) async {
+      final childValueNotifier1 =
+          ValueNotifier<Consumable<RouteInformation>?>(null);
       final provider1 = MockFlowRouteInformationProvider(childValueNotifier1);
-      final childValueNotifier2 = ValueNotifier<Consumable<RouteInformation>?>(null);
+      final childValueNotifier2 =
+          ValueNotifier<Consumable<RouteInformation>?>(null);
       final provider2 = MockFlowRouteInformationProvider(childValueNotifier2);
       var rebuildCount = 0;
+
+      final builder = Builder(
+        builder: (context) {
+          FlowRouteInformationProvider.of(context);
+          rebuildCount++;
+          return const SizedBox();
+        },
+      );
 
       await tester.pumpWidget(
         FlowRouteInformationProviderScope(
           provider1,
-          child: Builder(
-            builder: (context) {
-              FlowRouteInformationProvider.of(context);
-              rebuildCount++;
-              return const SizedBox();
-            },
-          ),
+          child: builder,
         ),
       );
 
@@ -138,13 +145,7 @@ void main() {
       await tester.pumpWidget(
         FlowRouteInformationProviderScope(
           provider2,
-          child: Builder(
-            builder: (context) {
-              FlowRouteInformationProvider.of(context);
-              rebuildCount++;
-              return const SizedBox();
-            },
-          ),
+          child: builder,
         ),
       );
 
@@ -154,21 +155,25 @@ void main() {
       childValueNotifier2.dispose();
     });
 
-    testWidgets('updateShouldNotify returns false when same value', (tester) async {
-      final childValueNotifier = ValueNotifier<Consumable<RouteInformation>?>(null);
+    testWidgets('updateShouldNotify returns false when same value',
+        (tester) async {
+      final childValueNotifier =
+          ValueNotifier<Consumable<RouteInformation>?>(null);
       final provider = MockFlowRouteInformationProvider(childValueNotifier);
       var rebuildCount = 0;
+
+      final builder = Builder(
+        builder: (context) {
+          FlowRouteInformationProvider.of(context);
+          rebuildCount++;
+          return const SizedBox();
+        },
+      );
 
       await tester.pumpWidget(
         FlowRouteInformationProviderScope(
           provider,
-          child: Builder(
-            builder: (context) {
-              FlowRouteInformationProvider.of(context);
-              rebuildCount++;
-              return const SizedBox();
-            },
-          ),
+          child: builder,
         ),
       );
 
@@ -177,13 +182,7 @@ void main() {
       await tester.pumpWidget(
         FlowRouteInformationProviderScope(
           provider,
-          child: Builder(
-            builder: (context) {
-              FlowRouteInformationProvider.of(context);
-              rebuildCount++;
-              return const SizedBox();
-            },
-          ),
+          child: builder,
         ),
       );
 

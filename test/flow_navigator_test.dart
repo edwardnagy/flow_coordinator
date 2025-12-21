@@ -1,11 +1,12 @@
-import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flow_coordinator/src/flow_navigator.dart';
 import 'package:flow_coordinator/src/flow_router_delegate.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('FlowNavigator.of', () {
-    testWidgets('finds FlowNavigator in widget tree without listening', (tester) async {
+    testWidgets('finds FlowNavigator in widget tree without listening',
+        (tester) async {
       final delegate = FlowRouterDelegate(
         initialPages: [const MaterialPage(child: SizedBox())],
         contextDescriptionProvider: () => 'Test',
@@ -28,7 +29,8 @@ void main() {
       delegate.dispose();
     });
 
-    testWidgets('finds FlowNavigator in widget tree with listening', (tester) async {
+    testWidgets('finds FlowNavigator in widget tree with listening',
+        (tester) async {
       final delegate = FlowRouterDelegate(
         initialPages: [const MaterialPage(child: SizedBox())],
         contextDescriptionProvider: () => 'Test',
@@ -51,7 +53,8 @@ void main() {
       delegate.dispose();
     });
 
-    testWidgets('throws FlutterError when no FlowNavigatorScope found', (tester) async {
+    testWidgets('throws FlutterError when no FlowNavigatorScope found',
+        (tester) async {
       await tester.pumpWidget(
         Builder(
           builder: (context) {
@@ -87,7 +90,8 @@ void main() {
   });
 
   group('FlowNavigator.maybeOf', () {
-    testWidgets('returns FlowNavigator when found without listening', (tester) async {
+    testWidgets('returns FlowNavigator when found without listening',
+        (tester) async {
       final delegate = FlowRouterDelegate(
         initialPages: [const MaterialPage(child: SizedBox())],
         contextDescriptionProvider: () => 'Test',
@@ -110,7 +114,8 @@ void main() {
       delegate.dispose();
     });
 
-    testWidgets('returns FlowNavigator when found with listening', (tester) async {
+    testWidgets('returns FlowNavigator when found with listening',
+        (tester) async {
       final delegate = FlowRouterDelegate(
         initialPages: [const MaterialPage(child: SizedBox())],
         contextDescriptionProvider: () => 'Test',
@@ -133,7 +138,8 @@ void main() {
       delegate.dispose();
     });
 
-    testWidgets('returns null when no FlowNavigatorScope found', (tester) async {
+    testWidgets('returns null when no FlowNavigatorScope found',
+        (tester) async {
       FlowNavigator? found;
 
       await tester.pumpWidget(
@@ -172,7 +178,8 @@ void main() {
       delegate.dispose();
     });
 
-    testWidgets('updateShouldNotify returns true when flowNavigator changes', (tester) async {
+    testWidgets('updateShouldNotify returns true when flowNavigator changes',
+        (tester) async {
       final delegate1 = FlowRouterDelegate(
         initialPages: [const MaterialPage(child: SizedBox())],
         contextDescriptionProvider: () => 'Test1',
@@ -183,16 +190,18 @@ void main() {
       );
       var rebuildCount = 0;
 
+      var builder = Builder(
+        builder: (context) {
+          FlowNavigator.of(context, listen: true);
+          rebuildCount++;
+          return const SizedBox();
+        },
+      );
+
       await tester.pumpWidget(
         FlowNavigatorScope(
           flowNavigator: delegate1,
-          child: Builder(
-            builder: (context) {
-              FlowNavigator.maybeOf(context);
-              rebuildCount++;
-              return const SizedBox();
-            },
-          ),
+          child: builder,
         ),
       );
 
@@ -201,13 +210,7 @@ void main() {
       await tester.pumpWidget(
         FlowNavigatorScope(
           flowNavigator: delegate2,
-          child: Builder(
-            builder: (context) {
-              FlowNavigator.maybeOf(context);
-              rebuildCount++;
-              return const SizedBox();
-            },
-          ),
+          child: builder,
         ),
       );
 
@@ -217,23 +220,26 @@ void main() {
       delegate2.dispose();
     });
 
-    testWidgets('updateShouldNotify returns false when same flowNavigator', (tester) async {
+    testWidgets('updateShouldNotify returns false when same flowNavigator',
+        (tester) async {
       final delegate = FlowRouterDelegate(
         initialPages: [const MaterialPage(child: SizedBox())],
         contextDescriptionProvider: () => 'Test',
       );
       var rebuildCount = 0;
 
+      var builder = Builder(
+        builder: (context) {
+          FlowNavigator.maybeOf(context);
+          rebuildCount++;
+          return const SizedBox();
+        },
+      );
+
       await tester.pumpWidget(
         FlowNavigatorScope(
           flowNavigator: delegate,
-          child: Builder(
-            builder: (context) {
-              FlowNavigator.maybeOf(context);
-              rebuildCount++;
-              return const SizedBox();
-            },
-          ),
+          child: builder,
         ),
       );
 
@@ -242,13 +248,7 @@ void main() {
       await tester.pumpWidget(
         FlowNavigatorScope(
           flowNavigator: delegate,
-          child: Builder(
-            builder: (context) {
-              FlowNavigator.maybeOf(context);
-              rebuildCount++;
-              return const SizedBox();
-            },
-          ),
+          child: builder,
         ),
       );
 

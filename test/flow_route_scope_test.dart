@@ -1,11 +1,15 @@
-import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:flow_coordinator/src/flow_coordinator_router.dart';
 import 'package:flow_coordinator/src/flow_route_scope.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import 'flow_coordinator_mixin_test.dart';
 
 void main() {
   group('RouteInformation.matchesUrlPattern', () {
     test('matches when path segments are prefix', () {
-      final route = RouteInformation(uri: Uri(pathSegments: ['home', 'books', '123']));
+      final route =
+          RouteInformation(uri: Uri(pathSegments: ['home', 'books', '123']));
       final pattern = RouteInformation(uri: Uri(pathSegments: ['home']));
 
       expect(route.matchesUrlPattern(pattern), isTrue);
@@ -13,28 +17,34 @@ void main() {
 
     test('matches when path segments match exactly', () {
       final route = RouteInformation(uri: Uri(pathSegments: ['home', 'books']));
-      final pattern = RouteInformation(uri: Uri(pathSegments: ['home', 'books']));
+      final pattern =
+          RouteInformation(uri: Uri(pathSegments: ['home', 'books']));
 
       expect(route.matchesUrlPattern(pattern), isTrue);
     });
 
     test('does not match when pattern has more segments', () {
       final route = RouteInformation(uri: Uri(pathSegments: ['home']));
-      final pattern = RouteInformation(uri: Uri(pathSegments: ['home', 'books']));
+      final pattern =
+          RouteInformation(uri: Uri(pathSegments: ['home', 'books']));
 
       expect(route.matchesUrlPattern(pattern), isFalse);
     });
 
     test('does not match when path segments differ', () {
-      final route = RouteInformation(uri: Uri(pathSegments: ['home', 'settings']));
-      final pattern = RouteInformation(uri: Uri(pathSegments: ['home', 'books']));
+      final route =
+          RouteInformation(uri: Uri(pathSegments: ['home', 'settings']));
+      final pattern =
+          RouteInformation(uri: Uri(pathSegments: ['home', 'books']));
 
       expect(route.matchesUrlPattern(pattern), isFalse);
     });
 
     test('matches when query parameters present in pattern exist in route', () {
       final route = RouteInformation(
-        uri: Uri(queryParameters: {'tab': 'books', 'filter': 'all', 'page': '1'}),
+        uri: Uri(
+          queryParameters: {'tab': 'books', 'filter': 'all', 'page': '1'},
+        ),
       );
       final pattern = RouteInformation(
         uri: Uri(queryParameters: {'tab': 'books'}),
@@ -156,45 +166,50 @@ void main() {
 
   group('FlowRouteScope', () {
     testWidgets('builds with required parameters', (tester) async {
+      final router = FlowCoordinatorRouter(
+        homeBuilder: (context) => const TestFlowCoordinator(
+          initialPagesOverride: [
+            MaterialPage(
+              child: FlowRouteScope(child: SizedBox()),
+            ),
+          ],
+        ),
+      );
+
       await tester.pumpWidget(
-        const Directionality(
-          textDirection: TextDirection.ltr,
-          child: FlowRouteScope(
-            child: SizedBox(),
-          ),
+        MaterialApp.router(
+          routerConfig: router,
         ),
       );
 
       expect(find.byType(FlowRouteScope), findsOneWidget);
+
+      router.dispose();
     });
 
     testWidgets('builds with all parameters', (tester) async {
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: FlowRouteScope(
-            routeInformation: RouteInformation(uri: Uri.parse('/test')),
-            shouldForwardChildUpdates: (routeInfo) => true,
-            isActive: false,
-            child: const SizedBox(),
-          ),
+      final router = FlowCoordinatorRouter(
+        homeBuilder: (context) => TestFlowCoordinator(
+          initialPagesOverride: [
+            MaterialPage(
+              child: FlowRouteScope(
+                routeInformation: RouteInformation(uri: Uri.parse('/test')),
+                shouldForwardChildUpdates: (routeInfo) => true,
+                isActive: false,
+                child: const SizedBox(),
+              ),
+            ),
+          ],
         ),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: router),
       );
 
       expect(find.byType(FlowRouteScope), findsOneWidget);
-    });
 
-    testWidgets('defaults isActive to true', (tester) async {
-      await tester.pumpWidget(
-        const Directionality(
-          textDirection: TextDirection.ltr,
-          child: FlowRouteScope(
-            child: Text('test'),
-          ),
-        ),
-      );
-
-      expect(find.text('test'), findsOneWidget);
+      router.dispose();
     });
   });
 }

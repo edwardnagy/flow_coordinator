@@ -1,8 +1,9 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flow_coordinator/src/flow_coordinator_mixin.dart';
 import 'package:flow_coordinator/src/flow_coordinator_router.dart';
+import 'package:flow_coordinator/src/route_information_combiner.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 // Test flow coordinator implementation
 class TestFlowCoordinator extends StatefulWidget {
@@ -15,13 +16,14 @@ class TestFlowCoordinator extends StatefulWidget {
 
   final List<Page>? initialPagesOverride;
   final RouteInformation? initialRouteInformationOverride;
-  final Future<RouteInformation?> Function(RouteInformation)? onNewRouteInformationCallback;
+  final Future<RouteInformation?> Function(RouteInformation)?
+      onNewRouteInformationCallback;
 
   @override
-  State<TestFlowCoordinator> createState() => _TestFlowCoordinatorState();
+  State<TestFlowCoordinator> createState() => TestFlowCoordinatorState();
 }
 
-class _TestFlowCoordinatorState extends State<TestFlowCoordinator>
+class TestFlowCoordinatorState extends State<TestFlowCoordinator>
     with FlowCoordinatorMixin {
   @override
   List<Page> get initialPages =>
@@ -47,8 +49,8 @@ void main() {
   group('FlowCoordinatorMixin', () {
     testWidgets('initializes with initial pages', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: FlowCoordinatorRouter(
+        MaterialApp.router(
+          routerConfig: FlowCoordinatorRouter(
             homeBuilder: (context) => const TestFlowCoordinator(),
           ),
         ),
@@ -58,15 +60,16 @@ void main() {
     });
 
     testWidgets('provides flowNavigator', (tester) async {
-      _TestFlowCoordinatorState? state;
+      TestFlowCoordinatorState? state;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: FlowCoordinatorRouter(
+        MaterialApp.router(
+          routerConfig: FlowCoordinatorRouter(
             homeBuilder: (context) {
               return Builder(
                 builder: (context) {
-                  state = context.findAncestorStateOfType<_TestFlowCoordinatorState>();
+                  state = context
+                      .findAncestorStateOfType<TestFlowCoordinatorState>();
                   return const TestFlowCoordinator();
                 },
               );
@@ -77,7 +80,7 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      state = tester.state<_TestFlowCoordinatorState>(
+      state = tester.state<TestFlowCoordinatorState>(
         find.byType(TestFlowCoordinator),
       );
 
@@ -86,11 +89,11 @@ void main() {
     });
 
     testWidgets('flowNavigator can push pages', (tester) async {
-      _TestFlowCoordinatorState? state;
+      TestFlowCoordinatorState? state;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: FlowCoordinatorRouter(
+        MaterialApp.router(
+          routerConfig: FlowCoordinatorRouter(
             homeBuilder: (context) => const TestFlowCoordinator(),
           ),
         ),
@@ -98,11 +101,11 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      state = tester.state<_TestFlowCoordinatorState>(
+      state = tester.state<TestFlowCoordinatorState>(
         find.byType(TestFlowCoordinator),
       );
 
-      state!.flowNavigator.push(
+      state.flowNavigator.push(
         const MaterialPage(key: ValueKey('new-page'), child: Text('New Page')),
       );
 
@@ -111,12 +114,13 @@ void main() {
       expect(find.text('New Page'), findsOneWidget);
     });
 
-    testWidgets('setNewRouteInformation triggers onNewRouteInformation', (tester) async {
+    testWidgets('setNewRouteInformation triggers onNewRouteInformation',
+        (tester) async {
       RouteInformation? receivedRouteInfo;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: FlowCoordinatorRouter(
+        MaterialApp.router(
+          routerConfig: FlowCoordinatorRouter(
             homeBuilder: (context) => TestFlowCoordinator(
               onNewRouteInformationCallback: (routeInfo) {
                 receivedRouteInfo = routeInfo;
@@ -129,7 +133,7 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      final state = tester.state<_TestFlowCoordinatorState>(
+      final state = tester.state<TestFlowCoordinatorState>(
         find.byType(TestFlowCoordinator),
       );
 
@@ -146,8 +150,8 @@ void main() {
       final initialRouteInfo = RouteInformation(uri: Uri.parse('/initial'));
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: FlowCoordinatorRouter(
+        MaterialApp.router(
+          routerConfig: FlowCoordinatorRouter(
             homeBuilder: (context) => TestFlowCoordinator(
               initialRouteInformationOverride: initialRouteInfo,
               onNewRouteInformationCallback: (routeInfo) {
@@ -167,8 +171,8 @@ void main() {
 
     testWidgets('builds router widget', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: FlowCoordinatorRouter(
+        MaterialApp.router(
+          routerConfig: FlowCoordinatorRouter(
             homeBuilder: (context) => const TestFlowCoordinator(),
           ),
         ),
@@ -181,8 +185,8 @@ void main() {
 
     testWidgets('disposes cleanly', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: FlowCoordinatorRouter(
+        MaterialApp.router(
+          routerConfig: FlowCoordinatorRouter(
             homeBuilder: (context) => const TestFlowCoordinator(),
           ),
         ),
@@ -196,28 +200,29 @@ void main() {
       // Should not throw
     });
 
-    testWidgets('default initialPages is empty', (tester) async {
+    testWidgets('throws assertion error when initialPages is empty',
+        (tester) async {
       // Create a flow coordinator without overriding initialPages
-      final widget = TestFlowCoordinator(initialPagesOverride: []);
-      
+      const widget = TestFlowCoordinator(initialPagesOverride: []);
+
       await tester.pumpWidget(
-        MaterialApp(
-          home: FlowCoordinatorRouter(
+        MaterialApp.router(
+          routerConfig: FlowCoordinatorRouter(
             homeBuilder: (context) => widget,
           ),
         ),
       );
 
-      // Widget should be created
-      expect(widget, isNotNull);
+      // Should throw assertion error
+      expect(tester.takeException(), isA<AssertionError>());
     });
 
     testWidgets('default onNewRouteInformation returns null', (tester) async {
       RouteInformation? result;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: FlowCoordinatorRouter(
+        MaterialApp.router(
+          routerConfig: FlowCoordinatorRouter(
             homeBuilder: (context) => const TestFlowCoordinator(),
           ),
         ),
@@ -225,7 +230,7 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      final state = tester.state<_TestFlowCoordinatorState>(
+      final state = tester.state<TestFlowCoordinatorState>(
         find.byType(TestFlowCoordinator),
       );
 
@@ -236,10 +241,12 @@ void main() {
       expect(result, isNull);
     });
 
-    testWidgets('default routeInformationCombiner is DefaultRouteInformationCombiner', (tester) async {
+    testWidgets(
+        'default routeInformationCombiner is DefaultRouteInformationCombiner',
+        (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: FlowCoordinatorRouter(
+        MaterialApp.router(
+          routerConfig: FlowCoordinatorRouter(
             homeBuilder: (context) => const TestFlowCoordinator(),
           ),
         ),
@@ -247,17 +254,20 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      final state = tester.state<_TestFlowCoordinatorState>(
+      final state = tester.state<TestFlowCoordinatorState>(
         find.byType(TestFlowCoordinator),
       );
 
-      expect(state.routeInformationCombiner, isA<DefaultRouteInformationCombiner>());
+      expect(
+        state.routeInformationCombiner,
+        isA<DefaultRouteInformationCombiner>(),
+      );
     });
 
     testWidgets('default initialRouteInformation is null', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: FlowCoordinatorRouter(
+        MaterialApp.router(
+          routerConfig: FlowCoordinatorRouter(
             homeBuilder: (context) => const TestFlowCoordinator(),
           ),
         ),
@@ -265,17 +275,18 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      final state = tester.state<_TestFlowCoordinatorState>(
+      final state = tester.state<TestFlowCoordinatorState>(
         find.byType(TestFlowCoordinator),
       );
 
       expect(state.initialRouteInformation, isNull);
     });
 
-    testWidgets('flowNavigator.canPop checks internal and parent', (tester) async {
+    testWidgets('flowNavigator.canPop checks internal and parent',
+        (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: FlowCoordinatorRouter(
+        MaterialApp.router(
+          routerConfig: FlowCoordinatorRouter(
             homeBuilder: (context) => const TestFlowCoordinator(),
           ),
         ),
@@ -283,7 +294,7 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      final state = tester.state<_TestFlowCoordinatorState>(
+      final state = tester.state<TestFlowCoordinatorState>(
         find.byType(TestFlowCoordinator),
       );
 
@@ -303,11 +314,11 @@ void main() {
 
     testWidgets('nested flow coordinators work', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: FlowCoordinatorRouter(
-            homeBuilder: (context) => TestFlowCoordinator(
+        MaterialApp.router(
+          routerConfig: FlowCoordinatorRouter(
+            homeBuilder: (context) => const TestFlowCoordinator(
               initialPagesOverride: [
-                const MaterialPage(
+                MaterialPage(
                   key: ValueKey('parent'),
                   child: TestFlowCoordinator(),
                 ),

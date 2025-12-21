@@ -1,7 +1,7 @@
-import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flow_coordinator/src/flow_back_button_dispatcher_builder.dart';
 import 'package:flow_coordinator/src/flow_route_status_scope.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('FlowBackButtonDispatcherBuilder', () {
@@ -25,7 +25,8 @@ void main() {
       expect(receivedDispatcher, isNull);
     });
 
-    testWidgets('provides null dispatcher when no Router ancestor', (tester) async {
+    testWidgets('provides null dispatcher when no Router ancestor',
+        (tester) async {
       ChildBackButtonDispatcher? receivedDispatcher;
 
       await tester.pumpWidget(
@@ -43,7 +44,8 @@ void main() {
       expect(receivedDispatcher, isNull);
     });
 
-    testWidgets('provides null dispatcher when route is not active', (tester) async {
+    testWidgets('provides null dispatcher when route is not active',
+        (tester) async {
       ChildBackButtonDispatcher? receivedDispatcher;
 
       await tester.pumpWidget(
@@ -65,7 +67,8 @@ void main() {
       expect(receivedDispatcher, isNull);
     });
 
-    testWidgets('provides null dispatcher when route is not top route', (tester) async {
+    testWidgets('provides null dispatcher when route is not top route',
+        (tester) async {
       ChildBackButtonDispatcher? receivedDispatcher;
 
       await tester.pumpWidget(
@@ -87,7 +90,9 @@ void main() {
       expect(receivedDispatcher, isNull);
     });
 
-    testWidgets('provides null dispatcher when both active and top route are false', (tester) async {
+    testWidgets(
+        'provides null dispatcher when both active and top route are false',
+        (tester) async {
       ChildBackButtonDispatcher? receivedDispatcher;
 
       await tester.pumpWidget(
@@ -112,6 +117,11 @@ void main() {
     testWidgets('updates when dependencies change', (tester) async {
       var buildCount = 0;
 
+      Widget builder(context, backButtonDispatcher) {
+        buildCount++;
+        return const SizedBox();
+      }
+
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -119,10 +129,7 @@ void main() {
             isActive: true,
             isTopRoute: true,
             child: FlowBackButtonDispatcherBuilder(
-              builder: (context, backButtonDispatcher) {
-                buildCount++;
-                return const SizedBox();
-              },
+              builder: builder,
             ),
           ),
         ),
@@ -138,10 +145,7 @@ void main() {
             isActive: false,
             isTopRoute: true,
             child: FlowBackButtonDispatcherBuilder(
-              builder: (context, backButtonDispatcher) {
-                buildCount++;
-                return const SizedBox();
-              },
+              builder: builder,
             ),
           ),
         ),
@@ -171,14 +175,16 @@ void main() {
     testWidgets('handles multiple rebuilds', (tester) async {
       var buildCount = 0;
 
+      Widget builder(context, backButtonDispatcher) {
+        buildCount++;
+        return const SizedBox();
+      }
+
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: FlowBackButtonDispatcherBuilder(
-            builder: (context, backButtonDispatcher) {
-              buildCount++;
-              return const SizedBox();
-            },
+            builder: builder,
           ),
         ),
       );
@@ -190,10 +196,7 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: FlowBackButtonDispatcherBuilder(
-            builder: (context, backButtonDispatcher) {
-              buildCount++;
-              return const SizedBox();
-            },
+            builder: builder,
           ),
         ),
       );

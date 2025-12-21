@@ -1,7 +1,8 @@
-import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flow_coordinator/src/flow_coordinator_router.dart';
 import 'package:flow_coordinator/src/identity_route_information_parser.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('FlowCoordinatorRouter', () {
@@ -109,7 +110,8 @@ void main() {
       router.dispose();
     });
 
-    test('defaults routeInformationParser to IdentityRouteInformationParser', () {
+    test('defaults routeInformationParser to IdentityRouteInformationParser',
+        () {
       final router = FlowCoordinatorRouter(
         homeBuilder: (context) => const SizedBox(),
       );
@@ -148,7 +150,8 @@ void main() {
       router.dispose();
     });
 
-    testWidgets('homeBuilder is called to build initial widget', (tester) async {
+    testWidgets('homeBuilder is called to build initial widget',
+        (tester) async {
       var homeBuilderCalled = false;
       final router = FlowCoordinatorRouter(
         homeBuilder: (context) {
@@ -169,7 +172,8 @@ void main() {
       router.dispose();
     });
 
-    testWidgets('route information reporting works when enabled', (tester) async {
+    testWidgets('route information reporting works when enabled',
+        (tester) async {
       final router = FlowCoordinatorRouter(
         routeInformationReportingEnabled: true,
         homeBuilder: (context) => const Scaffold(body: Text('Home')),

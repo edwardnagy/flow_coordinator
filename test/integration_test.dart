@@ -1,10 +1,9 @@
-import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flow_coordinator/src/flow_coordinator.dart';
 import 'package:flow_coordinator/src/flow_coordinator_mixin.dart';
 import 'package:flow_coordinator/src/flow_coordinator_router.dart';
-import 'package:flow_coordinator/src/flow_navigator.dart';
 import 'package:flow_coordinator/src/flow_route_scope.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 // Integration test that exercises the full flow coordinator stack
 class RootFlowCoordinator extends StatefulWidget {
@@ -29,7 +28,7 @@ class _RootFlowCoordinatorState extends State<RootFlowCoordinator>
     RouteInformation routeInformation,
   ) async {
     final path = routeInformation.uri.pathSegments.firstOrNull;
-    
+
     if (path == 'details') {
       flowNavigator.push(
         const MaterialPage(
@@ -38,7 +37,7 @@ class _RootFlowCoordinatorState extends State<RootFlowCoordinator>
         ),
       );
     }
-    
+
     return null;
   }
 }
@@ -53,7 +52,8 @@ class HomeScreen extends StatelessWidget {
       body: Center(
         child: ElevatedButton(
           onPressed: () {
-            final coordinator = FlowCoordinator.of<_RootFlowCoordinatorState>(context);
+            final coordinator =
+                FlowCoordinator.of<_RootFlowCoordinatorState>(context);
             coordinator.flowNavigator.push(
               const MaterialPage(
                 key: ValueKey('details'),
@@ -181,7 +181,8 @@ void main() {
       router.dispose();
     });
 
-    testWidgets('FlowNavigator.maybeOf returns null without coordinator', (tester) async {
+    testWidgets('FlowNavigator.maybeOf returns null without coordinator',
+        (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Builder(
@@ -215,7 +216,8 @@ void main() {
       expect(find.text('Details'), findsOneWidget);
 
       // Simulate system back button
-      final NavigatorState navigatorState = tester.state(find.byType(Navigator).first);
+      final navigatorState =
+          tester.state(find.byType(Navigator).first) as NavigatorState;
       await navigatorState.maybePop();
       await tester.pumpAndSettle();
 

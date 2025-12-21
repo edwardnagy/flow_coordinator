@@ -1,10 +1,9 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:flow_coordinator/src/flow_route_status_scope.dart';
+import 'package:flow_coordinator/src/route_information_combiner.dart';
 import 'package:flow_coordinator/src/route_information_reporter.dart';
 import 'package:flow_coordinator/src/route_information_reporter_delegate.dart';
-import 'package:flow_coordinator/src/route_information_combiner.dart';
-import 'package:flow_coordinator/src/flow_route_status_scope.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('RouteInformationReporter', () {
@@ -36,7 +35,8 @@ void main() {
       delegate.dispose();
     });
 
-    testWidgets('reports route information when active and top route', (tester) async {
+    testWidgets('reports route information when active and top route',
+        (tester) async {
       final delegate = RootRouteInformationReporterDelegate();
       final routeInfo = RouteInformation(uri: Uri.parse('/test'));
 
@@ -60,7 +60,7 @@ void main() {
         ),
       );
 
-      await tester.pump(); // Process post-frame callback
+      tester.binding.scheduleWarmUpFrame();
 
       expect(delegate.reportedRouteInformation, isNotNull);
       expect(delegate.reportedRouteInformation!.uri.path, equals('/test'));
@@ -91,7 +91,7 @@ void main() {
         ),
       );
 
-      await tester.pump();
+      tester.binding.scheduleWarmUpFrame();
 
       expect(delegate.reportedRouteInformation, isNull);
 
@@ -121,14 +121,15 @@ void main() {
         ),
       );
 
-      await tester.pump();
+      tester.binding.scheduleWarmUpFrame();
 
       expect(delegate.reportedRouteInformation, isNull);
 
       delegate.dispose();
     });
 
-    testWidgets('does not report when routeInformation is null', (tester) async {
+    testWidgets('does not report when routeInformation is null',
+        (tester) async {
       final delegate = RootRouteInformationReporterDelegate();
 
       await tester.pumpWidget(
@@ -136,12 +137,12 @@ void main() {
           textDirection: TextDirection.ltr,
           child: RouteInformationReporterScope(
             delegate,
-            child: RouteInformationCombinerScope(
-              const DefaultRouteInformationCombiner(),
+            child: const RouteInformationCombinerScope(
+              DefaultRouteInformationCombiner(),
               child: FlowRouteStatusScope(
                 isActive: true,
                 isTopRoute: true,
-                child: const RouteInformationReporter(
+                child: RouteInformationReporter(
                   routeInformation: null,
                   child: SizedBox(),
                 ),
@@ -151,7 +152,7 @@ void main() {
         ),
       );
 
-      await tester.pump();
+      tester.binding.scheduleWarmUpFrame();
 
       expect(delegate.reportedRouteInformation, isNull);
 
@@ -181,7 +182,7 @@ void main() {
         ),
       );
 
-      await tester.pump();
+      tester.binding.scheduleWarmUpFrame();
 
       expect(delegate.reportedRouteInformation!.uri.path, equals('/first'));
 
@@ -206,7 +207,7 @@ void main() {
         ),
       );
 
-      await tester.pump();
+      tester.binding.scheduleWarmUpFrame();
 
       expect(delegate.reportedRouteInformation!.uri.path, equals('/second'));
 
@@ -236,7 +237,7 @@ void main() {
         ),
       );
 
-      await tester.pump();
+      tester.binding.scheduleWarmUpFrame();
 
       expect(delegate.reportedRouteInformation, isNotNull);
 
@@ -254,7 +255,8 @@ void main() {
                 isActive: false,
                 isTopRoute: true,
                 child: RouteInformationReporter(
-                  routeInformation: RouteInformation(uri: Uri.parse('/changed')),
+                  routeInformation:
+                      RouteInformation(uri: Uri.parse('/changed')),
                   child: const SizedBox(),
                 ),
               ),
@@ -263,7 +265,7 @@ void main() {
         ),
       );
 
-      await tester.pump();
+      tester.binding.scheduleWarmUpFrame();
 
       // Should not have updated because route is inactive
       expect(delegate.reportedRouteInformation, same(firstReported));
@@ -271,7 +273,8 @@ void main() {
       delegate.dispose();
     });
 
-    testWidgets('works without FlowRouteStatusScope (defaults to active)', (tester) async {
+    testWidgets('works without FlowRouteStatusScope (defaults to active)',
+        (tester) async {
       final delegate = RootRouteInformationReporterDelegate();
 
       await tester.pumpWidget(
@@ -290,7 +293,7 @@ void main() {
         ),
       );
 
-      await tester.pump();
+      tester.binding.scheduleWarmUpFrame();
 
       // Without FlowRouteStatusScope, isTopRoute defaults to false,
       // so it should not report
@@ -299,7 +302,8 @@ void main() {
       delegate.dispose();
     });
 
-    testWidgets('creates child delegate with parent and combiner', (tester) async {
+    testWidgets('creates child delegate with parent and combiner',
+        (tester) async {
       final delegate = RootRouteInformationReporterDelegate();
 
       await tester.pumpWidget(
@@ -315,7 +319,8 @@ void main() {
                 child: RouteInformationReporter(
                   routeInformation: RouteInformation(uri: Uri.parse('/parent')),
                   child: RouteInformationReporter(
-                    routeInformation: RouteInformation(uri: Uri.parse('/child')),
+                    routeInformation:
+                        RouteInformation(uri: Uri.parse('/child')),
                     child: const SizedBox(),
                   ),
                 ),
@@ -325,7 +330,7 @@ void main() {
         ),
       );
 
-      await tester.pump();
+      tester.binding.scheduleWarmUpFrame();
 
       // Inner reporter should combine routes
       expect(delegate.reportedRouteInformation, isNotNull);
@@ -360,7 +365,7 @@ void main() {
         ),
       );
 
-      await tester.pump();
+      tester.binding.scheduleWarmUpFrame();
 
       expect(delegate.reportedRouteInformation!.state, equals(state));
 

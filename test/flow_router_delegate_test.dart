@@ -1,6 +1,6 @@
-import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flow_coordinator/src/flow_router_delegate.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('FlowRouterDelegate', () {
@@ -26,14 +26,17 @@ void main() {
 
     test('push adds page to stack', () {
       final delegate = FlowRouterDelegate(
-        initialPages: [const MaterialPage(key: ValueKey('page1'), child: SizedBox())],
+        initialPages: [
+          const MaterialPage(key: ValueKey('page1'), child: SizedBox()),
+        ],
         contextDescriptionProvider: () => 'Test',
       );
 
       var notified = false;
       delegate.addListener(() => notified = true);
 
-      delegate.push(const MaterialPage(key: ValueKey('page2'), child: SizedBox()));
+      delegate
+          .push(const MaterialPage(key: ValueKey('page2'), child: SizedBox()));
 
       expect(notified, isTrue);
       delegate.dispose();
@@ -41,11 +44,14 @@ void main() {
 
     test('replaceCurrentPage replaces top page', () {
       final delegate = FlowRouterDelegate(
-        initialPages: [const MaterialPage(key: ValueKey('page1'), child: SizedBox())],
+        initialPages: [
+          const MaterialPage(key: ValueKey('page1'), child: SizedBox()),
+        ],
         contextDescriptionProvider: () => 'Test',
       );
 
-      delegate.push(const MaterialPage(key: ValueKey('page2'), child: SizedBox()));
+      delegate
+          .push(const MaterialPage(key: ValueKey('page2'), child: SizedBox()));
 
       var notified = false;
       delegate.addListener(() => notified = true);
@@ -60,7 +66,9 @@ void main() {
 
     test('setPages replaces entire page stack', () {
       final delegate = FlowRouterDelegate(
-        initialPages: [const MaterialPage(key: ValueKey('page1'), child: SizedBox())],
+        initialPages: [
+          const MaterialPage(key: ValueKey('page1'), child: SizedBox()),
+        ],
         contextDescriptionProvider: () => 'Test',
       );
 
@@ -133,7 +141,8 @@ void main() {
     testWidgets('build asserts pages are not empty', (tester) async {
       final delegate = FlowRouterDelegate(
         initialPages: [const MaterialPage(child: SizedBox())],
-        contextDescriptionProvider: () => 'The flow coordinator being built was: Test',
+        contextDescriptionProvider: () =>
+            'The flow coordinator being built was: Test',
       );
 
       // Set empty pages list
@@ -200,7 +209,8 @@ void main() {
       delegate.dispose();
     });
 
-    testWidgets('maybePopInternally returns false when cannot pop', (tester) async {
+    testWidgets('maybePopInternally returns false when cannot pop',
+        (tester) async {
       final delegate = FlowRouterDelegate(
         initialPages: [
           const MaterialPage(key: ValueKey('page1'), child: SizedBox()),
@@ -269,13 +279,18 @@ void main() {
       var notificationCount = 0;
       delegate.addListener(() => notificationCount++);
 
-      delegate.push(const MaterialPage(key: ValueKey('page2'), child: SizedBox()));
+      delegate
+          .push(const MaterialPage(key: ValueKey('page2'), child: SizedBox()));
       expect(notificationCount, 1);
 
-      delegate.setPages([const MaterialPage(key: ValueKey('page3'), child: SizedBox())]);
+      delegate.setPages(
+        [const MaterialPage(key: ValueKey('page3'), child: SizedBox())],
+      );
       expect(notificationCount, 2);
 
-      delegate.replaceCurrentPage(const MaterialPage(key: ValueKey('page4'), child: SizedBox()));
+      delegate.replaceCurrentPage(
+        const MaterialPage(key: ValueKey('page4'), child: SizedBox()),
+      );
       expect(notificationCount, 3);
 
       delegate.dispose();

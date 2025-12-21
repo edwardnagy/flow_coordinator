@@ -1,12 +1,13 @@
-import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flow_coordinator/src/consumable.dart';
-import 'package:flow_coordinator/src/flow_coordinator.dart';
-import 'package:flow_coordinator/src/flow_coordinator_mixin.dart';
 import 'package:flow_coordinator/src/flow_coordinator_router.dart';
+import 'package:flow_coordinator/src/flow_route_scope.dart';
 import 'package:flow_coordinator/src/flow_router_delegate.dart';
-import 'package:flow_coordinator/src/route_information_reporter_delegate.dart';
 import 'package:flow_coordinator/src/route_information_combiner.dart';
+import 'package:flow_coordinator/src/route_information_reporter_delegate.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import 'flow_coordinator_mixin_test.dart';
 
 /// Additional tests for edge cases and scenarios not covered by main test files
 void main() {
@@ -39,7 +40,8 @@ void main() {
         expect(result.uri.queryParameters, isEmpty);
       });
 
-      test('matchesUrlPattern handles query parameters with special characters', () {
+      test('matchesUrlPattern handles query parameters with special characters',
+          () {
         final route = RouteInformation(
           uri: Uri(queryParameters: {'key': 'value with spaces'}),
         );
@@ -150,8 +152,8 @@ void main() {
         final router = FlowCoordinatorRouter(
           initialState: {
             'nested': {
-              'value': [1, 2, 3]
-            }
+              'value': [1, 2, 3],
+            },
           },
           homeBuilder: (context) => const Text('Home'),
         );
@@ -233,9 +235,10 @@ void main() {
         router.dispose();
       });
 
-      testWidgets('handles empty page list gracefully with assertion', (tester) async {
+      testWidgets('handles empty page list gracefully with assertion',
+          (tester) async {
         final router = FlowCoordinatorRouter(
-          homeBuilder: (context) => TestFlowCoordinator(
+          homeBuilder: (context) => const TestFlowCoordinator(
             initialPagesOverride: [],
           ),
         );
@@ -266,7 +269,7 @@ void main() {
           RouteInformation(uri: Uri.parse('/third')),
         );
 
-        await tester.pump();
+        tester.binding.scheduleWarmUpFrame();
 
         // Should report the last one
         expect(delegate.reportedRouteInformation!.uri.path, equals('/third'));
@@ -288,7 +291,7 @@ void main() {
           delegate.childReportsRouteInformation(
             RouteInformation(uri: Uri.parse(input)),
           );
-          await tester.pump();
+          tester.binding.scheduleWarmUpFrame();
           expect(
             delegate.reportedRouteInformation!.uri.toString(),
             equals(expected),
@@ -299,38 +302,4 @@ void main() {
       });
     });
   });
-}
-
-// Helper classes
-class TestFlowCoordinator extends StatefulWidget {
-  const TestFlowCoordinator({
-    super.key,
-    this.initialPagesOverride,
-    this.onNewRouteInformationCallback,
-  });
-
-  final List<Page>? initialPagesOverride;
-  final Future<RouteInformation?> Function(RouteInformation)?
-      onNewRouteInformationCallback;
-
-  @override
-  State<TestFlowCoordinator> createState() => TestFlowCoordinatorState();
-}
-
-class TestFlowCoordinatorState extends State<TestFlowCoordinator>
-    with FlowCoordinatorMixin {
-  @override
-  List<Page> get initialPages =>
-      widget.initialPagesOverride ??
-      [const MaterialPage(key: ValueKey('initial'), child: SizedBox())];
-
-  @override
-  Future<RouteInformation?> onNewRouteInformation(
-    RouteInformation routeInformation,
-  ) {
-    if (widget.onNewRouteInformationCallback != null) {
-      return widget.onNewRouteInformationCallback!(routeInformation);
-    }
-    return super.onNewRouteInformation(routeInformation);
-  }
 }

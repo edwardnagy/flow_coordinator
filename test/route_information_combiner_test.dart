@@ -1,6 +1,6 @@
+import 'package:flow_coordinator/src/route_information_combiner.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flow_coordinator/src/route_information_combiner.dart';
 
 void main() {
   group('DefaultRouteInformationCombiner', () {
@@ -12,7 +12,8 @@ void main() {
 
     test('combines path segments', () {
       final current = RouteInformation(uri: Uri(pathSegments: ['home']));
-      final child = RouteInformation(uri: Uri(pathSegments: ['details', '123']));
+      final child =
+          RouteInformation(uri: Uri(pathSegments: ['details', '123']));
 
       final result = combiner.combine(
         currentRouteInformation: current,
@@ -35,11 +36,14 @@ void main() {
         childRouteInformation: child,
       );
 
-      expect(result.uri.queryParameters, equals({
-        'tab': 'books',
-        'filter': 'recent', // child overrides current
-        'id': '42',
-      }));
+      expect(
+        result.uri.queryParameters,
+        equals({
+          'tab': 'books',
+          'filter': 'recent', // child overrides current
+          'id': '42',
+        }),
+      );
     });
 
     test('uses child fragment when present', () {
@@ -130,10 +134,13 @@ void main() {
       );
 
       expect(result.uri.pathSegments, equals(['home', '123']));
-      expect(result.uri.queryParameters, equals({
-        'tab': 'books',
-        'view': 'details',
-      }));
+      expect(
+        result.uri.queryParameters,
+        equals({
+          'tab': 'books',
+          'view': 'details',
+        }),
+      );
       expect(result.uri.fragment, equals('reviews'));
     });
 
@@ -169,7 +176,8 @@ void main() {
   });
 
   group('RouteInformationCombiner.of', () {
-    testWidgets('finds RouteInformationCombiner in widget tree', (tester) async {
+    testWidgets('finds RouteInformationCombiner in widget tree',
+        (tester) async {
       const combiner = DefaultRouteInformationCombiner();
       RouteInformationCombiner? found;
 
@@ -206,19 +214,20 @@ void main() {
   group('RouteInformationCombinerScope', () {
     testWidgets('updates when value changes', (tester) async {
       const combiner1 = DefaultRouteInformationCombiner();
-      const combiner2 = DefaultRouteInformationCombiner();
       var rebuildCount = 0;
+
+      final builder = Builder(
+        builder: (context) {
+          RouteInformationCombiner.of(context);
+          rebuildCount++;
+          return const SizedBox();
+        },
+      );
 
       await tester.pumpWidget(
         RouteInformationCombinerScope(
           combiner1,
-          child: Builder(
-            builder: (context) {
-              RouteInformationCombiner.of(context);
-              rebuildCount++;
-              return const SizedBox();
-            },
-          ),
+          child: builder,
         ),
       );
 
@@ -228,13 +237,7 @@ void main() {
       await tester.pumpWidget(
         RouteInformationCombinerScope(
           combiner1,
-          child: Builder(
-            builder: (context) {
-              RouteInformationCombiner.of(context);
-              rebuildCount++;
-              return const SizedBox();
-            },
-          ),
+          child: builder,
         ),
       );
 

@@ -1,12 +1,13 @@
-import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flow_coordinator/src/flow_coordinator.dart';
 import 'package:flow_coordinator/src/flow_coordinator_mixin.dart';
+import 'package:flow_coordinator/src/flow_coordinator_router.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 // Test flow coordinator implementation
 class TestFlowCoordinator extends StatefulWidget {
   const TestFlowCoordinator({super.key, this.child});
-  
+
   final Widget? child;
 
   @override
@@ -19,7 +20,7 @@ class TestFlowCoordinatorState extends State<TestFlowCoordinator>
   List<Page> get initialPages => [
         MaterialPage(child: widget.child ?? const SizedBox()),
       ];
-  
+
   @override
   Widget build(BuildContext context) {
     return flowRouter(context);
@@ -28,22 +29,26 @@ class TestFlowCoordinatorState extends State<TestFlowCoordinator>
 
 void main() {
   group('FlowCoordinator.of', () {
-    testWidgets('finds nearest FlowCoordinatorMixin in widget tree', (tester) async {
+    testWidgets('finds nearest FlowCoordinatorMixin in widget tree',
+        (tester) async {
       TestFlowCoordinatorState? foundState;
       BuildContext? innerContext;
 
-      // Build a TestFlowCoordinator with an inner widget that will look up the coordinator
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: TestFlowCoordinator(
-            child: Builder(
-              builder: (context) {
-                innerContext = context;
-                return const SizedBox();
-              },
-            ),
+      // Build a TestFlowCoordinator with an inner widget that will look up the
+      // coordinator
+      var router = FlowCoordinatorRouter(
+        homeBuilder: (context) => TestFlowCoordinator(
+          child: Builder(
+            builder: (context) {
+              innerContext = context;
+              return const SizedBox();
+            },
           ),
+        ),
+      );
+      await tester.pumpWidget(
+        MaterialApp.router(
+          routerConfig: router,
         ),
       );
 
@@ -53,9 +58,12 @@ void main() {
 
       expect(foundState, isNotNull);
       expect(foundState, isA<TestFlowCoordinatorState>());
+
+      router.dispose();
     });
 
-    testWidgets('throws FlutterError when no FlowCoordinatorMixin found', (tester) async {
+    testWidgets('throws FlutterError when no FlowCoordinatorMixin found',
+        (tester) async {
       await tester.pumpWidget(
         Builder(
           builder: (context) {
@@ -69,7 +77,8 @@ void main() {
       );
     });
 
-    testWidgets('throws FlutterError with specific type when not found', (tester) async {
+    testWidgets('throws FlutterError with specific type when not found',
+        (tester) async {
       await tester.pumpWidget(
         Builder(
           builder: (context) {

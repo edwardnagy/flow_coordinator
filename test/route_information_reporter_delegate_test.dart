@@ -1,7 +1,7 @@
+import 'package:flow_coordinator/src/route_information_combiner.dart';
+import 'package:flow_coordinator/src/route_information_reporter_delegate.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flow_coordinator/src/route_information_reporter_delegate.dart';
-import 'package:flow_coordinator/src/route_information_combiner.dart';
 
 void main() {
   group('RouteInformationReporterDelegate.of', () {
@@ -47,7 +47,8 @@ void main() {
       delegate.dispose();
     });
 
-    testWidgets('childReportsRouteInformation schedules reporting', (tester) async {
+    testWidgets('childReportsRouteInformation schedules reporting',
+        (tester) async {
       final delegate = RootRouteInformationReporterDelegate();
       var notified = false;
       delegate.addListener(() => notified = true);
@@ -58,7 +59,7 @@ void main() {
 
       expect(notified, isFalse); // Not notified yet
 
-      await tester.pump(); // Process post-frame callback
+      tester.binding.scheduleWarmUpFrame();
 
       expect(notified, isTrue);
       expect(delegate.reportedRouteInformation, isNotNull);
@@ -74,9 +75,12 @@ void main() {
         RouteInformation(uri: Uri.parse('test')),
       );
 
-      await tester.pump();
+      tester.binding.scheduleWarmUpFrame();
 
-      expect(delegate.reportedRouteInformation!.uri.toString(), equals('/test'));
+      expect(
+        delegate.reportedRouteInformation!.uri.toString(),
+        equals('/test'),
+      );
 
       delegate.dispose();
     });
@@ -88,9 +92,12 @@ void main() {
         RouteInformation(uri: Uri.parse('/test')),
       );
 
-      await tester.pump();
+      tester.binding.scheduleWarmUpFrame();
 
-      expect(delegate.reportedRouteInformation!.uri.toString(), equals('/test'));
+      expect(
+        delegate.reportedRouteInformation!.uri.toString(),
+        equals('/test'),
+      );
 
       delegate.dispose();
     });
@@ -103,7 +110,7 @@ void main() {
         RouteInformation(uri: Uri.parse('/test'), state: state),
       );
 
-      await tester.pump();
+      tester.binding.scheduleWarmUpFrame();
 
       expect(delegate.reportedRouteInformation!.state, same(state));
 
@@ -123,7 +130,7 @@ void main() {
         RouteInformation(uri: Uri.parse('/third')),
       );
 
-      await tester.pump();
+      tester.binding.scheduleWarmUpFrame();
 
       expect(delegate.reportedRouteInformation!.uri.path, equals('/third'));
 
@@ -157,7 +164,7 @@ void main() {
         RouteInformation(uri: Uri.parse('/child')),
       );
 
-      await tester.pump();
+      tester.binding.scheduleWarmUpFrame();
 
       expect(parent.reportedRouteInformation, isNotNull);
       expect(parent.reportedRouteInformation!.uri.path, equals('/child'));
@@ -165,7 +172,8 @@ void main() {
       parent.dispose();
     });
 
-    testWidgets('childReportsRouteInformation combines with current', (tester) async {
+    testWidgets('childReportsRouteInformation combines with current',
+        (tester) async {
       final parent = RootRouteInformationReporterDelegate();
       const combiner = DefaultRouteInformationCombiner();
       final child = ChildRouteInformationReporterDelegate(
@@ -177,15 +185,18 @@ void main() {
         RouteInformation(uri: Uri(pathSegments: ['parent'])),
       );
 
-      await tester.pump();
+      tester.binding.scheduleWarmUpFrame();
 
       child.childReportsRouteInformation(
         RouteInformation(uri: Uri(pathSegments: ['child'])),
       );
 
-      await tester.pump();
+      tester.binding.scheduleWarmUpFrame();
 
-      expect(parent.reportedRouteInformation!.uri.pathSegments, equals(['parent', 'child']));
+      expect(
+        parent.reportedRouteInformation!.uri.pathSegments,
+        equals(['parent', 'child']),
+      );
 
       parent.dispose();
     });
@@ -202,9 +213,12 @@ void main() {
         RouteInformation(uri: Uri(pathSegments: ['child'])),
       );
 
-      await tester.pump();
+      tester.binding.scheduleWarmUpFrame();
 
-      expect(parent.reportedRouteInformation!.uri.pathSegments, equals(['child']));
+      expect(
+        parent.reportedRouteInformation!.uri.pathSegments,
+        equals(['child']),
+      );
 
       parent.dispose();
     });
@@ -230,7 +244,8 @@ void main() {
       delegate.dispose();
     });
 
-    testWidgets('updateShouldNotify returns true when value changes', (tester) async {
+    testWidgets('updateShouldNotify returns true when value changes',
+        (tester) async {
       final delegate1 = RootRouteInformationReporterDelegate();
       final delegate2 = RootRouteInformationReporterDelegate();
       var rebuildCount = 0;
@@ -269,20 +284,23 @@ void main() {
       delegate2.dispose();
     });
 
-    testWidgets('updateShouldNotify returns false when same value', (tester) async {
+    testWidgets('updateShouldNotify returns false when same value',
+        (tester) async {
       final delegate = RootRouteInformationReporterDelegate();
       var rebuildCount = 0;
+
+      final builder = Builder(
+        builder: (context) {
+          RouteInformationReporterDelegate.of(context);
+          rebuildCount++;
+          return const SizedBox();
+        },
+      );
 
       await tester.pumpWidget(
         RouteInformationReporterScope(
           delegate,
-          child: Builder(
-            builder: (context) {
-              RouteInformationReporterDelegate.of(context);
-              rebuildCount++;
-              return const SizedBox();
-            },
-          ),
+          child: builder,
         ),
       );
 
@@ -291,13 +309,7 @@ void main() {
       await tester.pumpWidget(
         RouteInformationReporterScope(
           delegate,
-          child: Builder(
-            builder: (context) {
-              RouteInformationReporterDelegate.of(context);
-              rebuildCount++;
-              return const SizedBox();
-            },
-          ),
+          child: builder,
         ),
       );
 

@@ -41,8 +41,7 @@ class FlowRouteScope extends StatelessWidget {
   /// parent flow.
   ///
   /// If `null`, updates are forwarded only when they match [routeInformation].
-  /// See [_RouteInformationMatcher.matchesUrlPattern] for the matching
-  /// criteria.
+  /// See [RouteInformationMatcher.matchesUrlPattern] for the matching criteria.
   final RouteInformationPredicate? shouldForwardChildUpdates;
 
   /// Whether the subtree contains the currently active flow.
@@ -81,7 +80,8 @@ class FlowRouteScope extends StatelessWidget {
   }
 }
 
-extension _RouteInformationMatcher on RouteInformation {
+@visibleForTesting
+extension RouteInformationMatcher on RouteInformation {
   /// Determines whether this route matches the given [pattern].
   ///
   /// A match occurs if:

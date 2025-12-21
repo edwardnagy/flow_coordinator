@@ -1,9 +1,9 @@
+import 'package:flow_coordinator/src/child_route_information_filter.dart';
+import 'package:flow_coordinator/src/consumable.dart';
+import 'package:flow_coordinator/src/flow_route_information_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flow_coordinator/src/child_route_information_filter.dart';
-import 'package:flow_coordinator/src/flow_route_information_provider.dart';
-import 'package:flow_coordinator/src/consumable.dart';
 
 // Mock implementation for testing
 class MockChildFlowRouteInformationProvider
@@ -59,7 +59,8 @@ void main() {
       parentProvider.dispose();
     });
 
-    testWidgets('forwards all updates when parentValueMatcher is null', (tester) async {
+    testWidgets('forwards all updates when parentValueMatcher is null',
+        (tester) async {
       final parentProvider = MockChildFlowRouteInformationProvider();
       RouteInformation? receivedChildValue;
 
@@ -71,8 +72,14 @@ void main() {
             child: Builder(
               builder: (context) {
                 final provider = FlowRouteInformationProvider.of(context);
-                receivedChildValue = provider.childValueListenable.value?.consumeOrNull();
-                return const SizedBox();
+                return ListenableBuilder(
+                  listenable: provider.childValueListenable,
+                  builder: (context, _) {
+                    receivedChildValue =
+                        provider.childValueListenable.value?.consumeOrNull();
+                    return const SizedBox();
+                  },
+                );
               },
             ),
           ),
@@ -102,8 +109,14 @@ void main() {
             child: Builder(
               builder: (context) {
                 final provider = FlowRouteInformationProvider.of(context);
-                receivedChildValue = provider.childValueListenable.value?.consumeOrNull();
-                return const SizedBox();
+                return ListenableBuilder(
+                  listenable: provider.childValueListenable,
+                  builder: (context, _) {
+                    receivedChildValue =
+                        provider.childValueListenable.value?.consumeOrNull();
+                    return const SizedBox();
+                  },
+                );
               },
             ),
           ),
@@ -121,11 +134,12 @@ void main() {
       parentProvider.dispose();
     });
 
-    testWidgets('blocks updates when parentValueMatcher returns false', (tester) async {
+    testWidgets('blocks updates when parentValueMatcher returns false',
+        (tester) async {
       final parentProvider = MockChildFlowRouteInformationProvider(
         initialConsumedValue: RouteInformation(uri: Uri.parse('/other')),
       );
-      int buildCount = 0;
+      var buildCount = 0;
 
       await tester.pumpWidget(
         FlowRouteInformationProviderScope(
@@ -171,7 +185,8 @@ void main() {
               builder: (context) {
                 final provider = FlowRouteInformationProvider.of(context);
                 if (provider is ChildFlowRouteInformationProvider) {
-                  receivedConsumedValue = provider.consumedValueListenable.value;
+                  receivedConsumedValue =
+                      provider.consumedValueListenable.value;
                 }
                 return const SizedBox();
               },
@@ -200,17 +215,23 @@ void main() {
             child: Builder(
               builder: (context) {
                 final provider = FlowRouteInformationProvider.of(context);
-                if (provider is ChildFlowRouteInformationProvider) {
-                  receivedConsumedValue = provider.consumedValueListenable.value;
-                }
-                return const SizedBox();
+                return ListenableBuilder(
+                  listenable: (provider as ChildFlowRouteInformationProvider)
+                      .consumedValueListenable,
+                  builder: (context, _) {
+                    receivedConsumedValue =
+                        provider.consumedValueListenable.value;
+                    return const SizedBox();
+                  },
+                );
               },
             ),
           ),
         ),
       );
 
-      parentProvider.setConsumedValue(RouteInformation(uri: Uri.parse('/second')));
+      parentProvider
+          .setConsumedValue(RouteInformation(uri: Uri.parse('/second')));
 
       await tester.pump();
 
@@ -223,7 +244,7 @@ void main() {
       final parentProvider = MockChildFlowRouteInformationProvider(
         initialConsumedValue: RouteInformation(uri: Uri.parse('/home')),
       );
-      bool shouldForward = false;
+      var shouldForward = false;
 
       await tester.pumpWidget(
         FlowRouteInformationProviderScope(

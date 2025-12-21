@@ -46,7 +46,7 @@ export 'route_information_combiner.dart' show RouteInformationCombiner;
 /// ## Key Features
 ///
 /// * **Navigation Management**: Use [flowNavigator] to push, pop, and manage
-/// pages within the flow. The initial state of the flow is defined by 
+/// pages within the flow. The initial state of the flow is defined by
 /// overriding [initialPages].
 ///
 /// * **Deep Linking**: Override [onNewRouteInformation] to handle deep links
@@ -64,6 +64,7 @@ export 'route_information_combiner.dart' show RouteInformationCombiner;
 /// programmatically set a new deep link for the flow.
 mixin FlowCoordinatorMixin<T extends StatefulWidget> on State<T> {
   FlowRouteInformationProvider? _parentRouteInformationProvider;
+  bool _hasConsumedCustomRouteInformation = false;
 
   late final _routerDelegate = FlowRouterDelegate(
     initialPages: initialPages,
@@ -123,6 +124,12 @@ mixin FlowCoordinatorMixin<T extends StatefulWidget> on State<T> {
             Consumable(childRouteInformation);
       }
     });
+
+    late final isCustomRouteInformation =
+        routeInformation.uri != Uri.parse(Navigator.defaultRouteName) ||
+            routeInformation.state != null;
+    _hasConsumedCustomRouteInformation =
+        _hasConsumedCustomRouteInformation || isCustomRouteInformation;
   }
 
   void _onValueReceivedFromParent() {
@@ -161,10 +168,10 @@ mixin FlowCoordinatorMixin<T extends StatefulWidget> on State<T> {
           .addListener(_onValueReceivedFromParent);
     }
 
-    // Set the initial route information if other route information was not
-    // provided by the parent.
+    // Set the initial route information if other non-default route information
+    // has not been consumed yet from the parent.
     final initialRouteInformation = this.initialRouteInformation;
-    if (_routeInformationProvider.consumedValueListenable.value == null &&
+    if (!_hasConsumedCustomRouteInformation &&
         initialRouteInformation != null) {
       setNewRouteInformation(initialRouteInformation);
     }
