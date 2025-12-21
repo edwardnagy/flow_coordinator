@@ -40,6 +40,8 @@ class _FlowBackButtonDispatcherBuilderState
           ?.backButtonDispatcher
           ?.createChildBackButtonDispatcher();
       _backButtonDispatcher?.takePriority();
+    } else {
+      _backButtonDispatcher = null;
     }
   }
 

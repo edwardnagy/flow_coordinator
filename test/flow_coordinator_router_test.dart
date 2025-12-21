@@ -5,6 +5,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'flow_coordinator_mixin_test.dart';
+
 void main() {
   group('FlowCoordinatorRouter', () {
     test('creates with required homeBuilder', () {
@@ -358,7 +360,7 @@ void main() {
     testWidgets('uses platform default route when available', (tester) async {
       // This test covers line 64: platformUri handling
       // The platform default route name is checked in the constructor
-      
+
       final router = FlowCoordinatorRouter(
         homeBuilder: (context) => const Text('Home'),
       );
@@ -377,22 +379,28 @@ void main() {
       // This test covers lines 108-109: notifyListeners when route changes
       // The notifyListeners is triggered by _onRouteInformationReported callback
       // which is called when route information is reported from within the widget tree
-      
+
       final router = FlowCoordinatorRouter(
-        routeInformationReportingEnabled: true,  // Must enable reporting
+        routeInformationReportingEnabled: true, // Must enable reporting
         homeBuilder: (context) {
           // Build a simple widget tree with RouteInformationReporter
-          return RouteInformationReporter(
-            routeInformation: RouteInformation(uri: Uri.parse('/home')),
-            child: const Text('Home'),
+          return TestFlowCoordinator(
+            initialPagesOverride: [
+              MaterialPage(
+                child: RouteInformationReporter(
+                  routeInformation: RouteInformation(uri: Uri.parse('/home')),
+                  child: const SizedBox(),
+                ),
+              ),
+            ],
           );
         },
       );
 
       var notificationCount = 0;
       final initialCount = notificationCount;
-      
-      router.addListener(() {
+
+      router.routerDelegate.addListener(() {
         notificationCount++;
       });
 
@@ -400,7 +408,7 @@ void main() {
         MaterialApp.router(routerConfig: router),
       );
 
-      await tester.pumpAndSettle();
+      tester.binding.scheduleWarmUpFrame();
 
       // The listener should be notified when route information is reported
       // Note: Depending on the internal implementation, notifications may occur
@@ -412,7 +420,7 @@ void main() {
 
     testWidgets('popRoute returns false', (tester) async {
       // This test covers lines 120-121: popRoute implementation
-      
+
       final router = FlowCoordinatorRouter(
         homeBuilder: (context) => const Text('Home'),
       );
@@ -424,7 +432,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // popRoute should return false (handled by child coordinators)
-      final result = await router.popRoute();
+      final result = await router.routerDelegate.popRoute();
       expect(result, isFalse);
 
       router.dispose();

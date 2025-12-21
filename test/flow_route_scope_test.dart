@@ -1,5 +1,6 @@
 import 'package:flow_coordinator/src/flow_coordinator_router.dart';
 import 'package:flow_coordinator/src/flow_route_scope.dart';
+import 'package:flow_coordinator/src/flow_route_status_scope.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -230,7 +231,7 @@ void main() {
 
     testWidgets('checks if route is top route', (tester) async {
       // This test covers line 63: isTopRoute check with ModalRoute.of(context)?.isCurrent
-      
+
       final router = FlowCoordinatorRouter(
         homeBuilder: (context) => TestFlowCoordinator(
           initialPagesOverride: [
@@ -238,7 +239,8 @@ void main() {
               key: const ValueKey('page1'),
               child: Builder(
                 builder: (context) {
-                  final routeStatusScope = FlowRouteStatusScope.maybeOf(context);
+                  final routeStatusScope =
+                      FlowRouteStatusScope.maybeOf(context);
                   return Text('isTopRoute: ${routeStatusScope?.isTopRoute}');
                 },
               ),

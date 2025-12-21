@@ -390,7 +390,7 @@ void main() {
     testWidgets('overrides initialPages getter', (tester) async {
       // This test covers line 79: List<Page> get initialPages => [];
       // By default, initialPages returns an empty list, but subclasses override it
-      
+
       final router = FlowCoordinatorRouter(
         homeBuilder: (context) => const TestFlowCoordinator(),
       );
@@ -414,9 +414,9 @@ void main() {
 
     testWidgets('handles child route information from parent', (tester) async {
       // This test covers lines 123-124, 135-140, 157: child route information handling
-      
+
       final childRouteInfo = RouteInformation(uri: Uri.parse('/child'));
-      
+
       final router = FlowCoordinatorRouter(
         homeBuilder: (context) => TestFlowCoordinator(
           onNewRouteInformationCallback: (info) async {
@@ -452,7 +452,7 @@ void main() {
     testWidgets('parent route information provider change triggers listener',
         (tester) async {
       // This test covers lines 157: removeListener call when parent changes
-      
+
       final router = FlowCoordinatorRouter(
         homeBuilder: (context) => const TestFlowCoordinator(
           initialPagesOverride: [

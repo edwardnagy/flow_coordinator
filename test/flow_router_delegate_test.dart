@@ -370,11 +370,9 @@ void main() {
 
     testWidgets('pop delegates to parent when cannot pop internally',
         (tester) async {
-      // This test covers line 79: parentFlowNavigator.pop(result) when canPopInternally is false
-      
-      var parentPopCalled = false;
-      Object? passedResult;
-      
+      // This test covers line 79: parentFlowNavigator.pop(result) when
+      // canPopInternally is false
+
       // Create a mock parent flow navigator
       final parentDelegate = FlowRouterDelegate(
         initialPages: [
@@ -382,18 +380,14 @@ void main() {
         ],
         contextDescriptionProvider: () => 'Parent',
       );
-      
-      // Override pop to track calls
-      final originalPop = parentDelegate.pop;
-      
+
       // Create child delegate with parent
       final childDelegate = FlowRouterDelegate(
         initialPages: [
           const MaterialPage(key: ValueKey('child'), child: SizedBox()),
         ],
         contextDescriptionProvider: () => 'Child',
-        parentFlowNavigator: parentDelegate,
-      );
+      )..setParentFlowNavigator(parentDelegate);
 
       await tester.pumpWidget(
         Directionality(

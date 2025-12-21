@@ -1,6 +1,7 @@
+import 'package:flow_coordinator/flow_coordinator.dart';
 import 'package:flow_coordinator/src/flow_back_button_dispatcher_builder.dart';
 import 'package:flow_coordinator/src/flow_route_status_scope.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -266,22 +267,28 @@ void main() {
       var buildCount = 0;
       ChildBackButtonDispatcher? dispatcher;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: FlowRouteStatusScope(
-              isActive: true,
-              isTopRoute: true,
-              child: FlowBackButtonDispatcherBuilder(
-                builder: (context, backButtonDispatcher) {
-                  buildCount++;
-                  dispatcher = backButtonDispatcher;
-                  return Text('Build $buildCount');
-                },
+      Widget routerWidget({required bool isActive, required bool isTopRoute}) {
+        return MaterialApp.router(
+          routerConfig: FlowCoordinatorRouter(
+            homeBuilder: (context) => Scaffold(
+              body: FlowRouteStatusScope(
+                isActive: isActive,
+                isTopRoute: isTopRoute,
+                child: FlowBackButtonDispatcherBuilder(
+                  builder: (context, backButtonDispatcher) {
+                    buildCount++;
+                    dispatcher = backButtonDispatcher;
+                    return Text('Build $buildCount');
+                  },
+                ),
               ),
             ),
           ),
-        ),
+        );
+      }
+
+      await tester.pumpWidget(
+        routerWidget(isActive: true, isTopRoute: true),
       );
 
       expect(buildCount, 1);
@@ -290,21 +297,7 @@ void main() {
 
       // Trigger a rebuild that causes didChangeDependencies
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: FlowRouteStatusScope(
-              isActive: false, // Change the scope
-              isTopRoute: false,
-              child: FlowBackButtonDispatcherBuilder(
-                builder: (context, backButtonDispatcher) {
-                  buildCount++;
-                  dispatcher = backButtonDispatcher;
-                  return Text('Build $buildCount');
-                },
-              ),
-            ),
-          ),
-        ),
+        routerWidget(isActive: false, isTopRoute: false),
       );
 
       // Should have rebuilt
