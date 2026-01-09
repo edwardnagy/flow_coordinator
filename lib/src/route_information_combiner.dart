@@ -70,12 +70,13 @@ class DefaultRouteInformationCombiner implements RouteInformationCombiner {
                   ...currentUri.pathSegments,
                   ...childUri.pathSegments,
                 ],
-      queryParameters: childUri.queryParameters.isEmpty
-          ? null
-          : {
-              ...currentUri.queryParameters,
-              ...childUri.queryParameters,
-            },
+      queryParameters:
+          currentUri.queryParameters.isEmpty && childUri.queryParameters.isEmpty
+              ? null
+              : {
+                  ...currentUri.queryParameters,
+                  ...childUri.queryParameters,
+                },
       fragment: childUri.fragment.isEmpty ? null : childUri.fragment,
     );
     return RouteInformation(

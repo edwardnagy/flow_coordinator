@@ -1,0 +1,267 @@
+import 'package:flow_coordinator/src/flow_back_button_dispatcher_builder.dart';
+import 'package:flow_coordinator/src/flow_route_status_scope.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  group('FlowBackButtonDispatcherBuilder', () {
+    testWidgets('provides null dispatcher when Router not found',
+        (tester) async {
+      ChildBackButtonDispatcher? capturedDispatcher;
+
+      await tester.pumpWidget(
+        FlowBackButtonDispatcherBuilder(
+          builder: (context, dispatcher) {
+            capturedDispatcher = dispatcher;
+            return const SizedBox();
+          },
+        ),
+      );
+
+      expect(capturedDispatcher, isNull);
+    });
+
+    testWidgets('provides dispatcher when Router exists', (tester) async {
+      ChildBackButtonDispatcher? capturedDispatcher;
+
+      await tester.pumpWidget(
+        MaterialApp.router(
+          routerConfig: RouterConfig(
+            routeInformationProvider: PlatformRouteInformationProvider(
+              initialRouteInformation: const RouteInformation(location: '/'),
+            ),
+            routeInformationParser: const _TestRouteInformationParser(),
+            routerDelegate: _TestRouterDelegate(
+              onDispatcher: (dispatcher) => capturedDispatcher = dispatcher,
+            ),
+            backButtonDispatcher: RootBackButtonDispatcher(),
+          ),
+        ),
+      );
+
+      expect(capturedDispatcher, isNotNull);
+    });
+
+    testWidgets('dispatcher is null when FlowRouteStatusScope isActive is false',
+        (tester) async {
+      ChildBackButtonDispatcher? capturedDispatcher;
+
+      await tester.pumpWidget(
+        MaterialApp.router(
+          routerConfig: RouterConfig(
+            routeInformationProvider: PlatformRouteInformationProvider(
+              initialRouteInformation: const RouteInformation(location: '/'),
+            ),
+            routeInformationParser: const _TestRouteInformationParser(),
+            routerDelegate: _TestRouterDelegate(),
+            backButtonDispatcher: RootBackButtonDispatcher(),
+          ),
+          builder: (context, child) {
+            return FlowRouteStatusScope(
+              isActive: false,
+              isTopRoute: true,
+              child: FlowBackButtonDispatcherBuilder(
+                builder: (context, dispatcher) {
+                  capturedDispatcher = dispatcher;
+                  return child ?? const SizedBox();
+                },
+              ),
+            );
+          },
+        ),
+      );
+
+      expect(capturedDispatcher, isNull);
+    });
+
+    testWidgets('dispatcher is null when FlowRouteStatusScope isTopRoute is false',
+        (tester) async {
+      ChildBackButtonDispatcher? capturedDispatcher;
+
+      await tester.pumpWidget(
+        MaterialApp.router(
+          routerConfig: RouterConfig(
+            routeInformationProvider: PlatformRouteInformationProvider(
+              initialRouteInformation: const RouteInformation(location: '/'),
+            ),
+            routeInformationParser: const _TestRouteInformationParser(),
+            routerDelegate: _TestRouterDelegate(),
+            backButtonDispatcher: RootBackButtonDispatcher(),
+          ),
+          builder: (context, child) {
+            return FlowRouteStatusScope(
+              isActive: true,
+              isTopRoute: false,
+              child: FlowBackButtonDispatcherBuilder(
+                builder: (context, dispatcher) {
+                  capturedDispatcher = dispatcher;
+                  return child ?? const SizedBox();
+                },
+              ),
+            );
+          },
+        ),
+      );
+
+      expect(capturedDispatcher, isNull);
+    });
+
+    testWidgets('disposes dispatcher when dependencies change', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp.router(
+          routerConfig: RouterConfig(
+            routeInformationProvider: PlatformRouteInformationProvider(
+              initialRouteInformation: const RouteInformation(location: '/'),
+            ),
+            routeInformationParser: const _TestRouteInformationParser(),
+            routerDelegate: _TestRouterDelegate(),
+            backButtonDispatcher: RootBackButtonDispatcher(),
+          ),
+          builder: (context, child) {
+            return FlowBackButtonDispatcherBuilder(
+              builder: (context, dispatcher) {
+                return child ?? const SizedBox();
+              },
+            );
+          },
+        ),
+      );
+
+      // Change dependencies by wrapping in a new scope
+      await tester.pumpWidget(
+        MaterialApp.router(
+          routerConfig: RouterConfig(
+            routeInformationProvider: PlatformRouteInformationProvider(
+              initialRouteInformation: const RouteInformation(location: '/'),
+            ),
+            routeInformationParser: const _TestRouteInformationParser(),
+            routerDelegate: _TestRouterDelegate(),
+            backButtonDispatcher: RootBackButtonDispatcher(),
+          ),
+          builder: (context, child) {
+            return FlowRouteStatusScope(
+              isActive: false,
+              isTopRoute: true,
+              child: FlowBackButtonDispatcherBuilder(
+                builder: (context, dispatcher) {
+                  return child ?? const SizedBox();
+                },
+              ),
+            );
+          },
+        ),
+      );
+
+      // No errors should occur
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('forgets dispatcher when enabled state changes', (tester) async {
+      final statusNotifier = ValueNotifier(true);
+
+      await tester.pumpWidget(
+        MaterialApp.router(
+          routerConfig: RouterConfig(
+            routeInformationProvider: PlatformRouteInformationProvider(
+              initialRouteInformation: const RouteInformation(location: '/'),
+            ),
+            routeInformationParser: const _TestRouteInformationParser(),
+            routerDelegate: _TestRouterDelegate(),
+            backButtonDispatcher: RootBackButtonDispatcher(),
+          ),
+          builder: (context, child) {
+            return ValueListenableBuilder<bool>(
+              valueListenable: statusNotifier,
+              builder: (context, isActive, _) {
+                return FlowRouteStatusScope(
+                  isActive: isActive,
+                  isTopRoute: true,
+                  child: FlowBackButtonDispatcherBuilder(
+                    builder: (context, dispatcher) {
+                      return child ?? const SizedBox();
+                    },
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      );
+
+      // Initially enabled and dispatcher created
+      await tester.pump();
+
+      // Change to disabled state - triggers forget() on existing dispatcher
+      statusNotifier.value = false;
+      await tester.pump();
+
+      // No errors should occur
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('disposes dispatcher when widget is removed', (tester) async {
+      ChildBackButtonDispatcher? dispatcher;
+
+      await tester.pumpWidget(
+        MaterialApp.router(
+          routerConfig: RouterConfig(
+            routeInformationProvider: PlatformRouteInformationProvider(
+              initialRouteInformation: const RouteInformation(location: '/'),
+            ),
+            routeInformationParser: const _TestRouteInformationParser(),
+            routerDelegate: _TestRouterDelegate(
+              onDispatcher: (d) => dispatcher = d,
+            ),
+            backButtonDispatcher: RootBackButtonDispatcher(),
+          ),
+        ),
+      );
+
+      expect(dispatcher, isNotNull);
+
+      // Remove the widget
+      await tester.pumpWidget(const SizedBox());
+
+      // Verify no errors during disposal
+      expect(tester.takeException(), isNull);
+    });
+  });
+}
+
+class _TestRouterDelegate extends RouterDelegate<RouteInformation>
+    with ChangeNotifier {
+  _TestRouterDelegate({this.onDispatcher});
+
+  final ValueSetter<ChildBackButtonDispatcher?>? onDispatcher;
+
+  @override
+  Widget build(BuildContext context) {
+    return FlowBackButtonDispatcherBuilder(
+      builder: (context, dispatcher) {
+        onDispatcher?.call(dispatcher);
+        return const SizedBox();
+      },
+    );
+  }
+
+  @override
+  Future<void> setNewRoutePath(RouteInformation configuration) async {}
+
+  @override
+  Future<bool> popRoute() async => false;
+
+  @override
+  GlobalKey<NavigatorState>? get navigatorKey => GlobalKey();
+}
+
+class _TestRouteInformationParser
+    extends RouteInformationParser<RouteInformation> {
+  const _TestRouteInformationParser();
+
+  @override
+  Future<RouteInformation> parseRouteInformation(
+    RouteInformation routeInformation,
+  ) async {
+    return routeInformation;
+  }
+}
