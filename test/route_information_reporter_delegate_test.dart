@@ -254,7 +254,7 @@ void main() {
         routeInformationCombiner: combiner,
       );
 
-      //Set current route
+      // Set current route
       childDelegate.setCurrentRouteInformation(
         RouteInformation(uri: Uri.parse('/parent')),
       );
