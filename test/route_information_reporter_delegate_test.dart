@@ -323,6 +323,11 @@ void main() {
       await _pumpReports(tester);
 
       expect(combiner.combineCalled, true);
+      // Ensure the custom combined route is reported by the parent
+      expect(parent.reportedRouteInformation?.uri.toString(), '/custom');
+      // Validate parameters passed to combiner
+      expect(combiner.lastCurrent?.uri.toString(), '/parent');
+      expect(combiner.lastChild?.uri.toString(), '/child');
     });
   });
 
@@ -380,6 +385,8 @@ void main() {
 
 class _TestCombiner implements RouteInformationCombiner {
   bool combineCalled = false;
+  RouteInformation? lastCurrent;
+  RouteInformation? lastChild;
 
   @override
   RouteInformation combine({
@@ -387,6 +394,8 @@ class _TestCombiner implements RouteInformationCombiner {
     required RouteInformation childRouteInformation,
   }) {
     combineCalled = true;
+    lastCurrent = currentRouteInformation;
+    lastChild = childRouteInformation;
     return RouteInformation(uri: Uri.parse('/custom'));
   }
 }
