@@ -132,10 +132,14 @@ void main() {
             homeBuilder: (context) => ValueListenableBuilder<int>(
               valueListenable: rebuildNotifier,
               builder: (context, value, _) {
-                // Adding a dependency that changes will trigger didChangeDependencies
+                // Adding a dependency that changes will trigger
+                // didChangeDependencies
                 return TestFlowCoordinator(
-                  initialPages: const [MaterialPage(child: Text('Page 1'))],
-                  initialRoute: RouteInformation(uri: Uri.parse('/initial-$value')),
+                  initialPages: const [
+                    MaterialPage(child: Text('Page 1')),
+                  ],
+                  initialRoute:
+                      RouteInformation(uri: Uri.parse('/initial-$value')),
                 );
               },
             ),
@@ -169,7 +173,8 @@ void main() {
       expect(find.text('Page 1'), findsOneWidget);
     });
 
-    testWidgets('parent route changes trigger didChangeDependencies', (tester) async {
+    testWidgets('parent route changes trigger didChangeDependencies',
+        (tester) async {
       final parentKey = GlobalKey<_TestFlowCoordinatorState>();
       final childKey = GlobalKey<_TestFlowCoordinatorState>();
 
@@ -200,7 +205,8 @@ void main() {
       expect(find.text('Child'), findsOneWidget);
     });
 
-    testWidgets('removes listener when parent provider changes', (tester) async {
+    testWidgets('removes listener when parent provider changes',
+        (tester) async {
       final parent1Key = GlobalKey<_TestFlowCoordinatorState>();
       final parent2Key = GlobalKey<_TestFlowCoordinatorState>();
       final childKey = GlobalKey<_TestFlowCoordinatorState>();
@@ -219,7 +225,9 @@ void main() {
                       MaterialPage(
                         child: TestFlowCoordinator(
                           key: childKey,
-                          initialPages: const [MaterialPage(child: Text('Child'))],
+                          initialPages: const [
+                            MaterialPage(child: Text('Child')),
+                          ],
                         ),
                       ),
                     ],
@@ -231,7 +239,9 @@ void main() {
                       MaterialPage(
                         child: TestFlowCoordinator(
                           key: childKey,
-                          initialPages: const [MaterialPage(child: Text('Child'))],
+                          initialPages: const [
+                            MaterialPage(child: Text('Child')),
+                          ],
                         ),
                       ),
                     ],
@@ -283,7 +293,8 @@ void main() {
       expect(find.text('Child'), findsOneWidget);
     });
 
-    testWidgets('contextDescriptionProvider used in error messages', (tester) async {
+    testWidgets('contextDescriptionProvider used in error messages',
+        (tester) async {
       await tester.pumpWidget(
         MaterialApp.router(
           routerConfig: FlowCoordinatorRouter(
@@ -297,7 +308,8 @@ void main() {
       expect(ex.toString(), contains('The flow coordinator being built was'));
     });
 
-    testWidgets('child receives subsequent updates from parent via listener', (tester) async {
+    testWidgets('child receives subsequent updates from parent via listener',
+        (tester) async {
       final parentKey = GlobalKey<_ForwardingParentCoordinatorState>();
       var childInfoCount = 0;
 
@@ -329,7 +341,9 @@ void main() {
       expect(childInfoCount >= 2, isTrue);
     });
 
-    testWidgets('child receives forwarded route from parent on onNewRouteInformation', (tester) async {
+    testWidgets(
+        'child receives forwarded route from parent on onNewRouteInformation',
+        (tester) async {
       final childReceived = <RouteInformation>[];
 
       final forwardingKey = GlobalKey<_ForwardingParentCoordinatorState>();
@@ -348,9 +362,11 @@ void main() {
         ),
       );
 
-      // Trigger route in parent; parent forwards a child route which child should receive via listener.
-      forwardingKey.currentState!
-          .setNewRouteInformation(RouteInformation(uri: Uri.parse('/incoming')));
+      // Trigger route in parent; parent forwards a child route which
+      // child should receive via listener.
+      forwardingKey.currentState!.setNewRouteInformation(
+        RouteInformation(uri: Uri.parse('/incoming')),
+      );
       await tester.pump();
 
       expect(childReceived.any((i) => i.uri.path == '/forwarded'), isTrue);
@@ -415,7 +431,6 @@ class _TestFlowCoordinatorState extends State<TestFlowCoordinator>
     }
     return super.build(context);
   }
-
 }
 
 class _EmptyPagesCoordinator extends StatefulWidget {
@@ -429,34 +444,27 @@ class _EmptyPagesCoordinatorState extends State<_EmptyPagesCoordinator>
     with FlowCoordinatorMixin<_EmptyPagesCoordinator> {
   @override
   List<Page> get initialPages => const [];
-
-  @override
-  Widget build(BuildContext context) {
-    return super.build(context);
-  }
 }
 
 class _ForwardingParentCoordinator extends StatefulWidget {
   const _ForwardingParentCoordinator({super.key, required this.child});
   final Widget child;
 
-  static _ForwardingParentCoordinatorState of(Element element) {
-    final state = element.findAncestorStateOfType<_ForwardingParentCoordinatorState>();
-    assert(state != null);
-    return state!;
-  }
-
   @override
-  State<_ForwardingParentCoordinator> createState() => _ForwardingParentCoordinatorState();
+  State<_ForwardingParentCoordinator> createState() =>
+      _ForwardingParentCoordinatorState();
 }
 
-class _ForwardingParentCoordinatorState extends State<_ForwardingParentCoordinator>
+class _ForwardingParentCoordinatorState
+    extends State<_ForwardingParentCoordinator>
     with FlowCoordinatorMixin<_ForwardingParentCoordinator> {
   @override
   List<Page> get initialPages => [MaterialPage(child: widget.child)];
 
   @override
-  Future<RouteInformation?> onNewRouteInformation(RouteInformation routeInformation) async {
+  Future<RouteInformation?> onNewRouteInformation(
+    RouteInformation routeInformation,
+  ) async {
     // Forward a child route so that listeners in the child can receive it.
     return RouteInformation(uri: Uri.parse('/forwarded'));
   }

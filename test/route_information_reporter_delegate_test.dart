@@ -181,8 +181,7 @@ void main() {
       // Should only notify once with the last value
       await _pumpReports(tester);
       expect(notifyCount, 1);
-      expect(
-          delegate.reportedRouteInformation?.uri.toString(), '/third');
+      expect(delegate.reportedRouteInformation?.uri.toString(), '/third');
     });
 
     testWidgets('handles multiple frames of reports', (tester) async {
@@ -224,7 +223,7 @@ void main() {
       );
 
       final parent = RootRouteInformationReporterDelegate();
-      final combiner = const DefaultRouteInformationCombiner();
+      const combiner = DefaultRouteInformationCombiner();
       final childDelegate = ChildRouteInformationReporterDelegate(
         parent: parent,
         routeInformationCombiner: combiner,
@@ -248,7 +247,7 @@ void main() {
       );
 
       final parent = RootRouteInformationReporterDelegate();
-      final combiner = const DefaultRouteInformationCombiner();
+      const combiner = DefaultRouteInformationCombiner();
       final childDelegate = ChildRouteInformationReporterDelegate(
         parent: parent,
         routeInformationCombiner: combiner,
@@ -282,7 +281,7 @@ void main() {
       );
 
       final parent = RootRouteInformationReporterDelegate();
-      final combiner = const DefaultRouteInformationCombiner();
+      const combiner = DefaultRouteInformationCombiner();
       final childDelegate = ChildRouteInformationReporterDelegate(
         parent: parent,
         routeInformationCombiner: combiner,
@@ -389,19 +388,5 @@ class _TestCombiner implements RouteInformationCombiner {
   }) {
     combineCalled = true;
     return RouteInformation(uri: Uri.parse('/custom'));
-  }
-}
-
-class _TestWidget extends StatelessWidget {
-  const _TestWidget({required this.onBuild});
-
-  final VoidCallback onBuild;
-
-  @override
-  Widget build(BuildContext context) {
-    // Access the delegate to become dependent
-    RouteInformationReporterDelegate.of(context);
-    onBuild();
-    return const SizedBox();
   }
 }

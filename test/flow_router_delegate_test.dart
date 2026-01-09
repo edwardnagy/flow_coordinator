@@ -9,7 +9,7 @@ Widget _appWithDelegate(FlowRouterDelegate delegate) => MaterialApp.router(
         routerDelegate: delegate,
         routeInformationParser: const _PassthroughRouteInformationParser(),
         routeInformationProvider: PlatformRouteInformationProvider(
-          initialRouteInformation: const RouteInformation(location: '/'),
+          initialRouteInformation: RouteInformation(uri: Uri.parse('/')),
         ),
       ),
     );
@@ -211,7 +211,7 @@ void main() {
       await tester.pumpWidget(_appWithDelegate(delegate));
 
       expect(find.text('Page 2'), findsOneWidget);
-      
+
       delegate.pop();
       await tester.pumpAndSettle();
 

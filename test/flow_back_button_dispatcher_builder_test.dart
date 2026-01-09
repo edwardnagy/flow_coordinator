@@ -28,7 +28,7 @@ void main() {
         MaterialApp.router(
           routerConfig: RouterConfig(
             routeInformationProvider: PlatformRouteInformationProvider(
-              initialRouteInformation: const RouteInformation(location: '/'),
+              initialRouteInformation: RouteInformation(uri: Uri.parse('/')),
             ),
             routeInformationParser: const _TestRouteInformationParser(),
             routerDelegate: _TestRouterDelegate(
@@ -42,7 +42,8 @@ void main() {
       expect(capturedDispatcher, isNotNull);
     });
 
-    testWidgets('dispatcher is null when FlowRouteStatusScope isActive is false',
+    testWidgets(
+        'dispatcher is null when FlowRouteStatusScope isActive is false',
         (tester) async {
       ChildBackButtonDispatcher? capturedDispatcher;
 
@@ -50,7 +51,7 @@ void main() {
         MaterialApp.router(
           routerConfig: RouterConfig(
             routeInformationProvider: PlatformRouteInformationProvider(
-              initialRouteInformation: const RouteInformation(location: '/'),
+              initialRouteInformation: RouteInformation(uri: Uri.parse('/')),
             ),
             routeInformationParser: const _TestRouteInformationParser(),
             routerDelegate: _TestRouterDelegate(),
@@ -74,7 +75,8 @@ void main() {
       expect(capturedDispatcher, isNull);
     });
 
-    testWidgets('dispatcher is null when FlowRouteStatusScope isTopRoute is false',
+    testWidgets(
+        'dispatcher is null when FlowRouteStatusScope isTopRoute is false',
         (tester) async {
       ChildBackButtonDispatcher? capturedDispatcher;
 
@@ -82,7 +84,7 @@ void main() {
         MaterialApp.router(
           routerConfig: RouterConfig(
             routeInformationProvider: PlatformRouteInformationProvider(
-              initialRouteInformation: const RouteInformation(location: '/'),
+              initialRouteInformation: RouteInformation(uri: Uri.parse('/')),
             ),
             routeInformationParser: const _TestRouteInformationParser(),
             routerDelegate: _TestRouterDelegate(),
@@ -111,7 +113,7 @@ void main() {
         MaterialApp.router(
           routerConfig: RouterConfig(
             routeInformationProvider: PlatformRouteInformationProvider(
-              initialRouteInformation: const RouteInformation(location: '/'),
+              initialRouteInformation: RouteInformation(uri: Uri.parse('/')),
             ),
             routeInformationParser: const _TestRouteInformationParser(),
             routerDelegate: _TestRouterDelegate(),
@@ -132,7 +134,7 @@ void main() {
         MaterialApp.router(
           routerConfig: RouterConfig(
             routeInformationProvider: PlatformRouteInformationProvider(
-              initialRouteInformation: const RouteInformation(location: '/'),
+              initialRouteInformation: RouteInformation(uri: Uri.parse('/')),
             ),
             routeInformationParser: const _TestRouteInformationParser(),
             routerDelegate: _TestRouterDelegate(),
@@ -156,14 +158,15 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('forgets dispatcher when enabled state changes', (tester) async {
+    testWidgets('forgets dispatcher when enabled state changes',
+        (tester) async {
       final statusNotifier = ValueNotifier(true);
 
       await tester.pumpWidget(
         MaterialApp.router(
           routerConfig: RouterConfig(
             routeInformationProvider: PlatformRouteInformationProvider(
-              initialRouteInformation: const RouteInformation(location: '/'),
+              initialRouteInformation: RouteInformation(uri: Uri.parse('/')),
             ),
             routeInformationParser: const _TestRouteInformationParser(),
             routerDelegate: _TestRouterDelegate(),
@@ -206,7 +209,7 @@ void main() {
         MaterialApp.router(
           routerConfig: RouterConfig(
             routeInformationProvider: PlatformRouteInformationProvider(
-              initialRouteInformation: const RouteInformation(location: '/'),
+              initialRouteInformation: RouteInformation(uri: Uri.parse('/')),
             ),
             routeInformationParser: const _TestRouteInformationParser(),
             routerDelegate: _TestRouterDelegate(
@@ -249,9 +252,6 @@ class _TestRouterDelegate extends RouterDelegate<RouteInformation>
 
   @override
   Future<bool> popRoute() async => false;
-
-  @override
-  GlobalKey<NavigatorState>? get navigatorKey => GlobalKey();
 }
 
 class _TestRouteInformationParser

@@ -1,8 +1,8 @@
 import 'package:flow_coordinator/flow_coordinator.dart';
-import 'package:flutter/material.dart';
 import 'package:flow_coordinator/src/flow_route_status_scope.dart';
-import 'package:flow_coordinator/src/route_information_reporter.dart';
 import 'package:flow_coordinator/src/route_information_combiner.dart';
+import 'package:flow_coordinator/src/route_information_reporter.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -23,7 +23,7 @@ void main() {
       final router = FlowCoordinatorRouter(
         homeBuilder: (context) => const Text('Home Screen'),
       );
-      
+
       await tester.pumpWidget(
         MaterialApp.router(
           routerConfig: router,
@@ -32,9 +32,10 @@ void main() {
 
       // Verify initial state
       expect(find.text('Home Screen'), findsOneWidget);
-      
-      // We can't easily push routes directly on FlowCoordinatorRouter's delegate 
-      // because it's designed to work with FlowCoordinatorMixin.
+
+      // We can't easily push routes directly on
+      // FlowCoordinatorRouter's delegate because it's designed to
+      // work with FlowCoordinatorMixin.
       // But we can verify it initializes correctly.
       expect(router.routerDelegate, isNotNull);
       expect(router.routeInformationParser, isNotNull);
@@ -171,7 +172,8 @@ void main() {
         MaterialApp.router(routerConfig: router),
       );
 
-      // Update only the state, keep same URI to exercise the state inequality branch.
+      // Update only the state, keep same URI to exercise the state
+      // inequality branch.
       hostKey.currentState!.update(
         RouteInformation(uri: Uri.parse('/same'), state: 'b'),
       );

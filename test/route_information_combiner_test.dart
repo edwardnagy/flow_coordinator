@@ -8,12 +8,12 @@ void main() {
       const combiner = DefaultRouteInformationCombiner();
       final parentRoute = RouteInformation(uri: Uri.parse('/parent'));
       final childRoute = RouteInformation(uri: Uri.parse('/child'));
-      
+
       final result = combiner.combine(
         currentRouteInformation: parentRoute,
         childRouteInformation: childRoute,
       );
-      
+
       // Uri with pathSegments doesn't include leading slash
       expect(result.uri.pathSegments, ['parent', 'child']);
     });
@@ -22,12 +22,12 @@ void main() {
       const combiner = DefaultRouteInformationCombiner();
       final parentRoute = RouteInformation(uri: Uri.parse('/parent?a=1'));
       final childRoute = RouteInformation(uri: Uri.parse('/child'));
-      
+
       final result = combiner.combine(
         currentRouteInformation: parentRoute,
         childRouteInformation: childRoute,
       );
-      
+
       expect(result.uri.pathSegments, ['parent', 'child']);
       expect(result.uri.queryParameters['a'], '1');
     });
@@ -36,12 +36,12 @@ void main() {
       const combiner = DefaultRouteInformationCombiner();
       final parentRoute = RouteInformation(uri: Uri.parse('/parent?a=1&b=2'));
       final childRoute = RouteInformation(uri: Uri.parse('/child?b=3&c=4'));
-      
+
       final result = combiner.combine(
         currentRouteInformation: parentRoute,
         childRouteInformation: childRoute,
       );
-      
+
       expect(result.uri.queryParameters['a'], '1');
       expect(result.uri.queryParameters['b'], '3'); // Child overrides
       expect(result.uri.queryParameters['c'], '4');
@@ -66,21 +66,23 @@ void main() {
       const combiner = DefaultRouteInformationCombiner();
       final parentRoute = RouteInformation(uri: Uri.parse('/parent'));
       final childRoute = RouteInformation(uri: Uri.parse('/child'));
-      
+
       final result = combiner.combine(
         currentRouteInformation: parentRoute,
         childRouteInformation: childRoute,
       );
-      
+
       expect(result.uri.pathSegments, ['parent', 'child']);
     });
 
     testWidgets('of throws when RouteInformationCombinerScope not found',
         (tester) async {
-      await tester.pumpWidget(const Directionality(
-        textDirection: TextDirection.ltr,
-        child: SizedBox.shrink(),
-      ));
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: SizedBox.shrink(),
+        ),
+      );
 
       final context = tester.element(find.byType(SizedBox));
 
@@ -135,7 +137,8 @@ void main() {
       expect(result.state, 'child state');
     });
 
-    testWidgets('RouteInformationCombinerScope provides combiner to descendants',
+    testWidgets(
+        'RouteInformationCombinerScope provides combiner to descendants',
         (tester) async {
       const combiner = DefaultRouteInformationCombiner();
       await tester.pumpWidget(
@@ -155,7 +158,9 @@ void main() {
       expect(find.text('Found: true'), findsOneWidget);
     });
 
-    test('RouteInformationCombinerScope updateShouldNotify returns true when value changes', () {
+    test(
+        'RouteInformationCombinerScope updateShouldNotify returns true '
+        'when value changes', () {
       const combiner1 = DefaultRouteInformationCombiner();
       const combiner2 = _CustomRouteInformationCombiner();
       const scope1 = RouteInformationCombinerScope(
@@ -170,7 +175,9 @@ void main() {
       expect(scope2.updateShouldNotify(scope1), true);
     });
 
-    test('RouteInformationCombinerScope updateShouldNotify returns false when value same', () {
+    test(
+        'RouteInformationCombinerScope updateShouldNotify returns false '
+        'when value same', () {
       const combiner = DefaultRouteInformationCombiner();
       const scope1 = RouteInformationCombinerScope(
         combiner,

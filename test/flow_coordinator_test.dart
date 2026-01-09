@@ -25,12 +25,16 @@ void main() {
             builder: (context) {
               expect(
                 () => FlowCoordinator.of<_TestFlowCoordinatorState>(context),
-                throwsA(isA<FlutterError>().having(
-                  (e) => e.message,
-                  'message',
-                  contains(
-                      'Could not find a FlowCoordinatorMixin of type _TestFlowCoordinatorState'),
-                )),
+                throwsA(
+                  isA<FlutterError>().having(
+                    (e) => e.message,
+                    'message',
+                    contains(
+                      'Could not find a FlowCoordinatorMixin of type '
+                      '_TestFlowCoordinatorState',
+                    ),
+                  ),
+                ),
               );
               return Container();
             },

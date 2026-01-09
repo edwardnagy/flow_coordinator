@@ -1,9 +1,7 @@
-import 'package:flow_coordinator/flow_coordinator.dart';
+import 'package:flow_coordinator/src/flow_route_status_scope.dart';
+import 'package:flow_coordinator/src/route_information_combiner.dart';
 import 'package:flow_coordinator/src/route_information_reporter.dart';
 import 'package:flow_coordinator/src/route_information_reporter_delegate.dart';
-import 'package:flow_coordinator/src/route_information_combiner.dart';
-import 'package:flow_coordinator/src/flow_route_status_scope.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -42,9 +40,10 @@ void main() {
       expect(parent.reportedRouteInformation?.uri.toString(), '/reported');
     });
 
-    testWidgets('didUpdateWidget reports on change when active', (tester) async {
+    testWidgets('didUpdateWidget reports on change when active',
+        (tester) async {
       final parent = RootRouteInformationReporterDelegate();
-      RouteInformation info = RouteInformation(uri: Uri.parse('/one'));
+      var info = RouteInformation(uri: Uri.parse('/one'));
 
       Widget buildTree() => MaterialApp(
             home: FlowRouteStatusScope(
@@ -127,10 +126,11 @@ void main() {
       expect(parent.reportedRouteInformation, isNull);
     });
 
-    testWidgets('resets reported state when update cannot be reported', (tester) async {
+    testWidgets('resets reported state when update cannot be reported',
+        (tester) async {
       final parent = RootRouteInformationReporterDelegate();
       final statusNotifier = ValueNotifier(true);
-      RouteInformation info = RouteInformation(uri: Uri.parse('/one'));
+      var info = RouteInformation(uri: Uri.parse('/one'));
 
       Widget buildTree() => MaterialApp(
             home: ValueListenableBuilder<bool>(
@@ -169,6 +169,7 @@ void main() {
       expect(parent.reportedRouteInformation?.uri.toString(), '/one');
     });
 
-    // Note: didUpdateWidget branch is exercised indirectly in integration tests.
+    // Note: didUpdateWidget branch is exercised indirectly in
+    // integration tests.
   });
 }

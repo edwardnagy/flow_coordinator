@@ -7,8 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('ChildRouteInformationFilter', () {
-    testWidgets('filters route information based on predicate',
-        (tester) async {
+    testWidgets('filters route information based on predicate', (tester) async {
       final parentProvider = _TestChildFlowRouteInformationProvider();
 
       await tester.pumpWidget(
@@ -92,8 +91,8 @@ void main() {
     testWidgets('updates filter when parentValueMatcher changes',
         (tester) async {
       final parentProvider = _TestChildFlowRouteInformationProvider();
-      RouteInformationPredicate? matcher1 = (info) => info.uri.path == '/path1';
-      RouteInformationPredicate? matcher2 = (info) => info.uri.path == '/path2';
+      bool matcher1(RouteInformation info) => info.uri.path == '/path1';
+      bool matcher2(RouteInformation info) => info.uri.path == '/path2';
 
       await tester.pumpWidget(
         MaterialApp(
@@ -336,7 +335,8 @@ void main() {
 class _TestChildFlowRouteInformationProvider
     extends ChildFlowRouteInformationProvider {
   final _consumedValueNotifier = ValueNotifier<RouteInformation?>(null);
-  final _childValueNotifier = ValueNotifier<Consumable<RouteInformation>?>(null);
+  final _childValueNotifier =
+      ValueNotifier<Consumable<RouteInformation>?>(null);
 
   @override
   ValueListenable<RouteInformation?> get consumedValueListenable =>

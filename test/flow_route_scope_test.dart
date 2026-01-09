@@ -1,10 +1,7 @@
 import 'package:flow_coordinator/flow_coordinator.dart';
 import 'package:flow_coordinator/src/consumable.dart';
-import 'package:flow_coordinator/src/child_route_information_filter.dart';
-import 'package:flow_coordinator/src/flow_route_scope.dart';
-import 'package:flow_coordinator/src/flow_route_status_scope.dart';
 import 'package:flow_coordinator/src/flow_route_information_provider.dart';
-import 'package:flow_coordinator/src/route_information_reporter.dart';
+import 'package:flow_coordinator/src/flow_route_status_scope.dart';
 import 'package:flow_coordinator/src/route_information_combiner.dart';
 import 'package:flow_coordinator/src/route_information_reporter_delegate.dart';
 import 'package:flutter/foundation.dart';
@@ -17,9 +14,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp.router(
           routerConfig: FlowCoordinatorRouter(
-            homeBuilder: (context) => TestFlowCoordinator(
+            homeBuilder: (context) => const TestFlowCoordinator(
               child: FlowRouteScope(
-                child: const Text('Test Child'),
+                child: Text('Test Child'),
               ),
             ),
           ),
@@ -90,7 +87,6 @@ void main() {
         MaterialApp.router(
           routerConfig: FlowCoordinatorRouter(
             homeBuilder: (context) => TestFlowCoordinator(
-              child: const SizedBox.shrink(),
               initialPages: [
                 MaterialPage(
                   child: FlowRouteScope(
@@ -102,12 +98,13 @@ void main() {
                     ),
                   ),
                 ),
-                MaterialPage(
+                const MaterialPage(
                   child: FlowRouteScope(
-                    child: const Text('Page 2'),
+                    child: Text('Page 2'),
                   ),
                 ),
               ],
+              child: const SizedBox.shrink(),
             ),
           ),
         ),
@@ -141,16 +138,19 @@ void main() {
 
     testWidgets('uses custom shouldForwardChildUpdates predicate',
         (tester) async {
-      bool predicateCalled = false;
+      var predicateCallCount = 0;
 
       await tester.pumpWidget(
         MaterialApp.router(
           routerConfig: FlowCoordinatorRouter(
             homeBuilder: (context) => TestFlowCoordinator(
               child: FlowRouteScope(
+                routeInformation: RouteInformation(
+                  uri: Uri.parse('/parent'),
+                ),
                 shouldForwardChildUpdates: (info) {
-                  predicateCalled = true;
-                  return true;
+                  predicateCallCount++;
+                  return info.uri.path == '/allowed';
                 },
                 child: const Text('Child'),
               ),
@@ -160,10 +160,12 @@ void main() {
       );
 
       expect(find.text('Child'), findsOneWidget);
-      // Predicate might not be called until route information is provided
+      // Predicate is evaluated during build
+      expect(predicateCallCount, greaterThan(0));
     });
 
-    testWidgets('default matcher uses matchesUrlPattern when routeInformation provided',
+    testWidgets(
+        'default matcher uses matchesUrlPattern when routeInformation provided',
         (tester) async {
       final routeInfo = RouteInformation(uri: Uri.parse('/parent'));
 
@@ -189,10 +191,10 @@ void main() {
       await tester.pumpWidget(
         MaterialApp.router(
           routerConfig: FlowCoordinatorRouter(
-            homeBuilder: (context) => TestFlowCoordinator(
+            homeBuilder: (context) => const TestFlowCoordinator(
               child: FlowRouteScope(
                 routeInformation: null,
-                child: const Text('Child'),
+                child: Text('Child'),
               ),
             ),
           ),
@@ -228,14 +230,13 @@ void main() {
               child: FlowRouteInformationProviderScope(
                 parentProvider,
                 child: FlowRouteScope(
-                  routeInformation:
-                      RouteInformation(uri: Uri.parse('/path')),
+                  routeInformation: RouteInformation(uri: Uri.parse('/path')),
                   child: Builder(
                     builder: (context) {
                       final provider = FlowRouteInformationProvider.of(context)
                           as ChildFlowRouteInformationProvider;
-                      forwarded = provider.childValueListenable.value
-                          ?.consumeOrNull();
+                      forwarded =
+                          provider.childValueListenable.value?.consumeOrNull();
                       return const SizedBox();
                     },
                   ),
@@ -271,14 +272,13 @@ void main() {
               child: FlowRouteInformationProviderScope(
                 parentProvider,
                 child: FlowRouteScope(
-                  routeInformation:
-                      RouteInformation(uri: Uri.parse('/path')),
+                  routeInformation: RouteInformation(uri: Uri.parse('/path')),
                   child: Builder(
                     builder: (context) {
                       final provider = FlowRouteInformationProvider.of(context)
                           as ChildFlowRouteInformationProvider;
-                      forwarded = provider.childValueListenable.value
-                          ?.consumeOrNull();
+                      forwarded =
+                          provider.childValueListenable.value?.consumeOrNull();
                       return const SizedBox();
                     },
                   ),
@@ -320,8 +320,8 @@ void main() {
                     builder: (context) {
                       final provider = FlowRouteInformationProvider.of(context)
                           as ChildFlowRouteInformationProvider;
-                      forwarded = provider.childValueListenable.value
-                          ?.consumeOrNull();
+                      forwarded =
+                          provider.childValueListenable.value?.consumeOrNull();
                       return const SizedBox();
                     },
                   ),
@@ -335,7 +335,8 @@ void main() {
       expect(forwarded, isNotNull);
     });
 
-    testWidgets('default matcher with null pattern state matches any state', (tester) async {
+    testWidgets('default matcher with null pattern state matches any state',
+        (tester) async {
       final parentProvider = _TestChildRouteInformationProvider();
       parentProvider.setConsumed(
         RouteInformation(uri: Uri.parse('/path'), state: 'any-state'),
@@ -363,8 +364,8 @@ void main() {
                     builder: (context) {
                       final provider = FlowRouteInformationProvider.of(context)
                           as ChildFlowRouteInformationProvider;
-                      forwarded = provider.childValueListenable.value
-                          ?.consumeOrNull();
+                      forwarded =
+                          provider.childValueListenable.value?.consumeOrNull();
                       return const SizedBox();
                     },
                   ),
@@ -383,8 +384,7 @@ void main() {
 class _TestChildRouteInformationProvider
     extends ChildFlowRouteInformationProvider {
   final consumedValueNotifier = ValueNotifier<RouteInformation?>(null);
-  final childValueNotifier =
-      ValueNotifier<Consumable<RouteInformation>?>(null);
+  final childValueNotifier = ValueNotifier<Consumable<RouteInformation>?>(null);
 
   void setConsumed(RouteInformation? value) {
     consumedValueNotifier.value = value;
