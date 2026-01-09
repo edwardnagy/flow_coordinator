@@ -9,6 +9,7 @@ void main() {
   group('ChildRouteInformationFilter', () {
     testWidgets('filters route information based on predicate', (tester) async {
       final parentProvider = _TestChildFlowRouteInformationProvider();
+      addTearDown(parentProvider.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -54,6 +55,7 @@ void main() {
     testWidgets('forwards all updates when parentValueMatcher is null',
         (tester) async {
       final parentProvider = _TestChildFlowRouteInformationProvider();
+      addTearDown(parentProvider.dispose);
       FlowRouteInformationProvider? capturedProvider;
 
       await tester.pumpWidget(
@@ -91,6 +93,7 @@ void main() {
     testWidgets('updates filter when parentValueMatcher changes',
         (tester) async {
       final parentProvider = _TestChildFlowRouteInformationProvider();
+      addTearDown(parentProvider.dispose);
       bool matcher1(RouteInformation info) => info.uri.path == '/path1';
       bool matcher2(RouteInformation info) => info.uri.path == '/path2';
 
@@ -126,6 +129,7 @@ void main() {
 
     testWidgets('disposes filter provider on dispose', (tester) async {
       final parentProvider = _TestChildFlowRouteInformationProvider();
+      addTearDown(parentProvider.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -151,6 +155,8 @@ void main() {
     testWidgets('handles parent provider change', (tester) async {
       final parentProvider1 = _TestChildFlowRouteInformationProvider();
       final parentProvider2 = _TestChildFlowRouteInformationProvider();
+      addTearDown(parentProvider1.dispose);
+      addTearDown(parentProvider2.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -184,6 +190,7 @@ void main() {
 
     testWidgets('copies consumed value from parent', (tester) async {
       final parentProvider = _TestChildFlowRouteInformationProvider();
+      addTearDown(parentProvider.dispose);
       ChildFlowRouteInformationProvider? capturedProvider;
 
       await tester.pumpWidget(
@@ -216,6 +223,7 @@ void main() {
     testWidgets('filters child value based on parent consumed value',
         (tester) async {
       final parentProvider = _TestChildFlowRouteInformationProvider();
+      addTearDown(parentProvider.dispose);
       ChildFlowRouteInformationProvider? capturedProvider;
 
       await tester.pumpWidget(
@@ -272,6 +280,7 @@ void main() {
     testWidgets('handles null parent consumed value with matcher',
         (tester) async {
       final parentProvider = _TestChildFlowRouteInformationProvider();
+      addTearDown(parentProvider.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -296,6 +305,7 @@ void main() {
 
     testWidgets('listener updates when parent values change', (tester) async {
       final parentProvider = _TestChildFlowRouteInformationProvider();
+      addTearDown(parentProvider.dispose);
       var listenerCallCount = 0;
 
       await tester.pumpWidget(
