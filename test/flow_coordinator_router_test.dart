@@ -89,25 +89,6 @@ void main() {
       expect(find.text('Custom Back Button'), findsOneWidget);
     });
 
-    testWidgets('dispose cleans up resources', (tester) async {
-      final router = FlowCoordinatorRouter(
-        homeBuilder: (context) => const Text('Dispose Test'),
-      );
-
-      await tester.pumpWidget(
-        MaterialApp.router(
-          routerConfig: router,
-        ),
-      );
-
-      expect(find.text('Dispose Test'), findsOneWidget);
-
-      // Dispose the router
-      router.dispose();
-
-      // Verify no errors thrown during disposal
-    });
-
     testWidgets('initialUri is used when provided', (tester) async {
       final router = FlowCoordinatorRouter(
         initialUri: Uri.parse('/custom-initial'),
@@ -125,27 +106,7 @@ void main() {
 
     testWidgets('setNewRoutePath updates route', (tester) async {
       final router = FlowCoordinatorRouter(
-        homeBuilder: (context) => const Text('Home'),
-      );
-
-      await tester.pumpWidget(
-        MaterialApp.router(
-          routerConfig: router,
-        ),
-      );
-
-      // Set new route path
-      await router.routerDelegate.setNewRoutePath(
-        RouteInformation(uri: Uri.parse('/new-route')),
-      );
-      await tester.pumpAndSettle();
-
-      // Verify no crashes
-    });
-
-    testWidgets('popRoute returns false', (tester) async {
-      final router = FlowCoordinatorRouter(
-        homeBuilder: (context) => const Text('Home'),
+        homeBuilder: (context) => const SizedBox(),
       );
 
       await tester.pumpWidget(

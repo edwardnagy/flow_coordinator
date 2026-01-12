@@ -89,19 +89,38 @@ void main() {
         (tester) async {
       final parentProvider = _TestChildFlowRouteInformationProvider();
       addTearDown(parentProvider.dispose);
-      bool matcher1(RouteInformation info) => info.uri.path == '/path1';
-      bool matcher2(RouteInformation info) => info.uri.path == '/path2';
+      ChildFlowRouteInformationProvider? capturedProvider;
 
       await tester.pumpWidget(
         MaterialApp(
           home: FlowRouteInformationProviderScope(
             parentProvider,
             child: ChildRouteInformationFilter(
-              parentValueMatcher: matcher1,
-              child: const SizedBox(),
+              parentValueMatcher: (info) => info.uri.path == '/allowed1',
+              child: Builder(
+                builder: (context) {
+                  capturedProvider =
+                      FlowRouteInformationProvider.of(context) as
+                          ChildFlowRouteInformationProvider;
+                  return const SizedBox();
+                },
+              ),
             ),
           ),
         ),
+      );
+
+      parentProvider.setConsumedValue(
+        RouteInformation(uri: Uri.parse('/allowed1')),
+      );
+      parentProvider.setChildValue(
+        Consumable(RouteInformation(uri: Uri.parse('/child'))),
+      );
+      await tester.pump();
+
+      expect(
+        capturedProvider?.childValueListenable.value?.consumeOrNull()?.uri.path,
+        '/child',
       );
 
       await tester.pumpWidget(
@@ -109,17 +128,38 @@ void main() {
           home: FlowRouteInformationProviderScope(
             parentProvider,
             child: ChildRouteInformationFilter(
-              parentValueMatcher: matcher2,
-              child: const SizedBox(),
+              parentValueMatcher: (info) => info.uri.path == '/allowed2',
+              child: Builder(
+                builder: (context) {
+                  capturedProvider =
+                      FlowRouteInformationProvider.of(context) as
+                          ChildFlowRouteInformationProvider;
+                  return const SizedBox();
+                },
+              ),
             ),
           ),
         ),
+      );
+
+      parentProvider.setConsumedValue(
+        RouteInformation(uri: Uri.parse('/allowed2')),
+      );
+      parentProvider.setChildValue(
+        Consumable(RouteInformation(uri: Uri.parse('/child2'))),
+      );
+      await tester.pump();
+
+      expect(
+        capturedProvider?.childValueListenable.value?.consumeOrNull()?.uri.path,
+        '/child2',
       );
     });
 
     testWidgets('disposes filter provider on dispose', (tester) async {
       final parentProvider = _TestChildFlowRouteInformationProvider();
       addTearDown(parentProvider.dispose);
+      ChildFlowRouteInformationProvider? capturedProvider;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -127,12 +167,31 @@ void main() {
             parentProvider,
             child: ChildRouteInformationFilter(
               parentValueMatcher: (info) => true,
-              child: const SizedBox(),
+              child: Builder(
+                builder: (context) {
+                  capturedProvider =
+                      FlowRouteInformationProvider.of(context) as
+                          ChildFlowRouteInformationProvider;
+                  return const SizedBox();
+                },
+              ),
             ),
           ),
         ),
       );
 
+      expect(capturedProvider, isNotNull);
+
+      // Verify listener can be added without errors during disposal
+      if (capturedProvider != null) {
+        var listenerCalled = false;
+        capturedProvider!.consumedValueListenable.addListener(
+          () => listenerCalled = true,
+        );
+        expect(listenerCalled, false); // No events yet
+      }
+
+      // Remove widget triggers disposal
       await tester.pumpWidget(Container());
 
       expect(tester.takeException(), isNull);

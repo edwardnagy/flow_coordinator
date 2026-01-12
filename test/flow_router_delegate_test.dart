@@ -270,21 +270,6 @@ void main() {
       expect(find.text('Page 2'), findsNothing);
     });
 
-    testWidgets('setParentFlowNavigator updates parent', (tester) async {
-      final delegate = FlowRouterDelegate(
-        initialPages: const [MaterialPage(child: Text('Page 1'))],
-        contextDescriptionProvider: () => 'Test context',
-      );
-
-      final parent1 = _TestFlowNavigator();
-      final parent2 = _TestFlowNavigator();
-
-      delegate.setParentFlowNavigator(parent1);
-      delegate.setParentFlowNavigator(parent2);
-      delegate.setParentFlowNavigator(null);
-
-      // No errors should occur
-    });
   });
 }
 

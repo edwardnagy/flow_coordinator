@@ -11,17 +11,27 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('FlowRouteScope', () {
     testWidgets('builds with default values', (tester) async {
+      FlowRouteStatusScope? capturedScope;
+
       await tester.pumpWidget(
         MaterialApp.router(
           routerConfig: FlowCoordinatorRouter(
-            homeBuilder: (context) => const TestFlowCoordinator(
+            homeBuilder: (context) => TestFlowCoordinator(
               child: FlowRouteScope(
-                child: SizedBox.shrink(),
+                child: Builder(
+                  builder: (context) {
+                    capturedScope = FlowRouteStatusScope.maybeOf(context);
+                    return const SizedBox.shrink();
+                  },
+                ),
               ),
             ),
           ),
         ),
       );
+
+      expect(capturedScope, isNotNull);
+      expect(capturedScope?.isActive, true);
     });
 
     testWidgets('provides isActive status to children', (tester) async {
@@ -115,14 +125,18 @@ void main() {
 
     testWidgets('forwards route information to reporter', (tester) async {
       final routeInfo = RouteInformation(uri: Uri.parse('/test'));
+      final reporter = _RecordingReporterDelegate();
 
       await tester.pumpWidget(
         MaterialApp.router(
           routerConfig: FlowCoordinatorRouter(
-            homeBuilder: (context) => TestFlowCoordinator(
-              child: FlowRouteScope(
-                routeInformation: routeInfo,
-                child: const SizedBox(),
+            homeBuilder: (context) => RouteInformationReporterScope(
+              reporter,
+              child: TestFlowCoordinator(
+                child: FlowRouteScope(
+                  routeInformation: routeInfo,
+                  child: const SizedBox(),
+                ),
               ),
             ),
           ),
@@ -130,6 +144,7 @@ void main() {
       );
 
       await tester.pumpAndSettle();
+      expect(reporter.lastReported?.uri.toString(), '/test');
     });
 
     testWidgets('uses custom shouldForwardChildUpdates predicate',
@@ -161,38 +176,84 @@ void main() {
     testWidgets(
         'default matcher uses matchesUrlPattern when routeInformation provided',
         (tester) async {
-      final routeInfo = RouteInformation(uri: Uri.parse('/parent'));
+      final parentProvider = _TestChildRouteInformationProvider();
+      parentProvider.setConsumed(
+        RouteInformation(uri: Uri.parse('/parent?key=value')),
+      );
+      parentProvider.setChild(
+        RouteInformation(uri: Uri.parse('/child')),
+      );
+
+      RouteInformation? forwarded;
 
       await tester.pumpWidget(
-        MaterialApp.router(
-          routerConfig: FlowCoordinatorRouter(
-            homeBuilder: (context) => TestFlowCoordinator(
-              child: FlowRouteScope(
-                routeInformation: routeInfo,
-                child: const SizedBox(),
+        MaterialApp(
+          home: RouteInformationReporterScope(
+            _RecordingReporterDelegate(),
+            child: RouteInformationCombinerScope(
+              const DefaultRouteInformationCombiner(),
+              child: FlowRouteInformationProviderScope(
+                parentProvider,
+                child: FlowRouteScope(
+                  routeInformation: RouteInformation(uri: Uri.parse('/parent')),
+                  child: Builder(
+                    builder: (context) {
+                      final provider = FlowRouteInformationProvider.of(context)
+                          as ChildFlowRouteInformationProvider;
+                      forwarded =
+                          provider.childValueListenable.value?.consumeOrNull();
+                      return const SizedBox();
+                    },
+                  ),
+                ),
               ),
             ),
           ),
         ),
       );
 
-      await tester.pumpAndSettle();
+      expect(forwarded?.uri.path, '/child');
     });
 
     testWidgets('passes null matcher when routeInformation is null',
         (tester) async {
+      final parentProvider = _TestChildRouteInformationProvider();
+      parentProvider.setConsumed(
+        RouteInformation(uri: Uri.parse('/any-route')),
+      );
+      parentProvider.setChild(
+        RouteInformation(uri: Uri.parse('/child')),
+      );
+
+      RouteInformation? forwarded;
+
       await tester.pumpWidget(
-        MaterialApp.router(
-          routerConfig: FlowCoordinatorRouter(
-            homeBuilder: (context) => const TestFlowCoordinator(
-              child: FlowRouteScope(
-                routeInformation: null,
-                child: SizedBox(),
+        MaterialApp(
+          home: RouteInformationReporterScope(
+            _RecordingReporterDelegate(),
+            child: RouteInformationCombinerScope(
+              const DefaultRouteInformationCombiner(),
+              child: FlowRouteInformationProviderScope(
+                parentProvider,
+                child: FlowRouteScope(
+                  routeInformation: null,
+                  child: Builder(
+                    builder: (context) {
+                      final provider = FlowRouteInformationProvider.of(context)
+                          as ChildFlowRouteInformationProvider;
+                      forwarded =
+                          provider.childValueListenable.value?.consumeOrNull();
+                      return const SizedBox();
+                    },
+                  ),
+                ),
               ),
             ),
           ),
         ),
       );
+
+      expect(forwarded?.uri.path, '/child');
     });
   });
 
