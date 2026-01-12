@@ -338,7 +338,8 @@ void main() {
       );
       await tester.pump();
 
-      expect(childInfoCount >= 2, isTrue);
+      // Should have received at least 2 updates from parent
+      expect(childInfoCount, greaterThanOrEqualTo(2));
     });
 
     testWidgets(

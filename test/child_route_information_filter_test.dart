@@ -10,6 +10,7 @@ void main() {
     testWidgets('filters route information based on predicate', (tester) async {
       final parentProvider = _TestChildFlowRouteInformationProvider();
       addTearDown(parentProvider.dispose);
+      ChildFlowRouteInformationProvider? capturedProvider;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -20,6 +21,10 @@ void main() {
                   routeInfo.uri.path == '/allowed',
               child: Builder(
                 builder: (context) {
+                  final provider = FlowRouteInformationProvider.of(context);
+                  if (provider is ChildFlowRouteInformationProvider) {
+                    capturedProvider = provider;
+                  }
                   return const Text('Child');
                 },
               ),
@@ -42,21 +47,20 @@ void main() {
       );
       await tester.pump();
 
-      // Get filtered provider
-      final filteredProvider = tester
-          .element(find.text('Child'))
-          .dependOnInheritedWidgetOfExactType<
-              FlowRouteInformationProviderScope>()!
-          .value;
-
-      expect(filteredProvider, isNotNull);
+      // Verify child value was forwarded since parent matches predicate
+      expect(capturedProvider, isNotNull);
+      expect(capturedProvider?.childValueListenable.value, isNotNull);
+      expect(
+        capturedProvider?.childValueListenable.value?.consumeOrNull()?.uri.path,
+        '/test',
+      );
     });
 
     testWidgets('forwards all updates when parentValueMatcher is null',
         (tester) async {
       final parentProvider = _TestChildFlowRouteInformationProvider();
       addTearDown(parentProvider.dispose);
-      FlowRouteInformationProvider? capturedProvider;
+      ChildFlowRouteInformationProvider? capturedProvider;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -66,7 +70,10 @@ void main() {
               parentValueMatcher: null,
               child: Builder(
                 builder: (context) {
-                  capturedProvider = FlowRouteInformationProvider.of(context);
+                  final provider = FlowRouteInformationProvider.of(context);
+                  if (provider is ChildFlowRouteInformationProvider) {
+                    capturedProvider = provider;
+                  }
                   return const Text('Child');
                 },
               ),
@@ -87,7 +94,13 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      // Verify child value was forwarded
       expect(capturedProvider, isNotNull);
+      expect(capturedProvider?.childValueListenable.value, isNotNull);
+      expect(
+        capturedProvider?.childValueListenable.value?.consumeOrNull()?.uri.path,
+        '/child',
+      );
     });
 
     testWidgets('updates filter when parentValueMatcher changes',
@@ -273,14 +286,19 @@ void main() {
       );
       await tester.pump();
 
-      // Child value should be forwarded
+      // Child value should be forwarded with correct path
       expect(capturedProvider?.childValueListenable.value, isNotNull);
+      expect(
+        capturedProvider?.childValueListenable.value?.consumeOrNull()?.uri.path,
+        '/child2',
+      );
     });
 
     testWidgets('handles null parent consumed value with matcher',
         (tester) async {
       final parentProvider = _TestChildFlowRouteInformationProvider();
       addTearDown(parentProvider.dispose);
+      ChildFlowRouteInformationProvider? capturedProvider;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -288,7 +306,15 @@ void main() {
             parentProvider,
             child: ChildRouteInformationFilter(
               parentValueMatcher: (info) => info.uri.path == '/test',
-              child: const Text('Child'),
+              child: Builder(
+                builder: (context) {
+                  final provider = FlowRouteInformationProvider.of(context);
+                  if (provider is ChildFlowRouteInformationProvider) {
+                    capturedProvider = provider;
+                  }
+                  return const Text('Child');
+                },
+              ),
             ),
           ),
         ),
@@ -300,7 +326,9 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.text('Child'), findsOneWidget);
+      // Verify child value was NOT forwarded since parent consumed value is
+      // null
+      expect(capturedProvider?.childValueListenable.value, isNull);
     });
 
     testWidgets('listener updates when parent values change', (tester) async {

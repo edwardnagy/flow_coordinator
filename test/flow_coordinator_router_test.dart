@@ -179,8 +179,9 @@ void main() {
       );
       await tester.pump();
 
-      // No explicit assertion needed; this path exercises the branch.
+      // Verify widget still exists and no exceptions were thrown
       expect(find.byType(_ReportingHost), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
   });
 }
