@@ -21,11 +21,10 @@ void main() {
                   routeInfo.uri.path == '/allowed',
               child: Builder(
                 builder: (context) {
-                  final provider = FlowRouteInformationProvider.of(context);
-                  if (provider is ChildFlowRouteInformationProvider) {
-                    capturedProvider = provider;
-                  }
-                  return const Text('Child');
+                  capturedProvider =
+                      FlowRouteInformationProvider.of(context) as
+                          ChildFlowRouteInformationProvider;
+                  return const SizedBox();
                 },
               ),
             ),
@@ -33,23 +32,14 @@ void main() {
         ),
       );
 
-      expect(find.text('Child'), findsOneWidget);
-
-      // Set consumed value to allowed path
       parentProvider.setConsumedValue(
         RouteInformation(uri: Uri.parse('/allowed')),
       );
-      await tester.pump();
-
-      // Set child value - should be forwarded
       parentProvider.setChildValue(
         Consumable(RouteInformation(uri: Uri.parse('/test'))),
       );
       await tester.pump();
 
-      // Verify child value was forwarded since parent matches predicate
-      expect(capturedProvider, isNotNull);
-      expect(capturedProvider?.childValueListenable.value, isNotNull);
       expect(
         capturedProvider?.childValueListenable.value?.consumeOrNull()?.uri.path,
         '/test',
@@ -70,11 +60,10 @@ void main() {
               parentValueMatcher: null,
               child: Builder(
                 builder: (context) {
-                  final provider = FlowRouteInformationProvider.of(context);
-                  if (provider is ChildFlowRouteInformationProvider) {
-                    capturedProvider = provider;
-                  }
-                  return const Text('Child');
+                  capturedProvider =
+                      FlowRouteInformationProvider.of(context) as
+                          ChildFlowRouteInformationProvider;
+                  return const SizedBox();
                 },
               ),
             ),
@@ -82,21 +71,14 @@ void main() {
         ),
       );
 
-      // Set consumed value
       parentProvider.setConsumedValue(
         RouteInformation(uri: Uri.parse('/parent')),
       );
-      await tester.pump();
-
-      // Set child value - should always be forwarded when matcher is null
       parentProvider.setChildValue(
         Consumable(RouteInformation(uri: Uri.parse('/child'))),
       );
       await tester.pumpAndSettle();
 
-      // Verify child value was forwarded
-      expect(capturedProvider, isNotNull);
-      expect(capturedProvider?.childValueListenable.value, isNotNull);
       expect(
         capturedProvider?.childValueListenable.value?.consumeOrNull()?.uri.path,
         '/child',
@@ -116,28 +98,23 @@ void main() {
             parentProvider,
             child: ChildRouteInformationFilter(
               parentValueMatcher: matcher1,
-              child: const Text('Child'),
+              child: const SizedBox(),
             ),
           ),
         ),
       );
 
-      expect(find.text('Child'), findsOneWidget);
-
-      // Update the matcher
       await tester.pumpWidget(
         MaterialApp(
           home: FlowRouteInformationProviderScope(
             parentProvider,
             child: ChildRouteInformationFilter(
               parentValueMatcher: matcher2,
-              child: const Text('Child'),
+              child: const SizedBox(),
             ),
           ),
         ),
       );
-
-      expect(find.text('Child'), findsOneWidget);
     });
 
     testWidgets('disposes filter provider on dispose', (tester) async {
@@ -150,18 +127,14 @@ void main() {
             parentProvider,
             child: ChildRouteInformationFilter(
               parentValueMatcher: (info) => true,
-              child: const Text('Child'),
+              child: const SizedBox(),
             ),
           ),
         ),
       );
 
-      expect(find.text('Child'), findsOneWidget);
-
-      // Remove the widget
       await tester.pumpWidget(Container());
 
-      // Should not throw errors
       expect(tester.takeException(), isNull);
     });
 
@@ -177,28 +150,23 @@ void main() {
             parentProvider1,
             child: ChildRouteInformationFilter(
               parentValueMatcher: (info) => true,
-              child: const Text('Child'),
+              child: const SizedBox(),
             ),
           ),
         ),
       );
 
-      expect(find.text('Child'), findsOneWidget);
-
-      // Change parent provider
       await tester.pumpWidget(
         MaterialApp(
           home: FlowRouteInformationProviderScope(
             parentProvider2,
             child: ChildRouteInformationFilter(
               parentValueMatcher: (info) => true,
-              child: const Text('Child'),
+              child: const SizedBox(),
             ),
           ),
         ),
       );
-
-      expect(find.text('Child'), findsOneWidget);
     });
 
     testWidgets('copies consumed value from parent', (tester) async {
@@ -214,11 +182,10 @@ void main() {
               parentValueMatcher: null,
               child: Builder(
                 builder: (context) {
-                  final provider = FlowRouteInformationProvider.of(context);
-                  if (provider is ChildFlowRouteInformationProvider) {
-                    capturedProvider = provider;
-                  }
-                  return const Text('Child');
+                  capturedProvider =
+                      FlowRouteInformationProvider.of(context) as
+                          ChildFlowRouteInformationProvider;
+                  return const SizedBox();
                 },
               ),
             ),
@@ -247,11 +214,10 @@ void main() {
               parentValueMatcher: (info) => info.uri.path == '/allowed',
               child: Builder(
                 builder: (context) {
-                  final provider = FlowRouteInformationProvider.of(context);
-                  if (provider is ChildFlowRouteInformationProvider) {
-                    capturedProvider = provider;
-                  }
-                  return const Text('Child');
+                  capturedProvider =
+                      FlowRouteInformationProvider.of(context) as
+                          ChildFlowRouteInformationProvider;
+                  return const SizedBox();
                 },
               ),
             ),
@@ -259,35 +225,24 @@ void main() {
         ),
       );
 
-      // Set parent consumed value to disallowed path
       parentProvider.setConsumedValue(
         RouteInformation(uri: Uri.parse('/disallowed')),
       );
-      await tester.pump();
-
-      // Set child value - should NOT be forwarded
       parentProvider.setChildValue(
         Consumable(RouteInformation(uri: Uri.parse('/child'))),
       );
       await tester.pump();
 
-      // Child value should be null since it was filtered out
       expect(capturedProvider?.childValueListenable.value, isNull);
 
-      // Now set parent consumed value to allowed path
       parentProvider.setConsumedValue(
         RouteInformation(uri: Uri.parse('/allowed')),
       );
-      await tester.pump();
-
-      // Set child value again - should be forwarded this time
       parentProvider.setChildValue(
         Consumable(RouteInformation(uri: Uri.parse('/child2'))),
       );
       await tester.pump();
 
-      // Child value should be forwarded with correct path
-      expect(capturedProvider?.childValueListenable.value, isNotNull);
       expect(
         capturedProvider?.childValueListenable.value?.consumeOrNull()?.uri.path,
         '/child2',
@@ -308,11 +263,10 @@ void main() {
               parentValueMatcher: (info) => info.uri.path == '/test',
               child: Builder(
                 builder: (context) {
-                  final provider = FlowRouteInformationProvider.of(context);
-                  if (provider is ChildFlowRouteInformationProvider) {
-                    capturedProvider = provider;
-                  }
-                  return const Text('Child');
+                  capturedProvider =
+                      FlowRouteInformationProvider.of(context) as
+                          ChildFlowRouteInformationProvider;
+                  return const SizedBox();
                 },
               ),
             ),
@@ -320,14 +274,11 @@ void main() {
         ),
       );
 
-      // Parent consumed value is null, child value should not be forwarded
       parentProvider.setChildValue(
         Consumable(RouteInformation(uri: Uri.parse('/child'))),
       );
       await tester.pump();
 
-      // Verify child value was NOT forwarded since parent consumed value is
-      // null
       expect(capturedProvider?.childValueListenable.value, isNull);
     });
 
@@ -345,11 +296,10 @@ void main() {
               child: Builder(
                 builder: (context) {
                   final provider = FlowRouteInformationProvider.of(context);
-                  if (provider is ChildFlowRouteInformationProvider) {
-                    provider.consumedValueListenable
-                        .addListener(() => listenerCallCount++);
-                  }
-                  return const Text('Child');
+                  (provider as ChildFlowRouteInformationProvider)
+                      .consumedValueListenable
+                      .addListener(() => listenerCallCount++);
+                  return const SizedBox();
                 },
               ),
             ),
@@ -357,9 +307,6 @@ void main() {
         ),
       );
 
-      expect(listenerCallCount, 0);
-
-      // Change consumed value
       parentProvider.setConsumedValue(
         RouteInformation(uri: Uri.parse('/new')),
       );

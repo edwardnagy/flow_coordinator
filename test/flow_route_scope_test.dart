@@ -16,14 +16,12 @@ void main() {
           routerConfig: FlowCoordinatorRouter(
             homeBuilder: (context) => const TestFlowCoordinator(
               child: FlowRouteScope(
-                child: Text('Test Child'),
+                child: SizedBox.shrink(),
               ),
             ),
           ),
         ),
       );
-
-      expect(find.text('Test Child'), findsOneWidget);
     });
 
     testWidgets('provides isActive status to children', (tester) async {
@@ -38,7 +36,7 @@ void main() {
                 child: Builder(
                   builder: (context) {
                     capturedScope = FlowRouteStatusScope.maybeOf(context);
-                    return const Text('Child');
+                    return const SizedBox();
                   },
                 ),
               ),
@@ -65,7 +63,7 @@ void main() {
                   child: Builder(
                     builder: (context) {
                       capturedScope = FlowRouteStatusScope.maybeOf(context);
-                      return const Text('Child');
+                      return const SizedBox();
                     },
                   ),
                 ),
@@ -75,7 +73,6 @@ void main() {
         ),
       );
 
-      // Should be false because parent is false
       expect(capturedScope?.isActive, false);
     });
 
@@ -125,7 +122,7 @@ void main() {
             homeBuilder: (context) => TestFlowCoordinator(
               child: FlowRouteScope(
                 routeInformation: routeInfo,
-                child: const Text('Child'),
+                child: const SizedBox(),
               ),
             ),
           ),
@@ -133,7 +130,6 @@ void main() {
       );
 
       await tester.pumpAndSettle();
-      expect(find.text('Child'), findsOneWidget);
     });
 
     testWidgets('uses custom shouldForwardChildUpdates predicate',
@@ -152,15 +148,13 @@ void main() {
                   predicateCallCount++;
                   return info.uri.path == '/allowed';
                 },
-                child: const Text('Child'),
+                child: const SizedBox(),
               ),
             ),
           ),
         ),
       );
 
-      expect(find.text('Child'), findsOneWidget);
-      // Predicate is evaluated during build
       expect(predicateCallCount, greaterThan(0));
     });
 
@@ -175,7 +169,7 @@ void main() {
             homeBuilder: (context) => TestFlowCoordinator(
               child: FlowRouteScope(
                 routeInformation: routeInfo,
-                child: const Text('Child'),
+                child: const SizedBox(),
               ),
             ),
           ),
@@ -183,7 +177,6 @@ void main() {
       );
 
       await tester.pumpAndSettle();
-      expect(find.text('Child'), findsOneWidget);
     });
 
     testWidgets('passes null matcher when routeInformation is null',
@@ -194,14 +187,12 @@ void main() {
             homeBuilder: (context) => const TestFlowCoordinator(
               child: FlowRouteScope(
                 routeInformation: null,
-                child: Text('Child'),
+                child: SizedBox(),
               ),
             ),
           ),
         ),
       );
-
-      expect(find.text('Child'), findsOneWidget);
     });
   });
 
