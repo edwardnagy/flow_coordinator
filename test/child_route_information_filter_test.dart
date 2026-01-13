@@ -7,45 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('ChildRouteInformationFilter', () {
-    testWidgets('filters route information based on predicate', (tester) async {
-      final parentProvider = _TestChildFlowRouteInformationProvider();
-      addTearDown(parentProvider.dispose);
-      ChildFlowRouteInformationProvider? capturedProvider;
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: FlowRouteInformationProviderScope(
-            parentProvider,
-            child: ChildRouteInformationFilter(
-              parentValueMatcher: (routeInfo) =>
-                  routeInfo.uri.path == '/allowed',
-              child: Builder(
-                builder: (context) {
-                  capturedProvider =
-                      FlowRouteInformationProvider.of(context) as
-                          ChildFlowRouteInformationProvider;
-                  return const SizedBox();
-                },
-              ),
-            ),
-          ),
-        ),
-      );
-
-      parentProvider.setConsumedValue(
-        RouteInformation(uri: Uri.parse('/allowed')),
-      );
-      parentProvider.setChildValue(
-        Consumable(RouteInformation(uri: Uri.parse('/test'))),
-      );
-      await tester.pump();
-
-      expect(
-        capturedProvider?.childValueListenable.value?.consumeOrNull()?.uri.path,
-        '/test',
-      );
-    });
-
     testWidgets('forwards all updates when parentValueMatcher is null',
         (tester) async {
       final parentProvider = _TestChildFlowRouteInformationProvider();

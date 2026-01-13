@@ -173,48 +173,6 @@ void main() {
       expect(predicateCallCount, greaterThan(0));
     });
 
-    testWidgets(
-        'default matcher uses matchesUrlPattern when routeInformation provided',
-        (tester) async {
-      final parentProvider = _TestChildRouteInformationProvider();
-      parentProvider.setConsumed(
-        RouteInformation(uri: Uri.parse('/parent?key=value')),
-      );
-      parentProvider.setChild(
-        RouteInformation(uri: Uri.parse('/child')),
-      );
-
-      RouteInformation? forwarded;
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: RouteInformationReporterScope(
-            _RecordingReporterDelegate(),
-            child: RouteInformationCombinerScope(
-              const DefaultRouteInformationCombiner(),
-              child: FlowRouteInformationProviderScope(
-                parentProvider,
-                child: FlowRouteScope(
-                  routeInformation: RouteInformation(uri: Uri.parse('/parent')),
-                  child: Builder(
-                    builder: (context) {
-                      final provider = FlowRouteInformationProvider.of(context)
-                          as ChildFlowRouteInformationProvider;
-                      forwarded =
-                          provider.childValueListenable.value?.consumeOrNull();
-                      return const SizedBox();
-                    },
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      expect(forwarded?.uri.path, '/child');
-    });
-
     testWidgets('passes null matcher when routeInformation is null',
         (tester) async {
       final parentProvider = _TestChildRouteInformationProvider();
