@@ -117,8 +117,6 @@ void main() {
         ),
       );
 
-      await tester.pumpAndSettle();
-
       // Page 1 should not be top route since Page 2 is on top
       expect(capturedScope?.isTopRoute, false);
     });
@@ -143,7 +141,6 @@ void main() {
         ),
       );
 
-      await tester.pumpAndSettle();
       expect(reporter.lastReported?.uri.toString(), '/test');
     });
 

@@ -100,7 +100,6 @@ void main() {
       key.currentState!.setNewRouteInformation(
         RouteInformation(uri: Uri.parse('/test')),
       );
-      await tester.pumpAndSettle();
 
       expect(capturedRouteInfo, isNotNull);
       expect(capturedRouteInfo!.uri.path, '/test');
@@ -201,7 +200,7 @@ void main() {
       parentKey.currentState!.setNewRouteInformation(
         RouteInformation(uri: Uri.parse('/parent-changed')),
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(find.text('Child'), findsOneWidget);
     });
@@ -259,7 +258,7 @@ void main() {
 
       // Switch to second parent - triggers listener removal from first parent
       switchParent.value = true;
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(find.text('Child'), findsOneWidget);
     });
@@ -290,7 +289,7 @@ void main() {
       childKey.currentState!.setNewRouteInformation(
         RouteInformation(uri: Uri.parse('/child-route')),
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(find.text('Child'), findsOneWidget);
     });

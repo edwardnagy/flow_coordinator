@@ -6,7 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 Future<void> _pumpReports(WidgetTester tester) async {
   WidgetsBinding.instance.scheduleFrame();
   await tester.pump();
-  await tester.pump();
 }
 
 void main() {
@@ -315,7 +314,6 @@ void main() {
       childDelegate.setCurrentRouteInformation(
         RouteInformation(uri: Uri.parse('/parent')),
       );
-      await tester.pumpAndSettle();
 
       childDelegate.childReportsRouteInformation(
         RouteInformation(uri: Uri.parse('/child')),

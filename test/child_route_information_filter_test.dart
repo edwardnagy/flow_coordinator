@@ -38,7 +38,6 @@ void main() {
       parentProvider.setChildValue(
         Consumable(RouteInformation(uri: Uri.parse('/child'))),
       );
-      await tester.pumpAndSettle();
 
       expect(
         capturedProvider?.childValueListenable.value?.consumeOrNull()?.uri.path,
@@ -77,7 +76,6 @@ void main() {
       parentProvider.setChildValue(
         Consumable(RouteInformation(uri: Uri.parse('/child'))),
       );
-      await tester.pump();
 
       expect(
         capturedProvider?.childValueListenable.value?.consumeOrNull()?.uri.path,
@@ -109,7 +107,6 @@ void main() {
       parentProvider.setChildValue(
         Consumable(RouteInformation(uri: Uri.parse('/child2'))),
       );
-      await tester.pump();
 
       expect(
         capturedProvider?.childValueListenable.value?.consumeOrNull()?.uri.path,
@@ -215,7 +212,6 @@ void main() {
 
       final testRoute = RouteInformation(uri: Uri.parse('/test'));
       parentProvider.setConsumedValue(testRoute);
-      await tester.pump();
 
       expect(capturedProvider?.consumedValueListenable.value, testRoute);
     });
@@ -251,7 +247,6 @@ void main() {
       parentProvider.setChildValue(
         Consumable(RouteInformation(uri: Uri.parse('/child'))),
       );
-      await tester.pump();
 
       expect(capturedProvider?.childValueListenable.value, isNull);
 
@@ -261,7 +256,6 @@ void main() {
       parentProvider.setChildValue(
         Consumable(RouteInformation(uri: Uri.parse('/child2'))),
       );
-      await tester.pump();
 
       expect(
         capturedProvider?.childValueListenable.value?.consumeOrNull()?.uri.path,
@@ -297,7 +291,6 @@ void main() {
       parentProvider.setChildValue(
         Consumable(RouteInformation(uri: Uri.parse('/child'))),
       );
-      await tester.pump();
 
       expect(capturedProvider?.childValueListenable.value, isNull);
     });
@@ -330,7 +323,6 @@ void main() {
       parentProvider.setConsumedValue(
         RouteInformation(uri: Uri.parse('/new')),
       );
-      await tester.pump();
 
       expect(listenerCallCount, greaterThan(0));
     });
