@@ -176,6 +176,7 @@ void main() {
     testWidgets('passes null matcher when routeInformation is null',
         (tester) async {
       final parentProvider = _TestChildRouteInformationProvider();
+      addTearDown(parentProvider.dispose);
       parentProvider.setConsumed(
         RouteInformation(uri: Uri.parse('/any-route')),
       );
@@ -222,6 +223,7 @@ void main() {
     testWidgets('forwards child route information when parent matches pattern',
         (tester) async {
       final parentProvider = _TestChildRouteInformationProvider();
+      addTearDown(parentProvider.dispose);
       parentProvider.setConsumed(
         RouteInformation(uri: Uri.parse('/path?a=1')),
       );
@@ -264,6 +266,7 @@ void main() {
     testWidgets('blocks child route information when pattern does not match',
         (tester) async {
       final parentProvider = _TestChildRouteInformationProvider();
+      addTearDown(parentProvider.dispose);
       parentProvider.setConsumed(
         RouteInformation(uri: Uri.parse('/different')),
       );
@@ -304,6 +307,7 @@ void main() {
 
     testWidgets('default matcher checks query and state', (tester) async {
       final parentProvider = _TestChildRouteInformationProvider();
+      addTearDown(parentProvider.dispose);
       parentProvider.setConsumed(
         RouteInformation(uri: Uri.parse('/path?a=1&b=2'), state: 's'),
       );
@@ -348,6 +352,7 @@ void main() {
     testWidgets('default matcher with null pattern state matches any state',
         (tester) async {
       final parentProvider = _TestChildRouteInformationProvider();
+      addTearDown(parentProvider.dispose);
       parentProvider.setConsumed(
         RouteInformation(uri: Uri.parse('/path'), state: 'any-state'),
       );
@@ -412,6 +417,11 @@ class _TestChildRouteInformationProvider
   @override
   ValueListenable<Consumable<RouteInformation>?> get childValueListenable =>
       childValueNotifier;
+
+  void dispose() {
+    consumedValueNotifier.dispose();
+    childValueNotifier.dispose();
+  }
 }
 
 class _RecordingReporterDelegate extends RouteInformationReporterDelegate {

@@ -23,6 +23,7 @@ void main() {
       final router = FlowCoordinatorRouter(
         homeBuilder: (context) => const Text('Home Screen'),
       );
+      addTearDown(router.dispose);
 
       await tester.pumpWidget(
         MaterialApp.router(
@@ -47,6 +48,7 @@ void main() {
         routeInformationReportingEnabled: true,
         homeBuilder: (context) => const Text('Home with Reporting'),
       );
+      addTearDown(router.dispose);
 
       await tester.pumpWidget(
         MaterialApp.router(
@@ -62,6 +64,7 @@ void main() {
         routeInformationReportingEnabled: false,
         homeBuilder: (context) => const Text('Home without Reporting'),
       );
+      addTearDown(router.dispose);
 
       await tester.pumpWidget(
         MaterialApp.router(
@@ -79,6 +82,7 @@ void main() {
         backButtonDispatcher: backButtonDispatcher,
         homeBuilder: (context) => const Text('Custom Back Button'),
       );
+      addTearDown(router.dispose);
 
       await tester.pumpWidget(
         MaterialApp.router(
@@ -94,6 +98,7 @@ void main() {
         initialUri: Uri.parse('/custom-initial'),
         homeBuilder: (context) => const Text('Custom Initial URI'),
       );
+      addTearDown(router.dispose);
 
       await tester.pumpWidget(
         MaterialApp.router(
@@ -108,6 +113,7 @@ void main() {
       final router = FlowCoordinatorRouter(
         homeBuilder: (context) => const SizedBox(),
       );
+      addTearDown(router.dispose);
 
       await tester.pumpWidget(
         MaterialApp.router(
@@ -128,6 +134,7 @@ void main() {
           initial: RouteInformation(uri: Uri.parse('/same'), state: 'a'),
         ),
       );
+      addTearDown(router.dispose);
 
       await tester.pumpWidget(
         MaterialApp.router(routerConfig: router),

@@ -27,6 +27,7 @@ void main() {
 
     testWidgets('of returns provider when scope exists', (tester) async {
       final provider = _TestFlowRouteInformationProvider();
+      addTearDown(provider.dispose);
       FlowRouteInformationProvider? capturedProvider;
 
       await tester.pumpWidget(
@@ -50,6 +51,7 @@ void main() {
   group('FlowRouteInformationProviderScope', () {
     testWidgets('provides value to descendants', (tester) async {
       final provider = _TestFlowRouteInformationProvider();
+      addTearDown(provider.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -71,6 +73,8 @@ void main() {
     test('updateShouldNotify returns true when value changes', () {
       final provider1 = _TestFlowRouteInformationProvider();
       final provider2 = _TestFlowRouteInformationProvider();
+      addTearDown(provider1.dispose);
+      addTearDown(provider2.dispose);
       final scope1 = FlowRouteInformationProviderScope(
         provider1,
         child: const SizedBox(),
@@ -85,6 +89,7 @@ void main() {
 
     test('updateShouldNotify returns false when value same', () {
       final provider = _TestFlowRouteInformationProvider();
+      addTearDown(provider.dispose);
       final scope1 = FlowRouteInformationProviderScope(
         provider,
         child: const SizedBox(),
@@ -111,4 +116,9 @@ class _TestFlowRouteInformationProvider
   @override
   ValueListenable<Consumable<RouteInformation>?> get childValueListenable =>
       _childValue;
+
+  void dispose() {
+    _consumedValue.dispose();
+    _childValue.dispose();
+  }
 }

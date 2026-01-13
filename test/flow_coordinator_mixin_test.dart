@@ -125,6 +125,7 @@ void main() {
     testWidgets('sets initial route on dependency change when consumed is null',
         (tester) async {
       final rebuildNotifier = ValueNotifier(0);
+      addTearDown(rebuildNotifier.dispose);
 
       await tester.pumpWidget(
         MaterialApp.router(
@@ -211,6 +212,7 @@ void main() {
       final parent2Key = GlobalKey<_TestFlowCoordinatorState>();
       final childKey = GlobalKey<_TestFlowCoordinatorState>();
       final switchParent = ValueNotifier(false);
+      addTearDown(switchParent.dispose);
 
       await tester.pumpWidget(
         MaterialApp.router(

@@ -130,6 +130,7 @@ void main() {
         (tester) async {
       final parent = RootRouteInformationReporterDelegate();
       final statusNotifier = ValueNotifier(true);
+      addTearDown(statusNotifier.dispose);
       var info = RouteInformation(uri: Uri.parse('/one'));
 
       Widget buildTree() => MaterialApp(
