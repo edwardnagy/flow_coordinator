@@ -10,19 +10,6 @@ void main() {
         MaterialApp(
           home: Builder(
             builder: (context) {
-              return Container();
-            },
-          ),
-        ),
-      );
-
-      final exception = tester.takeException();
-      expect(exception, isNull, reason: 'No exception should be thrown yet');
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Builder(
-            builder: (context) {
               expect(
                 () => FlowCoordinator.of<_TestFlowCoordinatorState>(context),
                 throwsA(

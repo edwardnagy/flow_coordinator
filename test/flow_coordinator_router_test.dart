@@ -8,12 +8,13 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('FlowCoordinatorRouter', () {
     testWidgets('builds the home widget', (tester) async {
+      final router = FlowCoordinatorRouter(
+        homeBuilder: (context) => const Text('Home Screen'),
+      );
+      addTearDown(router.dispose);
+
       await tester.pumpWidget(
-        MaterialApp.router(
-          routerConfig: FlowCoordinatorRouter(
-            homeBuilder: (context) => const Text('Home Screen'),
-          ),
-        ),
+        MaterialApp.router(routerConfig: router),
       );
 
       expect(find.text('Home Screen'), findsOneWidget);
@@ -56,13 +57,13 @@ void main() {
         ),
       );
 
-      expect(find.text('Home with Reporting'), findsOneWidget);
+      expect(router.routeInformationReportingEnabled, isTrue);
     });
 
     testWidgets('works without route information reporting', (tester) async {
       final router = FlowCoordinatorRouter(
         routeInformationReportingEnabled: false,
-        homeBuilder: (context) => const Text('Home without Reporting'),
+        homeBuilder: (context) => const SizedBox(),
       );
       addTearDown(router.dispose);
 
@@ -72,7 +73,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Home without Reporting'), findsOneWidget);
+      expect(router.routeInformationReportingEnabled, isFalse);
     });
 
     testWidgets('uses custom backButtonDispatcher when provided',
@@ -80,7 +81,7 @@ void main() {
       final backButtonDispatcher = RootBackButtonDispatcher();
       final router = FlowCoordinatorRouter(
         backButtonDispatcher: backButtonDispatcher,
-        homeBuilder: (context) => const Text('Custom Back Button'),
+        homeBuilder: (context) => const SizedBox(),
       );
       addTearDown(router.dispose);
 
@@ -90,13 +91,14 @@ void main() {
         ),
       );
 
-      expect(find.text('Custom Back Button'), findsOneWidget);
+      expect(router.backButtonDispatcher, same(backButtonDispatcher));
     });
 
     testWidgets('initialUri is used when provided', (tester) async {
+      final initialUri = Uri.parse('/custom-initial');
       final router = FlowCoordinatorRouter(
-        initialUri: Uri.parse('/custom-initial'),
-        homeBuilder: (context) => const Text('Custom Initial URI'),
+        initialUri: initialUri,
+        homeBuilder: (context) => const SizedBox(),
       );
       addTearDown(router.dispose);
 
@@ -106,7 +108,10 @@ void main() {
         ),
       );
 
-      expect(find.text('Custom Initial URI'), findsOneWidget);
+      expect(
+        router.routeInformationProvider.value.uri.path,
+        initialUri.path,
+      );
     });
 
     testWidgets('popRoute returns false at root level', (tester) async {

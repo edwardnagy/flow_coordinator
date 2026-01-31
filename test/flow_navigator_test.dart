@@ -38,13 +38,9 @@ void main() {
     testWidgets('maybeOf returns null when not found', (tester) async {
       await tester.pumpWidget(Container());
       final context = tester.element(find.byType(Container));
+      
+      // Test both with and without listen parameter
       expect(FlowNavigator.maybeOf(context), isNull);
-    });
-
-    testWidgets('maybeOf with listen true returns null when not found',
-        (tester) async {
-      await tester.pumpWidget(Container());
-      final context = tester.element(find.byType(Container));
       expect(FlowNavigator.maybeOf(context, listen: true), isNull);
     });
 
@@ -54,7 +50,7 @@ void main() {
       expect(() => FlowNavigator.of(context), throwsA(isA<FlutterError>()));
     });
 
-    testWidgets('Finds FlowNavigator when provided', (tester) async {
+    testWidgets('finds FlowNavigator when provided', (tester) async {
       final navigator = TestFlowNavigator();
       await tester.pumpWidget(
         FlowNavigatorScope(
@@ -67,23 +63,9 @@ void main() {
         ),
       );
       final context = tester.element(find.byType(Container));
+      
+      // Test both with and without listen parameter
       expect(FlowNavigator.of(context), navigator);
-    });
-
-    testWidgets('Finds FlowNavigator when provided with listen',
-        (tester) async {
-      final navigator = TestFlowNavigator();
-      await tester.pumpWidget(
-        FlowNavigatorScope(
-          flowNavigator: navigator,
-          child: Builder(
-            builder: (context) {
-              return Container();
-            },
-          ),
-        ),
-      );
-      final context = tester.element(find.byType(Container));
       expect(FlowNavigator.of(context, listen: true), navigator);
     });
 

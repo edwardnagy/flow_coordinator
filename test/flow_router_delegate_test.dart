@@ -34,10 +34,12 @@ void main() {
         contextDescriptionProvider: () => 'Test context',
       );
 
-      await delegate.setNewRoutePath(
-        RouteInformation(uri: Uri.parse('/')),
-      );
-      // Should complete without errors
+      final routeInfo = RouteInformation(uri: Uri.parse('/new-route'));
+      final future = delegate.setNewRoutePath(routeInfo);
+      
+      // Verify it returns a SynchronousFuture (completes immediately)
+      expect(future, isA<SynchronousFuture<void>>());
+      await future;
     });
 
     testWidgets('push adds page to navigation stack', (tester) async {

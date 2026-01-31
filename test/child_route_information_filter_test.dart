@@ -138,8 +138,6 @@ void main() {
         ),
       );
 
-      expect(capturedProvider, isNotNull);
-
       // Verify provider is functional before disposal
       var listenerCallCount = 0;
       capturedProvider!.consumedValueListenable.addListener(
