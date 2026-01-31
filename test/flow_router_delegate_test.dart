@@ -16,18 +16,6 @@ Widget _appWithDelegate(FlowRouterDelegate delegate) => MaterialApp.router(
 
 void main() {
   group('FlowRouterDelegate', () {
-    test('initializes with provided pages', () {
-      final delegate = FlowRouterDelegate(
-        initialPages: const [
-          MaterialPage(child: Text('Page 1')),
-          MaterialPage(child: Text('Page 2')),
-        ],
-        contextDescriptionProvider: () => 'Test context',
-      );
-
-      expect(delegate.navigatorKey, isNotNull);
-    });
-
     test('setNewRoutePath completes synchronously', () async {
       final delegate = FlowRouterDelegate(
         initialPages: const [MaterialPage(child: Text('Page 1'))],

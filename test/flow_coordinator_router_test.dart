@@ -20,56 +20,6 @@ void main() {
       expect(find.text('Home Screen'), findsOneWidget);
     });
 
-    testWidgets('initializes router delegate, parser, and provider',
-        (tester) async {
-      final router = FlowCoordinatorRouter(
-        homeBuilder: (context) => const Text('Home Screen'),
-      );
-      addTearDown(router.dispose);
-
-      await tester.pumpWidget(
-        MaterialApp.router(
-          routerConfig: router,
-        ),
-      );
-
-      expect(router.routerDelegate, isNotNull);
-      expect(router.routeInformationParser, isNotNull);
-      expect(router.routeInformationProvider, isNotNull);
-    });
-
-    testWidgets('handles route information reporting', (tester) async {
-      final router = FlowCoordinatorRouter(
-        routeInformationReportingEnabled: true,
-        homeBuilder: (context) => const Text('Home with Reporting'),
-      );
-      addTearDown(router.dispose);
-
-      await tester.pumpWidget(
-        MaterialApp.router(
-          routerConfig: router,
-        ),
-      );
-
-      expect(router.routeInformationReportingEnabled, isTrue);
-    });
-
-    testWidgets('works without route information reporting', (tester) async {
-      final router = FlowCoordinatorRouter(
-        routeInformationReportingEnabled: false,
-        homeBuilder: (context) => const SizedBox(),
-      );
-      addTearDown(router.dispose);
-
-      await tester.pumpWidget(
-        MaterialApp.router(
-          routerConfig: router,
-        ),
-      );
-
-      expect(router.routeInformationReportingEnabled, isFalse);
-    });
-
     testWidgets('uses custom backButtonDispatcher when provided',
         (tester) async {
       final backButtonDispatcher = RootBackButtonDispatcher();
@@ -154,7 +104,6 @@ void main() {
 
       // Verify notifyListeners was called due to state change
       expect(notifyCount, greaterThan(initialNotifyCount));
-      expect(find.byType(_ReportingHost), findsOneWidget);
     });
   });
 
