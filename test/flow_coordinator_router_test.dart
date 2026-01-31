@@ -152,6 +152,39 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   });
+
+  group('effectiveInitialUri', () {
+    test(
+        'returns initialUri when platform default is '
+        'Navigator.defaultRouteName', () {
+      final result = FlowCoordinatorRouter.effectiveInitialUri(
+        initialUri: Uri.parse('/custom'),
+        platformDefaultRouteNameOverride: Navigator.defaultRouteName,
+      );
+
+      expect(result, Uri.parse('/custom'));
+    });
+
+    test('returns Navigator.defaultRouteName when no URIs provided', () {
+      final result = FlowCoordinatorRouter.effectiveInitialUri(
+        initialUri: null,
+        platformDefaultRouteNameOverride: Navigator.defaultRouteName,
+      );
+
+      expect(result, Uri.parse(Navigator.defaultRouteName));
+    });
+
+    test(
+        'returns platform URI when platform default differs from '
+        'Navigator.defaultRouteName', () {
+      final result = FlowCoordinatorRouter.effectiveInitialUri(
+        initialUri: Uri.parse('/fallback'),
+        platformDefaultRouteNameOverride: '/platform-route',
+      );
+
+      expect(result, Uri.parse('/platform-route'));
+    });
+  });
 }
 
 class _ReportingHost extends StatefulWidget {
