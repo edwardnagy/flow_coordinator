@@ -60,6 +60,7 @@ class _RouteInformationReporterState extends State<RouteInformationReporter> {
 
   @override
   Widget build(BuildContext context) {
+    // TODO: Make this a pure function. Does this currently need to be run after didUpdateWidget?
     _delegate = ChildRouteInformationReporterDelegate(
       parent: RouteInformationReporterDelegate.of(context),
       routeInformationCombiner: RouteInformationCombiner.of(context),
