@@ -9,20 +9,15 @@ void main() {
     testWidgets('of throws error when scope not found', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: Builder(
-            builder: (context) {
-              try {
-                FlowRouteInformationProvider.of(context);
-                return const Text('Should not reach here');
-              } catch (e) {
-                return Text('Error: ${e.runtimeType}');
-              }
-            },
-          ),
+          home: Container(),
         ),
       );
 
-      expect(find.textContaining('Error: FlutterError'), findsOneWidget);
+      final context = tester.element(find.byType(Container));
+      expect(
+        () => FlowRouteInformationProvider.of(context),
+        throwsA(isA<FlutterError>()),
+      );
     });
 
     testWidgets('of returns provider when scope exists', (tester) async {

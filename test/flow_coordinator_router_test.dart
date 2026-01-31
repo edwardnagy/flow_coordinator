@@ -20,7 +20,8 @@ void main() {
       expect(find.text('Home Screen'), findsOneWidget);
     });
 
-    testWidgets('can navigate using the router delegate', (tester) async {
+    testWidgets('initializes router delegate, parser, and provider',
+        (tester) async {
       final router = FlowCoordinatorRouter(
         homeBuilder: (context) => const Text('Home Screen'),
       );
@@ -32,13 +33,6 @@ void main() {
         ),
       );
 
-      // Verify initial state
-      expect(find.text('Home Screen'), findsOneWidget);
-
-      // We can't easily push routes directly on
-      // FlowCoordinatorRouter's delegate because it's designed to
-      // work with FlowCoordinatorMixin.
-      // But we can verify it initializes correctly.
       expect(router.routerDelegate, isNotNull);
       expect(router.routeInformationParser, isNotNull);
       expect(router.routeInformationProvider, isNotNull);

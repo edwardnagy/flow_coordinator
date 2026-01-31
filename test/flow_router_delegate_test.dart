@@ -42,7 +42,7 @@ void main() {
       await future;
     });
 
-    testWidgets('push adds page to navigation stack', (tester) async {
+    test('push adds page to navigation stack', () {
       final delegate = FlowRouterDelegate(
         initialPages: const [MaterialPage(child: Text('Page 1'))],
         contextDescriptionProvider: () => 'Test context',
@@ -56,7 +56,7 @@ void main() {
       expect(notified, true);
     });
 
-    testWidgets('replaceCurrentPage replaces top page', (tester) async {
+    test('replaceCurrentPage replaces top page', () {
       final delegate = FlowRouterDelegate(
         initialPages: const [
           MaterialPage(child: Text('Page 1')),
@@ -73,7 +73,7 @@ void main() {
       expect(notified, true);
     });
 
-    testWidgets('setPages replaces all pages', (tester) async {
+    test('setPages replaces all pages', () {
       final delegate = FlowRouterDelegate(
         initialPages: const [MaterialPage(child: Text('Page 1'))],
         contextDescriptionProvider: () => 'Test context',
