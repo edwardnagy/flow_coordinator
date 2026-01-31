@@ -59,6 +59,7 @@ class FlowCoordinatorRouter implements RouterConfig<RouteInformation> {
   }) {
     final platformDefaultRouteName =
         WidgetsBinding.instance.platformDispatcher.defaultRouteName;
+    // TODO: extract Navigator.defaultRouteName into a variable that can be set from tests.
     final platformUri = platformDefaultRouteName == Navigator.defaultRouteName
         ? null
         : Uri.parse(platformDefaultRouteName);
