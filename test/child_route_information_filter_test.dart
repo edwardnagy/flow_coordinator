@@ -140,19 +140,32 @@ void main() {
 
       expect(capturedProvider, isNotNull);
 
-      // Verify listener can be added without errors during disposal
-      if (capturedProvider != null) {
-        var listenerCalled = false;
-        capturedProvider!.consumedValueListenable.addListener(
-          () => listenerCalled = true,
-        );
-        expect(listenerCalled, false); // No events yet
-      }
+      // Verify provider is functional before disposal
+      var listenerCallCount = 0;
+      capturedProvider!.consumedValueListenable.addListener(
+        () => listenerCallCount++,
+      );
+
+      parentProvider.setConsumedValue(
+        RouteInformation(uri: Uri.parse('/test')),
+      );
+      expect(listenerCallCount, greaterThan(0));
 
       // Remove widget triggers disposal
       await tester.pumpWidget(Container());
 
-      expect(tester.takeException(), isNull);
+      // After disposal, updating parent should not cause issues
+      // (listeners were properly removed). We verify this by checking
+      // the operation completes without error.
+      parentProvider.setConsumedValue(
+        RouteInformation(uri: Uri.parse('/after-dispose')),
+      );
+      parentProvider.setChildValue(
+        Consumable(RouteInformation(uri: Uri.parse('/after-dispose-child'))),
+      );
+
+      // Pump to process any pending callbacks - test passes if no crash
+      await tester.pump();
     });
 
     testWidgets('handles parent provider change', (tester) async {
@@ -160,29 +173,76 @@ void main() {
       final parentProvider2 = _TestChildFlowRouteInformationProvider();
       addTearDown(parentProvider1.dispose);
       addTearDown(parentProvider2.dispose);
+      ChildFlowRouteInformationProvider? capturedProvider;
 
       await tester.pumpWidget(
         MaterialApp(
           home: FlowRouteInformationProviderScope(
             parentProvider1,
             child: ChildRouteInformationFilter(
-              parentValueMatcher: (info) => true,
-              child: const SizedBox(),
+              parentValueMatcher: null, // null matcher forwards all updates
+              child: Builder(
+                builder: (context) {
+                  capturedProvider =
+                      FlowRouteInformationProvider.of(context) as
+                          ChildFlowRouteInformationProvider;
+                  return const SizedBox();
+                },
+              ),
             ),
           ),
         ),
       );
 
+      // Set value on first parent
+      parentProvider1.setChildValue(
+        Consumable(RouteInformation(uri: Uri.parse('/from-parent1'))),
+      );
+      expect(
+        capturedProvider?.childValueListenable.value?.consumeOrNull()?.uri.path,
+        '/from-parent1',
+      );
+
+      // Switch to second parent
       await tester.pumpWidget(
         MaterialApp(
           home: FlowRouteInformationProviderScope(
             parentProvider2,
             child: ChildRouteInformationFilter(
-              parentValueMatcher: (info) => true,
-              child: const SizedBox(),
+              parentValueMatcher: null,
+              child: Builder(
+                builder: (context) {
+                  capturedProvider =
+                      FlowRouteInformationProvider.of(context) as
+                          ChildFlowRouteInformationProvider;
+                  return const SizedBox();
+                },
+              ),
             ),
           ),
         ),
+      );
+
+      // Verify child receives values from new parent
+      parentProvider2.setChildValue(
+        Consumable(RouteInformation(uri: Uri.parse('/from-parent2'))),
+      );
+      expect(
+        capturedProvider?.childValueListenable.value?.consumeOrNull()?.uri.path,
+        '/from-parent2',
+      );
+
+      // Verify old parent updates don't affect the child anymore
+      parentProvider1.setChildValue(
+        Consumable(RouteInformation(uri: Uri.parse('/old-parent-update'))),
+      );
+      // New value from parent2 should be received, not affected by parent1
+      parentProvider2.setChildValue(
+        Consumable(RouteInformation(uri: Uri.parse('/still-parent2'))),
+      );
+      expect(
+        capturedProvider?.childValueListenable.value?.consumeOrNull()?.uri.path,
+        '/still-parent2',
       );
     });
 

@@ -109,7 +109,7 @@ void main() {
       expect(find.text('Custom Initial URI'), findsOneWidget);
     });
 
-    testWidgets('setNewRoutePath updates route', (tester) async {
+    testWidgets('popRoute returns false at root level', (tester) async {
       final router = FlowCoordinatorRouter(
         homeBuilder: (context) => const SizedBox(),
       );
@@ -127,6 +127,7 @@ void main() {
 
     testWidgets('notifies on state-only route change', (tester) async {
       final hostKey = GlobalKey<_ReportingHostState>();
+      var notifyCount = 0;
       final router = FlowCoordinatorRouter(
         routeInformationReportingEnabled: true,
         homeBuilder: (context) => _ReportingHost(
@@ -135,10 +136,15 @@ void main() {
         ),
       );
       addTearDown(router.dispose);
+      router.routerDelegate.addListener(() => notifyCount++);
 
       await tester.pumpWidget(
         MaterialApp.router(routerConfig: router),
       );
+
+      // Wait for initial report
+      await tester.pump();
+      final initialNotifyCount = notifyCount;
 
       // Update only the state, keep same URI to exercise the state
       // inequality branch.
@@ -147,9 +153,9 @@ void main() {
       );
       await tester.pump();
 
-      // Verify widget still exists and no exceptions were thrown
+      // Verify notifyListeners was called due to state change
+      expect(notifyCount, greaterThan(initialNotifyCount));
       expect(find.byType(_ReportingHost), findsOneWidget);
-      expect(tester.takeException(), isNull);
     });
   });
 

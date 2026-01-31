@@ -261,6 +261,23 @@ void main() {
       await tester.pump();
 
       expect(find.text('Child'), findsOneWidget);
+
+      // Verify old parent's route changes complete without error
+      // and the child remains visible (proper cleanup occurred)
+      parent1Key.currentState?.setNewRouteInformation(
+        RouteInformation(uri: Uri.parse('/old-parent-route')),
+      );
+      await tester.pump();
+
+      // Child should still be visible under new parent
+      expect(find.text('Child'), findsOneWidget);
+
+      // Verify new parent can still communicate with child
+      parent2Key.currentState?.setNewRouteInformation(
+        RouteInformation(uri: Uri.parse('/new-parent-route')),
+      );
+      await tester.pump();
+      expect(find.text('Child'), findsOneWidget);
     });
 
     testWidgets('child propagates route to parent', (tester) async {
