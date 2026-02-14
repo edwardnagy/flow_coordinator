@@ -14,6 +14,14 @@ abstract interface class RouteInformationCombiner {
     if (scope == null) {
       throw FlutterError.fromParts([
         ErrorSummary('No RouteInformationCombinerScope found.'),
+        ErrorDescription(
+          'A RouteInformationCombinerScope is typically provided by the '
+          'FlowCoordinatorMixin.',
+        ),
+        ErrorHint(
+          'Make sure you have a Flow Coordinator widget that mixes in '
+          'FlowCoordinatorMixin above this widget in the widget tree.',
+        ),
         ...context.describeMissingAncestor(
           expectedAncestorType: RouteInformationCombinerScope,
         ),
