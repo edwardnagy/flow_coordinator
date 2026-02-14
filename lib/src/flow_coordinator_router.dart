@@ -22,7 +22,7 @@ class FlowCoordinatorRouter implements RouterConfig<RouteInformation> {
         routeInformationProvider = routeInformationProvider ??
             PlatformRouteInformationProvider(
               initialRouteInformation: RouteInformation(
-                uri: _effectiveInitialUri(initialUri: initialUri),
+                uri: effectiveInitialUri(initialUri: initialUri),
                 state: initialState,
               ),
             );
@@ -54,14 +54,17 @@ class FlowCoordinatorRouter implements RouterConfig<RouteInformation> {
   /// Builds the initial widget of the app, typically the root flow coordinator.
   final WidgetBuilder homeBuilder;
 
-  static Uri _effectiveInitialUri({
+  @visibleForTesting
+  static Uri effectiveInitialUri({
     required Uri? initialUri,
+    String? platformDefaultRouteNameOverride,
   }) {
-    final platformDefaultRouteName =
+    final platformDefaultRouteName = platformDefaultRouteNameOverride ??
         WidgetsBinding.instance.platformDispatcher.defaultRouteName;
-    final platformUri = platformDefaultRouteName == Navigator.defaultRouteName
-        ? null
-        : Uri.parse(platformDefaultRouteName);
+    Uri? platformUri;
+    if (platformDefaultRouteName != Navigator.defaultRouteName) {
+      platformUri = Uri.parse(platformDefaultRouteName);
+    }
 
     final effectiveUri =
         platformUri ?? initialUri ?? Uri.parse(Navigator.defaultRouteName);
