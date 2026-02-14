@@ -51,9 +51,16 @@ class FlowCoordinatorRouter implements RouterConfig<RouteInformation> {
   /// saving state restoration data.
   final bool routeInformationReportingEnabled;
 
-  /// Builds the initial widget of the app, typically the root flow coordinator.
+  /// The builder for the initial widget of the app, typically the root flow
+  /// coordinator.
   final WidgetBuilder homeBuilder;
 
+  /// The effective initial [Uri] computed from the given [initialUri] and
+  /// the platform's default route name.
+  ///
+  /// The platform's default route name takes precedence over [initialUri] if
+  /// it differs from [Navigator.defaultRouteName]. If neither is available,
+  /// falls back to [Navigator.defaultRouteName].
   @visibleForTesting
   static Uri effectiveInitialUri({
     required Uri? initialUri,

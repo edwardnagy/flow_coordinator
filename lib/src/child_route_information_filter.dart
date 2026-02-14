@@ -5,6 +5,8 @@ import 'package:flutter/widgets.dart';
 import 'consumable.dart';
 import 'flow_route_information_provider.dart';
 
+/// A function that evaluates whether the given [RouteInformation] matches a
+/// condition.
 typedef RouteInformationPredicate = bool Function(
   RouteInformation routeInformation,
 );
@@ -24,6 +26,8 @@ class ChildRouteInformationFilter extends StatefulWidget {
   ///
   /// If `null`, all updates from the parent are forwarded to the child.
   final RouteInformationPredicate? parentValueMatcher;
+
+  /// The widget below this widget in the tree.
   final Widget child;
 
   @override

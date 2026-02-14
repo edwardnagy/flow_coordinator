@@ -2,7 +2,12 @@ import 'package:flutter/widgets.dart';
 
 import 'route_information_combiner.dart';
 
+/// A delegate that receives route information reports from child flows.
 abstract class RouteInformationReporterDelegate {
+  /// The nearest [RouteInformationReporterDelegate] in the widget tree above
+  /// the given [context].
+  ///
+  /// Throws a [FlutterError] if no [RouteInformationReporterScope] is found.
   static RouteInformationReporterDelegate of(BuildContext context) {
     final scope = context
         .dependOnInheritedWidgetOfExactType<RouteInformationReporterScope>();
@@ -21,11 +26,16 @@ abstract class RouteInformationReporterDelegate {
     return scope.value;
   }
 
+  /// Reports route information from a child flow to this delegate.
   void childReportsRouteInformation(RouteInformation childRouteInformation);
 }
 
+/// The root [RouteInformationReporterDelegate] that collects reported route
+/// information and notifies listeners.
 class RootRouteInformationReporterDelegate
     extends RouteInformationReporterDelegate with ChangeNotifier {
+  /// The most recently reported route information, or `null` if nothing has
+  /// been reported yet.
   RouteInformation? get reportedRouteInformation => _reportedRouteInformation;
   RouteInformation? _reportedRouteInformation;
 
@@ -69,6 +79,9 @@ class RootRouteInformationReporterDelegate
   }
 }
 
+/// A child [RouteInformationReporterDelegate] that combines its own route
+/// information with reports from nested children before forwarding to its
+/// [parent].
 class ChildRouteInformationReporterDelegate
     extends RouteInformationReporterDelegate {
   ChildRouteInformationReporterDelegate({
@@ -97,7 +110,10 @@ class ChildRouteInformationReporterDelegate
   }
 }
 
-/// NOTE: Reporting happens on the route level, not the router level. Only the
+/// An [InheritedWidget] that provides a [RouteInformationReporterDelegate] to
+/// its descendants.
+///
+/// Reporting happens on the route level, not the router level. Only the
 /// top-most route should report route information.
 class RouteInformationReporterScope extends InheritedWidget {
   const RouteInformationReporterScope(

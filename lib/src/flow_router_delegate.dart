@@ -3,6 +3,8 @@ import 'package:flutter/widgets.dart';
 
 import 'flow_navigator.dart';
 
+/// A [RouterDelegate] that implements [FlowNavigator] to manage a stack of
+/// pages within a flow coordinator.
 final class FlowRouterDelegate extends RouterDelegate<RouteInformation>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<RouteInformation>
     implements FlowNavigator {

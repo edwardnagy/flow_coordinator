@@ -57,7 +57,7 @@ export 'route_information_combiner.dart' show RouteInformationCombiner;
 /// navigation stack using [flowNavigator].
 ///
 /// * **Combined Reporting of Route Information**: [routeInformationCombiner]
-/// allows customization of  how route information from nested flows is combined
+/// allows customization of how route information from nested flows is combined
 /// into the current flow before being sent to the parent flow or the platform.
 ///
 /// * **Programmatic Navigation**: Use [setNewRouteInformation] to
@@ -86,8 +86,8 @@ mixin FlowCoordinatorMixin<T extends StatefulWidget> on State<T> {
   /// provided by the parent flow.
   RouteInformation? get initialRouteInformation => null;
 
-  /// Defines how route information from nested flows is combined into the
-  /// current flow.
+  /// The [RouteInformationCombiner] that defines how route information from
+  /// nested flows is combined into the current flow.
   RouteInformationCombiner get routeInformationCombiner =>
       const DefaultRouteInformationCombiner();
 

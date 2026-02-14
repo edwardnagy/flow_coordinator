@@ -5,11 +5,14 @@ import 'flow_route_status_scope.dart';
 /// A widget that provides a [ChildBackButtonDispatcher] to its [builder] that
 /// can be passed to a nested [Router] to handle back button events.
 class FlowBackButtonDispatcherBuilder extends StatefulWidget {
+  /// Creates a [FlowBackButtonDispatcherBuilder].
   const FlowBackButtonDispatcherBuilder({
     super.key,
     required this.builder,
   });
 
+  /// The builder that receives a [ChildBackButtonDispatcher] and returns a
+  /// widget.
   final Widget Function(
     BuildContext context,
     ChildBackButtonDispatcher? backButtonDispatcher,

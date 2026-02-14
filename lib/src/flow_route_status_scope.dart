@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+/// An [InheritedWidget] that provides the active and top-route status of a
+/// flow route to its descendants.
 class FlowRouteStatusScope extends InheritedWidget {
   const FlowRouteStatusScope({
     super.key,
@@ -15,6 +17,8 @@ class FlowRouteStatusScope extends InheritedWidget {
   /// Whether the route is the top route in the navigator.
   final bool isTopRoute;
 
+  /// The nearest [FlowRouteStatusScope] above the given [context], or `null`
+  /// if none exists.
   static FlowRouteStatusScope? maybeOf(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<FlowRouteStatusScope>();
 
