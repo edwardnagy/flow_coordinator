@@ -34,8 +34,8 @@ class FlowRouteScope extends StatelessWidget {
   /// is `null`.
   final RouteInformation? routeInformation;
 
-  /// Determines if the child subtree should receive route information updates
-  /// from the parent flow.
+  /// A predicate that determines whether the child subtree should receive
+  /// route information updates from the parent flow.
   ///
   /// This method is invoked with the latest route information consumed by the
   /// parent flow.
@@ -51,6 +51,7 @@ class FlowRouteScope extends StatelessWidget {
   /// delivered to the child. If `false`, both are suppressed.
   final bool isActive;
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   @override
@@ -83,7 +84,7 @@ class FlowRouteScope extends StatelessWidget {
 
 @visibleForTesting
 extension RouteInformationMatcher on RouteInformation {
-  /// Determines whether this route matches the given [pattern].
+  /// Whether this route matches the given [pattern].
   ///
   /// A match occurs if:
   /// - The path segments in [pattern] appear in this URI in the same order,

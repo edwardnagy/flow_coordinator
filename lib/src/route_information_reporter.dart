@@ -11,13 +11,17 @@ import 'route_information_reporter_delegate.dart';
 ///
 /// If [routeInformation] is `null`, no route information is reported.
 class RouteInformationReporter extends StatefulWidget {
+  /// Creates a [RouteInformationReporter].
   const RouteInformationReporter({
     super.key,
     required this.routeInformation,
     required this.child,
   });
 
+  /// The route information to report, or `null` if nothing should be reported.
   final RouteInformation? routeInformation;
+
+  /// The widget below this widget in the tree.
   final Widget child;
 
   @override

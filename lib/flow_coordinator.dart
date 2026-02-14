@@ -1,4 +1,4 @@
-// A navigation and routing API that organizes screens into user flows.
+/// A navigation and routing API that organizes screens into user flows.
 library;
 
 export 'src/flow_coordinator.dart';

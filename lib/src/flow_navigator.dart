@@ -1,9 +1,9 @@
 import 'package:flutter/widgets.dart';
 
-/// Provides methods to manage the navigation stack within a flow coordinator
+/// An interface for managing the navigation stack within a flow coordinator
 /// (pushing, popping, and replacing pages).
 abstract interface class FlowNavigator {
-  /// Returns the nearest [FlowNavigator] that encloses the given [context].
+  /// The nearest [FlowNavigator] that encloses the given [context].
   ///
   /// Throws a [FlutterError] if no [FlowNavigator] is found in the widget tree.
   static FlowNavigator of(BuildContext context, {bool listen = false}) {
@@ -24,8 +24,8 @@ The context used was: $context
     return navigatorScope.flowNavigator;
   }
 
-  /// Returns the nearest [FlowNavigator] that encloses the given [context],
-  /// or null if no [FlowNavigator] is found.
+  /// The nearest [FlowNavigator] that encloses the given [context], or `null`
+  /// if no [FlowNavigator] is found.
   static FlowNavigator? maybeOf(BuildContext context, {bool listen = false}) {
     final navigatorScope = listen
         ? context.dependOnInheritedWidgetOfExactType<FlowNavigatorScope>()
@@ -54,12 +54,12 @@ The context used was: $context
   /// Attempts to pop this navigator or any of its ancestor navigators from the
   /// widget tree.
   ///
-  /// Returns true if a navigator was popped, otherwise false.
+  /// Returns `true` if a navigator was popped, otherwise `false`.
   Future<bool> maybePop<T extends Object?>([T? result]);
 
   /// Attempts to pop this navigator.
   ///
-  /// Returns true if this navigator was popped, otherwise false.
+  /// Returns `true` if this navigator was popped, otherwise `false`.
   ///
   /// Behaves like [Navigator.maybePop].
   Future<bool> maybePopInternally<T extends Object?>([T? result]);
@@ -74,6 +74,7 @@ The context used was: $context
   void popInternally<T extends Object?>([T? result]);
 }
 
+/// An [InheritedWidget] that provides a [FlowNavigator] to its descendants.
 class FlowNavigatorScope extends InheritedWidget {
   const FlowNavigatorScope({
     super.key,

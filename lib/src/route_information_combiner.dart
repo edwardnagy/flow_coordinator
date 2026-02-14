@@ -1,13 +1,17 @@
 import 'package:flutter/widgets.dart';
 
-/// Defines how route information from nested flows is combined into a parent
-/// flow's route information.
+/// An interface that defines how route information from nested flows is
+/// combined into a parent flow's route information.
 ///
 /// When using nested flow coordinators, each child flow may report its own
 /// route information. The [RouteInformationCombiner] is responsible for merging
 /// the child's route information with the current flow's route information to
 /// produce a complete route that represents the full navigation hierarchy.
 abstract interface class RouteInformationCombiner {
+  /// The nearest [RouteInformationCombiner] in the widget tree above the given
+  /// [context].
+  ///
+  /// Throws a [FlutterError] if no [RouteInformationCombinerScope] is found.
   static RouteInformationCombiner of(BuildContext context) {
     final scope = context
         .dependOnInheritedWidgetOfExactType<RouteInformationCombinerScope>();
@@ -30,8 +34,8 @@ abstract interface class RouteInformationCombiner {
     return scope.value;
   }
 
-  /// Combines the [currentRouteInformation] with the [childRouteInformation]
-  /// to produce a single [RouteInformation] that represents the complete route.
+  /// The combined [RouteInformation] from [currentRouteInformation] and
+  /// [childRouteInformation], representing the complete route.
   ///
   /// The [currentRouteInformation] represents the route of the current flow,
   /// while the [childRouteInformation] represents the route of a nested child
@@ -94,7 +98,10 @@ class DefaultRouteInformationCombiner implements RouteInformationCombiner {
   }
 }
 
+/// An [InheritedWidget] that provides a [RouteInformationCombiner] to its
+/// descendants.
 class RouteInformationCombinerScope extends InheritedWidget {
+  /// Creates a [RouteInformationCombinerScope].
   const RouteInformationCombinerScope(
     this.value, {
     super.key,
