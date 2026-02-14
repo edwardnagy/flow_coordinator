@@ -15,7 +15,7 @@ class FlowCoordinatorRouter implements RouterConfig<RouteInformation> {
     this.routeInformationParser = const IdentityRouteInformationParser(),
     Uri? initialUri,
     Object? initialState,
-    this.routeInformationReportingEnabled = false,
+    this.routeInformationReportingEnabled = true,
     required this.homeBuilder,
   })  : backButtonDispatcher =
             backButtonDispatcher ?? RootBackButtonDispatcher(),
@@ -49,6 +49,8 @@ class FlowCoordinatorRouter implements RouterConfig<RouteInformation> {
   ///
   /// This enables features like updating the browser URL in web applications or
   /// saving state restoration data.
+  ///
+  /// Defaults to `true`.
   final bool routeInformationReportingEnabled;
 
   /// The builder for the initial widget of the app, typically the root flow

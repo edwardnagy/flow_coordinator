@@ -247,16 +247,6 @@ address bar. Set `routeInformation` to the desired URL segment for each screen.
 The browser URL reflects the topmost active `FlowRouteScope`, including when
 navigating back with in-app or Android back buttons.
 
-> **Note:** Set `routeInformationReportingEnabled: true` on
-> `FlowCoordinatorRouter` to enable browser URL updates:
->
-> ```dart
-> final _router = FlowCoordinatorRouter(
->   routeInformationReportingEnabled: true,
->   homeBuilder: (context) => const MyFlowCoordinator(),
-> );
-> ```
-
 ```dart
 class _MyFlowCoordinatorState extends State<MyFlowCoordinator>
     with FlowCoordinatorMixin {
