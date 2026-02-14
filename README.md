@@ -5,38 +5,31 @@ Flow Controller (Coordinator) pattern.
 
 ## What Is a User Flow?
 
-Think of a user flow as the ordered set of screens and choices that complete a
-goal. A flow coordinator owns those navigation rules, including any sub-flows
-inside it. Common scenarios:
+A user flow is an ordered sequence of screens that complete a goal. A flow
+coordinator owns the navigation rules for its screens, including any sub-flows.
+Common examples:
 
-- Checkout: shopping cart -> address & delivery options -> payment -> review ->
-confirmation.
-- Password reset: request link -> verify code -> set new password -> success.
-- Profile setup: create account -> upload avatar -> pick preferences -> done.
+- **Checkout:** cart → delivery options → payment → review → confirmation.
+- **Password reset:** request link → verify code → set new password → success.
+- **Profile setup:** create account → upload avatar → pick preferences → done.
 
 ## Features
 
-Use Flow Coordinators to:
-
 - Reuse screens and flows across different parts of your app.
-- Separate complex navigation logic from UI code.
-- Handle deep linking and complex routing scenarios modularly.
+- Separate navigation logic from UI code.
+- Handle deep linking and nested routing modularly.
 - Update the browser URL to reflect the current route.
-- Restore the app state after termination.
-- Guard screens from unauthorized access — for example, redirect to login if the
-user is not authenticated.
-- Support nested routing with tabs.
-- Preserve compatibility with the Navigator API.
+- Restore app state after termination.
+- Guard routes — for example, redirect to login if unauthenticated.
+- Support tabbed navigation with persistent sub-flows.
+- Preserve compatibility with the `Navigator` API.
 
 ## Getting Started
 
-To configure your app, set the `routerConfig` parameter of `MaterialApp.router`
-or `CupertinoApp.router` to a `FlowCoordinatorRouter`, and provide a builder for
-the root Flow Coordinator of your app:
+Set the `routerConfig` of `MaterialApp.router` (or `CupertinoApp.router`) to a
+`FlowCoordinatorRouter`, and provide a builder for the root flow coordinator:
 
 ```dart
-import 'package:flow_coordinator/flow_coordinator.dart';
-
 final _router = FlowCoordinatorRouter(
     homeBuilder: (context) => const MyFlowCoordinator(),
 );
@@ -53,22 +46,20 @@ class MyApp extends StatelessWidget {
 
 ## Usage
 
-This section has code examples for the following navigation scenarios:
-
 - [Navigating Between Screens](#navigating-between-screens)
 - [Deep Link Handling](#deep-link-handling)
 - [Updating the Browser URL](#updating-the-browser-url)
 - [Tabbed Navigation with Nested Routing](#tabbed-navigation-with-nested-routing)
 
-A complete example app that meets all navigation requirements identified by the
-Flutter team in their [Routing API Usability Research](https://github.com/flutter/uxr/blob/master/docs/Flutter-Routing-API-Usability-Research.md)
-as “important yet difficult to implement” is available in the [example](example/)
-directory.
+A complete example app is available in the [example](example/) directory. It
+demonstrates all the navigation requirements identified by the Flutter team in
+their [Routing API Usability Research](https://github.com/flutter/uxr/blob/master/docs/Flutter-Routing-API-Usability-Research.md)
+as “important yet difficult to implement”.
 
 ### Navigating Between Screens
 
-Create an interface for your screen's navigation events. The interface should implement
-`FlowCoordinatorMixin`:
+Define an interface for your screen's navigation events. The interface must
+implement `FlowCoordinatorMixin`:
 
 ```dart
 abstract interface class MyScreenListener<T extends StatefulWidget>
@@ -77,9 +68,8 @@ abstract interface class MyScreenListener<T extends StatefulWidget>
 }
 ```
 
-In your screen widget, use `FlowCoordinatorMixin.of<MyScreenListener>(context)`
-to retrieve the nearest Flow Coordinator that implements the listener interface.
-Call the appropriate method when a navigation event occurs:
+In the screen, retrieve the nearest flow coordinator that implements the
+listener using `FlowCoordinator.of`:
 
 ```dart
 class MyScreen extends StatelessWidget {
@@ -92,8 +82,7 @@ class MyScreen extends StatelessWidget {
       body: Center(
         child: ElevatedButton(
           onPressed: () {
-            final listener = FlowCoordinatorMixin.of<MyScreenListener>(context);
-            listener.onButtonPressed();
+            FlowCoordinator.of<MyScreenListener>(context).onButtonPressed();
           },
           child: const Text('Go to Next Screen'),
         ),
@@ -103,10 +92,8 @@ class MyScreen extends StatelessWidget {
 }
 ```
 
-Define the Flow Coordinator that manages the screen. This needs
-to be a StatefulWidget that mixes in `FlowCoordinatorMixin` and implements the
-listener interface created earlier. Set your screen as `initialPages` of the flow.
-Then, implement the navigation logic of the listener methods using the
+Create a `StatefulWidget` that mixes in `FlowCoordinatorMixin` and implements
+the listener. Override `initialPages` to set the starting screen, then use
 `flowNavigator` to push, pop, or replace pages:
 
 ```dart
@@ -134,16 +121,15 @@ class _MyFlowCoordinatorState extends State<MyFlowCoordinator>
 }
 ```
 
-You can set this Flow Coordinator as the root of your app, or push it from another
-Flow Coordinator just like a regular screen.
+A flow coordinator can be set as the root of the app or pushed from another flow
+coordinator like a regular screen.
 
 #### Navigating Back
 
-Use `flowNavigator.pop()` from inside a Flow Coordinator,
-or `FlowNavigator.of(context).pop()` from inside a screen,
-to navigate back to the previous screen in the navigation stack. This ensures that
-the correct screen/flow is popped even in case the previous screen is managed by
-a different Flow Coordinator.
+Use `flowNavigator.pop()` from inside a flow coordinator, or
+`FlowNavigator.of(context).pop()` from inside a screen. The correct screen or
+flow is popped even when the previous screen belongs to a different flow
+coordinator.
 
 ```dart
 class MyNextScreen extends StatelessWidget {
@@ -155,9 +141,7 @@ class MyNextScreen extends StatelessWidget {
       appBar: AppBar(title: const Text('My Next Screen')),
       body: Center(
         child: ElevatedButton(
-          onPressed: () {
-            FlowNavigator.of(context).pop();
-          },
+          onPressed: () => FlowNavigator.of(context).pop(),
           child: const Text('Go Back'),
         ),
       ),
@@ -166,22 +150,20 @@ class MyNextScreen extends StatelessWidget {
 }
 ```
 
-Android back button handling is automatically delegated to the topmost navigator
-— no additional configuration is needed.
+Android back button handling is automatically delegated to the topmost
+navigator — no additional configuration is needed.
 
 ### Deep Link Handling
 
-Override the `onNewRouteInformation` method of your Flow
-Coordinator's FlowCoordinatorMixin to handle incoming deep links:
+Override `onNewRouteInformation` to handle incoming deep links:
 
 ```dart
-/// State of the MyFlowCoordinator plain StatefulWidget.
 class _MyFlowCoordinatorState extends State<MyFlowCoordinator>
     with FlowCoordinatorMixin {
   @override
   Future<RouteInformation?> onNewRouteInformation(
     RouteInformation routeInformation,
-  ) async {
+  ) {
     if (routeInformation.uri.pathSegments.firstOrNull == 'next') {
       flowNavigator.push(
         MaterialPage(key: ValueKey('my-next-screen'), child: MyNextScreen()),
@@ -192,31 +174,22 @@ class _MyFlowCoordinatorState extends State<MyFlowCoordinator>
 }
 ```
 
-Note, return a `SynchronousFuture` if the deep link can be handled synchronously
-to avoid waiting for the next microtask to schedule the build.
+Return a `SynchronousFuture` when the result can be computed synchronously to
+avoid waiting for the next microtask.
 
-#### Nested Routing
+#### Forwarding to Child Flows
 
-If part of the deep link should be handled by a child Flow Coordinator,
-return a `RouteInformation` object from the `onNewRouteInformation` that
-contains the remaining part of the deep link. The child Flow Coordinator will
-receive it in its own `onNewRouteInformation` method.
-
-In the example below, the `HomeFlowCoordinator` routes to either the
-`BookFlowCoordinator` or the `SettingsScreen` based on the first path segment.
-It then forwards the remaining path segments to the child Flow Coordinator
-by returning a new `RouteInformation` object. The `BookFlowCoordinator`
-handles the remaining path segments to show either the list of books or
-the details of a specific book.
+Return a `RouteInformation` from `onNewRouteInformation` to forward the
+remaining path segments to a child flow coordinator. The child receives them in
+its own `onNewRouteInformation`:
 
 ```dart
-/// State of the HomeFlowCoordinator StatefulWidget.
 class _HomeFlowCoordinatorState extends State<HomeFlowCoordinator>
     with FlowCoordinatorMixin {
   @override
   Future<RouteInformation?> onNewRouteInformation(
     RouteInformation routeInformation,
-  ) async {
+  ) {
     switch (routeInformation.uri.pathSegments.firstOrNull) {
       case 'books':
         flowNavigator.setPages([
@@ -234,13 +207,12 @@ class _HomeFlowCoordinatorState extends State<HomeFlowCoordinator>
   }
 }
 
-/// State of the BookFlowCoordinator plain StatefulWidget.
 class _BookFlowCoordinatorState extends State<BookFlowCoordinator>
     with FlowCoordinatorMixin {
   @override
   Future<RouteInformation?> onNewRouteInformation(
     RouteInformation routeInformation,
-  ) async {
+  ) {
     final bookID = routeInformation.uri.pathSegments.firstOrNull;
     flowNavigator.setPages([
       MaterialPage(key: ValueKey('books-list'), child: BooksListScreen()),
@@ -255,26 +227,47 @@ class _BookFlowCoordinatorState extends State<BookFlowCoordinator>
 }
 ```
 
-### Updating the Browser URL
+#### Programmatic Deep Links
 
-Wrap your screen widgets with `FlowRouteScope` to update the browser URL when navigating
-between screens. Set `routeInformation` to the desired URL for each screen. The
-browser's address bar will reflect the URL of the topmost `FlowRouteScope` in
-the navigation stack, even when navigating back using in-app or Android back buttons.
+Use `setNewRouteInformation` to programmatically trigger `onNewRouteInformation`
+on the current flow coordinator:
 
 ```dart
-/// State of the MyFlowCoordinator plain StatefulWidget.
+void openRandomBook() {
+  setNewRouteInformation(
+    RouteInformation(uri: Uri(pathSegments: ['books', '42'])),
+  );
+}
+```
+
+### Updating the Browser URL
+
+Wrap screen widgets with `FlowRouteScope` to report their route to the browser's
+address bar. Set `routeInformation` to the desired URL segment for each screen.
+The browser URL reflects the topmost active `FlowRouteScope`, including when
+navigating back with in-app or Android back buttons.
+
+> **Note:** Set `routeInformationReportingEnabled: true` on
+> `FlowCoordinatorRouter` to enable browser URL updates:
+>
+> ```dart
+> final _router = FlowCoordinatorRouter(
+>   routeInformationReportingEnabled: true,
+>   homeBuilder: (context) => const MyFlowCoordinator(),
+> );
+> ```
+
+```dart
 class _MyFlowCoordinatorState extends State<MyFlowCoordinator>
     with FlowCoordinatorMixin {
   @override
   Future<RouteInformation?> onNewRouteInformation(
     RouteInformation routeInformation,
-  ) async {
+  ) {
     flowNavigator.setPages([
       MaterialPage(
         key: ValueKey('my-screen'),
         child: FlowRouteScope(
-          // Update URL to '/' when MyScreen is active.
           routeInformation: RouteInformation(uri: Uri()),
           child: MyScreen(),
         ),
@@ -282,8 +275,7 @@ class _MyFlowCoordinatorState extends State<MyFlowCoordinator>
       if (routeInformation.uri.pathSegments.firstOrNull == 'next')
         MaterialPage(
           key: ValueKey('my-next-screen'),
-          FlowRouteScope(
-            // Update URL to '/next' when MyNextScreen is active.
+          child: FlowRouteScope(
             routeInformation: RouteInformation(
               uri: Uri(pathSegments: ['next']),
             ),
@@ -296,26 +288,24 @@ class _MyFlowCoordinatorState extends State<MyFlowCoordinator>
 }
 ```
 
+Route information from nested flows is combined automatically — a parent
+reporting `books` and a child reporting `123` produces `/books/123`. Override
+`routeInformationCombiner` in your flow coordinator to customize this behavior.
+
 ### Tabbed Navigation with Nested Routing
 
-For layouts where multiple flow coordinators coexist — such as a navigation bar
-with persistent sub-flows — you must use `FlowRouteScope` to explicitly specify
-the route information and active state of each child flow coordinator.
-This has the following effects:
+For layouts where multiple flow coordinators coexist — such as tabs — wrap each
+child in a `FlowRouteScope` to control its active state:
 
-- **Deep Link Filtering:** It controls deep link propagation by
-conditionally forwarding route updates to the child subtree only when they match
-the specified `routeInformation`.
-- **Updating the Browser URL:** When the route is `isActive`, its
-`routeInformation` is combined with ancestor routes and reported to the platform
-to update the browser's address bar or save state restoration data.
-- **Back Button Handling:** Back button events are only delivered to the child
-subtree if `isActive` is true.
+- **Deep link filtering:** Only the tab whose `routeInformation` matches the
+incoming URL receives the deep link.
+- **URL reporting:** Only the active tab's route is reported to the browser.
+- **Back button scoping:** Back button events are delivered only to the active
+tab.
 
 ```dart
 enum HomeTab { books, settings }
 
-/// State of the HomeFlowCoordinator StatefulWidget.
 class _HomeFlowCoordinatorState extends State<HomeFlowCoordinator>
     with FlowCoordinatorMixin
     implements HomeScreenListener<HomeFlowCoordinator> {
@@ -325,8 +315,7 @@ class _HomeFlowCoordinatorState extends State<HomeFlowCoordinator>
   @override
   Future<RouteInformation?> onNewRouteInformation(
     RouteInformation routeInformation,
-  ) async {
-    // 1. Parse the first segment to determine the active tab.
+  ) {
     final pathSegments = routeInformation.uri.pathSegments;
     final selectedTab = switch (pathSegments.firstOrNull) {
       'books' => HomeTab.books,
@@ -334,18 +323,11 @@ class _HomeFlowCoordinatorState extends State<HomeFlowCoordinator>
       _ => HomeTab.books,
     };
 
-    // 2. Update the navigation stack to show the correct tab.
     flowNavigator.setPages([_buildHomePage(selectedTab)]);
 
-    // 3. Forward the remaining URI segments to the child flow.
-    final childRoute = RouteInformation(
-      uri: Uri(pathSegments: pathSegments.skip(1).toList()),
+    return SynchronousFuture(
+      RouteInformation(uri: Uri(pathSegments: pathSegments.skip(1).toList())),
     );
-    return SynchronousFuture(childRoute);
-  }
-
-  void _onTabSelected(HomeTab tab) {
-    flowNavigator.setPages([_buildHomePage(tab)]);
   }
 
   Page _buildHomePage(HomeTab currentTab) {
@@ -354,7 +336,6 @@ class _HomeFlowCoordinatorState extends State<HomeFlowCoordinator>
         selectedTab: currentTab,
         tabBuilder: (context, tab) => switch (tab) {
           HomeTab.books => FlowRouteScope(
-            // Only the active tab responds to back buttons & reports URLs.
             isActive: currentTab == HomeTab.books,
             routeInformation: RouteInformation(uri: Uri(path: 'books')),
             child: const BooksFlowCoordinator(),
@@ -371,10 +352,9 @@ class _HomeFlowCoordinatorState extends State<HomeFlowCoordinator>
 }
 ```
 
-## Common Issues and Solutions
+## Troubleshooting
 
 ### Navigation Animations Not Working
 
-Ensure that each Page you push to the `flowNavigator` has a unique LocalKey. This
-allows the Navigator widget used under the hood to correctly identify pages and
-apply navigation animations.
+Each `Page` pushed to `flowNavigator` must have a unique `LocalKey`. This allows
+the `Navigator` to correctly identify pages and apply transition animations.
