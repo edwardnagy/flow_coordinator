@@ -3,8 +3,8 @@ import 'package:flutter/widgets.dart';
 
 import 'flow_navigator.dart';
 
-final class FlowRouterDelegate extends RouterDelegate
-    with ChangeNotifier, PopNavigatorRouterDelegateMixin
+final class FlowRouterDelegate extends RouterDelegate<RouteInformation>
+    with ChangeNotifier, PopNavigatorRouterDelegateMixin<RouteInformation>
     implements FlowNavigator {
   FlowRouterDelegate({
     required List<Page> initialPages,
@@ -26,7 +26,8 @@ final class FlowRouterDelegate extends RouterDelegate
       _parentFlowNavigator = parentFlowNavigator;
 
   @override
-  Future<void> setNewRoutePath(configuration) => SynchronousFuture(null);
+  Future<void> setNewRoutePath(RouteInformation configuration) =>
+      SynchronousFuture(null);
 
   @override
   void push(Page page) {
