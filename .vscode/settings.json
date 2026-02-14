@@ -4,6 +4,7 @@
         "MD041": false
     },
     "chat.tools.terminal.autoApprove": {
-        "flutter": true
+        "flutter": true,
+        "lcov": true
     }
 }
