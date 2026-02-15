@@ -3,6 +3,50 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  group('FlowNavigator', () {
+    testWidgets('maybeOf returns null when no FlowNavigator found',
+        (tester) async {
+      await tester.pumpWidget(const SizedBox());
+
+      final context = tester.element(find.byType(SizedBox));
+      expect(FlowNavigator.maybeOf(context), isNull);
+    });
+
+    testWidgets('maybeOf returns FlowNavigator when found', (tester) async {
+      final navigator = _MockFlowNavigator();
+      await tester.pumpWidget(
+        FlowNavigatorScope(
+          flowNavigator: navigator,
+          child: const SizedBox(),
+        ),
+      );
+
+      final context = tester.element(find.byType(SizedBox));
+      expect(FlowNavigator.maybeOf(context), navigator);
+    });
+
+    testWidgets('of returns FlowNavigator when found', (tester) async {
+      final navigator = _MockFlowNavigator();
+      await tester.pumpWidget(
+        FlowNavigatorScope(
+          flowNavigator: navigator,
+          child: const SizedBox(),
+        ),
+      );
+
+      final context = tester.element(find.byType(SizedBox));
+      expect(FlowNavigator.of(context), navigator);
+    });
+
+    testWidgets('of throws FlutterError when no FlowNavigator found',
+        (tester) async {
+      await tester.pumpWidget(const SizedBox());
+
+      final context = tester.element(find.byType(SizedBox));
+      expect(() => FlowNavigator.of(context), throwsA(isA<FlutterError>()));
+    });
+  });
+
   group('FlowNavigatorScope', () {
     test(
       'updateShouldNotify returns true when navigator differs',
