@@ -2,15 +2,6 @@ import 'package:flow_coordinator/src/route_information_combiner.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class _CustomCombiner implements RouteInformationCombiner {
-  @override
-  RouteInformation combine({
-    required RouteInformation currentRouteInformation,
-    required RouteInformation childRouteInformation,
-  }) =>
-      childRouteInformation;
-}
-
 void main() {
   group('RouteInformationCombiner', () {
     testWidgets('of returns combiner when found', (tester) async {
@@ -164,4 +155,13 @@ void main() {
       );
     });
   });
+}
+
+class _CustomCombiner implements RouteInformationCombiner {
+  @override
+  RouteInformation combine({
+    required RouteInformation currentRouteInformation,
+    required RouteInformation childRouteInformation,
+  }) =>
+      childRouteInformation;
 }

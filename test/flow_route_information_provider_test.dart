@@ -4,12 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class _TestProvider extends FlowRouteInformationProvider {
-  @override
-  ValueListenable<Consumable<RouteInformation>?> get childValueListenable =>
-      ValueNotifier(null);
-}
-
 void main() {
   group('FlowRouteInformationProvider', () {
     testWidgets('of returns provider when found', (tester) async {
@@ -86,4 +80,10 @@ void main() {
       );
     });
   });
+}
+
+class _TestProvider extends FlowRouteInformationProvider {
+  @override
+  ValueListenable<Consumable<RouteInformation>?> get childValueListenable =>
+      ValueNotifier(null);
 }

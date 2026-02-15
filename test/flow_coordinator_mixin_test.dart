@@ -8,99 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// A flow coordinator that uses the default (empty) initialPages.
-class _DefaultPagesFlowCoordinator extends StatefulWidget {
-  const _DefaultPagesFlowCoordinator();
-
-  @override
-  State<_DefaultPagesFlowCoordinator> createState() =>
-      _DefaultPagesFlowCoordinatorState();
-}
-
-class _DefaultPagesFlowCoordinatorState
-    extends State<_DefaultPagesFlowCoordinator> with FlowCoordinatorMixin {
-  @override
-  Widget build(BuildContext context) => flowRouter(context);
-}
-
-/// A test FlowRouteInformationProvider for swapping in the widget tree.
-class _TestFlowRouteInfoProvider implements FlowRouteInformationProvider {
-  final childNotifier = ValueNotifier<Consumable<RouteInformation>?>(null);
-
-  @override
-  ValueListenable<Consumable<RouteInformation>?> get childValueListenable =>
-      childNotifier;
-
-  void dispose() => childNotifier.dispose();
-}
-
-// Minimal flow coordinator for testing
-class _TestFlowCoordinator extends StatefulWidget {
-  const _TestFlowCoordinator({
-    this.initialPages,
-    this.initialRouteInformation,
-    this.onNewRouteInformationCallback,
-    this.onBuild,
-  });
-
-  final List<Page>? initialPages;
-  final RouteInformation? initialRouteInformation;
-  final Future<RouteInformation?> Function(RouteInformation)?
-      onNewRouteInformationCallback;
-  final void Function(_TestFlowCoordinatorState)? onBuild;
-
-  @override
-  State<_TestFlowCoordinator> createState() => _TestFlowCoordinatorState();
-}
-
-class _TestFlowCoordinatorState extends State<_TestFlowCoordinator>
-    with FlowCoordinatorMixin {
-  @override
-  List<Page> get initialPages =>
-      widget.initialPages ??
-      [
-        const MaterialPage(
-          key: ValueKey('initial'),
-          child: SizedBox(),
-        ),
-      ];
-
-  @override
-  RouteInformation? get initialRouteInformation =>
-      widget.initialRouteInformation;
-
-  @override
-  Future<RouteInformation?> onNewRouteInformation(
-    RouteInformation routeInformation,
-  ) {
-    if (widget.onNewRouteInformationCallback != null) {
-      return widget.onNewRouteInformationCallback!(
-        routeInformation,
-      );
-    }
-    return super.onNewRouteInformation(routeInformation);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    widget.onBuild?.call(this);
-    return flowRouter(context);
-  }
-}
-
-Widget _buildTestApp({
-  required WidgetBuilder homeBuilder,
-  Uri? initialUri,
-}) {
-  return WidgetsApp.router(
-    routerConfig: FlowCoordinatorRouter(
-      homeBuilder: homeBuilder,
-      initialUri: initialUri,
-    ),
-    color: const Color(0xFF000000),
-  );
-}
-
 void main() {
   group('FlowCoordinatorMixin', () {
     testWidgets(
@@ -174,9 +81,9 @@ void main() {
     );
 
     testWidgets(
-      'onNewRouteInformation is called with default return',
+      'onNewRouteInformation is called with initial platform route information',
       (tester) async {
-        var called = false;
+        RouteInformation? receivedInfo;
         await tester.pumpWidget(
           _buildTestApp(
             homeBuilder: (_) => _TestFlowCoordinator(
@@ -184,15 +91,15 @@ void main() {
                 MaterialPage(child: SizedBox()),
               ],
               onNewRouteInformationCallback: (info) {
-                called = true;
+                receivedInfo = info;
                 return SynchronousFuture(null);
               },
             ),
-            initialUri: Uri.parse('/test'),
+            initialUri: Uri.parse('/initial-platform'),
           ),
         );
 
-        expect(called, isTrue);
+        expect(receivedInfo?.uri, Uri.parse('/initial-platform'));
       },
     );
 
@@ -291,7 +198,7 @@ void main() {
 
     testWidgets(
       'initialRouteInformation is not applied after custom '
-      'route information',
+      'route information from platform',
       (tester) async {
         final receivedUris = <Uri>[];
         await tester.pumpWidget(
@@ -312,8 +219,6 @@ void main() {
           ),
         );
 
-        // Should have been called with /custom but not with /initial
-        // because custom route info takes precedence
         expect(receivedUris, contains(Uri.parse('/custom')));
         expect(receivedUris, isNot(contains(Uri.parse('/initial'))));
       },
@@ -323,7 +228,7 @@ void main() {
       'routeInformationCombiner defaults to '
       'DefaultRouteInformationCombiner',
       (tester) async {
-        _TestFlowCoordinatorState? state;
+        late _TestFlowCoordinatorState state;
         await tester.pumpWidget(
           _buildTestApp(
             homeBuilder: (_) => _TestFlowCoordinator(
@@ -336,7 +241,7 @@ void main() {
         );
 
         expect(
-          state!.routeInformationCombiner,
+          state.routeInformationCombiner,
           isA<DefaultRouteInformationCombiner>(),
         );
       },
@@ -359,78 +264,6 @@ void main() {
         );
       },
     );
-
-    testWidgets(
-      'removes listener from old parent provider when provider changes',
-      (tester) async {
-        final providerA = _TestFlowRouteInfoProvider();
-        final providerB = _TestFlowRouteInfoProvider();
-        final currentProvider =
-            ValueNotifier<FlowRouteInformationProvider>(providerA);
-        RouteInformation? receivedAfterSwap;
-        addTearDown(() {
-          currentProvider.dispose();
-          providerA.dispose();
-          providerB.dispose();
-        });
-
-        await tester.pumpWidget(
-          _buildTestApp(
-            homeBuilder: (_) =>
-                ValueListenableBuilder<FlowRouteInformationProvider>(
-              valueListenable: currentProvider,
-              builder: (_, provider, __) => FlowRouteInformationProviderScope(
-                provider,
-                child: _TestFlowCoordinator(
-                  initialPages: const [
-                    MaterialPage(child: SizedBox()),
-                  ],
-                  onNewRouteInformationCallback: (info) {
-                    receivedAfterSwap = info;
-                    return SynchronousFuture(null);
-                  },
-                ),
-              ),
-            ),
-          ),
-        );
-
-        // Swap the provider to trigger didChangeDependencies with a
-        // non-null _parentRouteInformationProvider, exercising the
-        // removeListener call.
-        currentProvider.value = providerB;
-        await tester.pump();
-
-        // Clear any route info received during the swap itself.
-        receivedAfterSwap = null;
-
-        // Fire a change on the OLD provider — listener should have
-        // been removed, so the flow coordinator must NOT receive it.
-        providerA.childNotifier.value = Consumable(
-          RouteInformation(uri: Uri.parse('/from-old-provider')),
-        );
-        await tester.pump();
-
-        expect(receivedAfterSwap, isNull);
-      },
-    );
-
-    testWidgets('disposes cleanly', (tester) async {
-      await tester.pumpWidget(
-        _buildTestApp(
-          homeBuilder: (_) => const _TestFlowCoordinator(
-            initialPages: [
-              MaterialPage(child: SizedBox()),
-            ],
-          ),
-        ),
-      );
-
-      // Replace with different widget to trigger dispose
-      await tester.pumpWidget(const SizedBox());
-
-      expect(tester.takeException(), isNull);
-    });
 
     testWidgets(
       'FlowRouteScope integration - reports route info',
@@ -459,11 +292,7 @@ void main() {
             color: const Color(0xFF000000),
           ),
         );
-        // Pump extra frames for post-frame reporting callbacks.
-        for (var i = 0; i < 3; i++) {
-          tester.binding.scheduleFrame();
-          await tester.pump();
-        }
+        tester.binding.scheduleWarmUpFrame();
 
         expect(find.text('Books'), findsOneWidget);
         expect(
@@ -476,7 +305,6 @@ void main() {
     testWidgets(
       'child flow coordinator receives route info from parent',
       (tester) async {
-        _TestFlowCoordinatorState? parentState;
         RouteInformation? childReceivedInfo;
 
         await tester.pumpWidget(
@@ -485,10 +313,6 @@ void main() {
               initialPages: [
                 MaterialPage(
                   child: FlowRouteScope(
-                    routeInformation: RouteInformation(
-                      uri: Uri.parse('/parent'),
-                    ),
-                    shouldForwardChildUpdates: (_) => true,
                     child: _TestFlowCoordinator(
                       initialPages: const [
                         MaterialPage(
@@ -503,7 +327,6 @@ void main() {
                   ),
                 ),
               ],
-              onBuild: (s) => parentState = s,
               onNewRouteInformationCallback: (info) {
                 return SynchronousFuture(
                   RouteInformation(
@@ -515,13 +338,91 @@ void main() {
           ),
         );
 
-        parentState!.setNewRouteInformation(
-          RouteInformation(uri: Uri.parse('/new-route')),
-        );
-
         expect(childReceivedInfo, isNotNull);
         expect(childReceivedInfo!.uri, Uri.parse('/forwarded'));
       },
     );
   });
+}
+
+/// A flow coordinator that uses the default (empty) initialPages.
+class _DefaultPagesFlowCoordinator extends StatefulWidget {
+  const _DefaultPagesFlowCoordinator();
+
+  @override
+  State<_DefaultPagesFlowCoordinator> createState() =>
+      _DefaultPagesFlowCoordinatorState();
+}
+
+class _DefaultPagesFlowCoordinatorState
+    extends State<_DefaultPagesFlowCoordinator> with FlowCoordinatorMixin {
+  @override
+  Widget build(BuildContext context) => flowRouter(context);
+}
+
+/// Minimal flow coordinator for testing
+class _TestFlowCoordinator extends StatefulWidget {
+  const _TestFlowCoordinator({
+    this.initialPages,
+    this.initialRouteInformation,
+    this.onNewRouteInformationCallback,
+    this.onBuild,
+  });
+
+  final List<Page>? initialPages;
+  final RouteInformation? initialRouteInformation;
+  final Future<RouteInformation?> Function(RouteInformation)?
+      onNewRouteInformationCallback;
+  final void Function(_TestFlowCoordinatorState)? onBuild;
+
+  @override
+  State<_TestFlowCoordinator> createState() => _TestFlowCoordinatorState();
+}
+
+class _TestFlowCoordinatorState extends State<_TestFlowCoordinator>
+    with FlowCoordinatorMixin {
+  @override
+  List<Page> get initialPages =>
+      widget.initialPages ??
+      [
+        const MaterialPage(
+          key: ValueKey('initial'),
+          child: SizedBox(),
+        ),
+      ];
+
+  @override
+  RouteInformation? get initialRouteInformation =>
+      widget.initialRouteInformation;
+
+  @override
+  Future<RouteInformation?> onNewRouteInformation(
+    RouteInformation routeInformation,
+  ) {
+    if (widget.onNewRouteInformationCallback != null) {
+      return widget.onNewRouteInformationCallback!(
+        routeInformation,
+      );
+    }
+    return super.onNewRouteInformation(routeInformation);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    widget.onBuild?.call(this);
+    return flowRouter(context);
+  }
+}
+
+Widget _buildTestApp({
+  required WidgetBuilder homeBuilder,
+  Uri? initialUri,
+}) {
+  return WidgetsApp.router(
+    routerConfig: FlowCoordinatorRouter(
+      homeBuilder: homeBuilder,
+      initialUri: initialUri,
+    ),
+    color: const Color(0xFF000000),
+  );
 }

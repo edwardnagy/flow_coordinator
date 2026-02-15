@@ -4,33 +4,6 @@ import 'package:flow_coordinator/src/flow_route_scope.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-// Minimal flow coordinator for route info reporting tests.
-class _TestFlowCoordinator extends StatefulWidget {
-  const _TestFlowCoordinator({required this.pages});
-
-  final List<Page> pages;
-
-  @override
-  State<_TestFlowCoordinator> createState() => _TestFlowCoordinatorState();
-}
-
-class _TestFlowCoordinatorState extends State<_TestFlowCoordinator>
-    with FlowCoordinatorMixin {
-  @override
-  List<Page> get initialPages => widget.pages;
-
-  @override
-  Widget build(BuildContext context) => flowRouter(context);
-}
-
-/// Pumps frames until all post-frame callbacks have fired.
-Future<void> pumpFrames(WidgetTester tester, [int count = 3]) async {
-  for (var i = 0; i < count; i++) {
-    tester.binding.scheduleFrame();
-    await tester.pump();
-  }
-}
-
 void main() {
   group('FlowCoordinatorRouter', () {
     group('effectiveInitialUri', () {
@@ -234,7 +207,7 @@ void main() {
             color: const Color(0xFF000000),
           ),
         );
-        await pumpFrames(tester);
+        tester.binding.scheduleWarmUpFrame();
 
         expect(
           router.routerDelegate.currentConfiguration?.uri,
@@ -248,7 +221,8 @@ void main() {
         // Change state without changing URI to exercise the state
         // comparison branch.
         stateNotifier.value = 'stateB';
-        await pumpFrames(tester);
+        await tester.pump();
+        tester.binding.scheduleWarmUpFrame();
 
         expect(
           router.routerDelegate.currentConfiguration?.uri,
@@ -287,7 +261,7 @@ void main() {
             color: const Color(0xFF000000),
           ),
         );
-        await pumpFrames(tester);
+        tester.binding.scheduleWarmUpFrame();
 
         expect(
           router.routerDelegate.currentConfiguration?.uri,
@@ -296,4 +270,23 @@ void main() {
       },
     );
   });
+}
+
+/// Minimal flow coordinator for route info reporting tests.
+class _TestFlowCoordinator extends StatefulWidget {
+  const _TestFlowCoordinator({required this.pages});
+
+  final List<Page> pages;
+
+  @override
+  State<_TestFlowCoordinator> createState() => _TestFlowCoordinatorState();
+}
+
+class _TestFlowCoordinatorState extends State<_TestFlowCoordinator>
+    with FlowCoordinatorMixin {
+  @override
+  List<Page> get initialPages => widget.pages;
+
+  @override
+  Widget build(BuildContext context) => flowRouter(context);
 }

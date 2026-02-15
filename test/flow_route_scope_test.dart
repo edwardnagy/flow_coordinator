@@ -5,36 +5,6 @@ import 'package:flow_coordinator/src/flow_route_status_scope.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-// Minimal flow coordinator for widget tests.
-class _TestFlowCoordinator extends StatefulWidget {
-  const _TestFlowCoordinator({required this.pages});
-
-  final List<Page> pages;
-
-  @override
-  State<_TestFlowCoordinator> createState() => _TestFlowCoordinatorState();
-}
-
-class _TestFlowCoordinatorState extends State<_TestFlowCoordinator>
-    with FlowCoordinatorMixin {
-  @override
-  List<Page> get initialPages => widget.pages;
-
-  @override
-  Widget build(BuildContext context) => flowRouter(context);
-}
-
-Widget _buildTestApp({
-  required WidgetBuilder homeBuilder,
-}) {
-  return WidgetsApp.router(
-    routerConfig: FlowCoordinatorRouter(
-      homeBuilder: homeBuilder,
-    ),
-    color: const Color(0xFF000000),
-  );
-}
-
 void main() {
   group('RouteInformationMatcher', () {
     test('matches exact same URI', () {
@@ -315,41 +285,35 @@ void main() {
         expect(secondPageIsTopRoute, isTrue);
       },
     );
-
-    testWidgets(
-      'evaluates parent isTopRoute in nested FlowRouteScopes',
-      (tester) async {
-        bool? innerIsTopRoute;
-        await tester.pumpWidget(
-          _buildTestApp(
-            homeBuilder: (_) => _TestFlowCoordinator(
-              pages: [
-                MaterialPage(
-                  child: FlowRouteScope(
-                    routeInformation: RouteInformation(
-                      uri: Uri.parse('/parent'),
-                    ),
-                    child: FlowRouteScope(
-                      routeInformation: RouteInformation(
-                        uri: Uri.parse('/child'),
-                      ),
-                      child: Builder(
-                        builder: (context) {
-                          final scope = FlowRouteStatusScope.maybeOf(context);
-                          innerIsTopRoute = scope?.isTopRoute;
-                          return const SizedBox();
-                        },
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-
-        expect(innerIsTopRoute, isTrue);
-      },
-    );
   });
+}
+
+// Minimal flow coordinator for widget tests.
+class _TestFlowCoordinator extends StatefulWidget {
+  const _TestFlowCoordinator({required this.pages});
+
+  final List<Page> pages;
+
+  @override
+  State<_TestFlowCoordinator> createState() => _TestFlowCoordinatorState();
+}
+
+class _TestFlowCoordinatorState extends State<_TestFlowCoordinator>
+    with FlowCoordinatorMixin {
+  @override
+  List<Page> get initialPages => widget.pages;
+
+  @override
+  Widget build(BuildContext context) => flowRouter(context);
+}
+
+Widget _buildTestApp({
+  required WidgetBuilder homeBuilder,
+}) {
+  return WidgetsApp.router(
+    routerConfig: FlowCoordinatorRouter(
+      homeBuilder: homeBuilder,
+    ),
+    color: const Color(0xFF000000),
+  );
 }

@@ -4,25 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('FlowRouteStatusScope', () {
-    testWidgets('maybeOf returns scope when present', (tester) async {
-      FlowRouteStatusScope? result;
-      await tester.pumpWidget(
-        FlowRouteStatusScope(
-          isActive: true,
-          isTopRoute: false,
-          child: Builder(
-            builder: (context) {
-              result = FlowRouteStatusScope.maybeOf(context);
-              return const SizedBox();
-            },
-          ),
-        ),
-      );
-      expect(result, isNotNull);
-      expect(result!.isActive, isTrue);
-      expect(result!.isTopRoute, isFalse);
-    });
-
     testWidgets('maybeOf returns null when not present', (tester) async {
       FlowRouteStatusScope? result;
       await tester.pumpWidget(

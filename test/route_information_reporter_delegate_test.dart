@@ -3,13 +3,6 @@ import 'package:flow_coordinator/src/route_information_reporter_delegate.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Triggers post-frame callbacks in tests by scheduling a frame
-/// and pumping.
-Future<void> pumpPostFrameCallbacks(WidgetTester tester) async {
-  tester.binding.scheduleFrame();
-  await tester.pump();
-}
-
 void main() {
   group('RouteInformationReporterDelegate', () {
     testWidgets('of returns delegate when found', (tester) async {
@@ -73,7 +66,8 @@ void main() {
 
         expect(delegate.reportedRouteInformation, isNull);
 
-        await pumpPostFrameCallbacks(tester);
+        await tester.pump();
+        tester.binding.scheduleWarmUpFrame();
 
         expect(notified, isTrue);
         expect(
@@ -94,7 +88,8 @@ void main() {
           RouteInformation(uri: Uri.parse('test')),
         );
 
-        await pumpPostFrameCallbacks(tester);
+        await tester.pump();
+        tester.binding.scheduleWarmUpFrame();
 
         expect(
           delegate.reportedRouteInformation?.uri.toString(),
@@ -114,7 +109,8 @@ void main() {
           RouteInformation(uri: Uri.parse('/existing')),
         );
 
-        await pumpPostFrameCallbacks(tester);
+        await tester.pump();
+        tester.binding.scheduleWarmUpFrame();
 
         expect(
           delegate.reportedRouteInformation?.uri,
@@ -134,11 +130,13 @@ void main() {
         delegate.childReportsRouteInformation(
           RouteInformation(uri: Uri.parse('/first')),
         );
+        await tester.pump();
         delegate.childReportsRouteInformation(
           RouteInformation(uri: Uri.parse('/second')),
         );
+        await tester.pump();
 
-        await pumpPostFrameCallbacks(tester);
+        tester.binding.scheduleWarmUpFrame();
 
         expect(notifyCount, 1);
         expect(
@@ -164,7 +162,8 @@ void main() {
           RouteInformation(uri: Uri.parse('/child')),
         );
 
-        await pumpPostFrameCallbacks(tester);
+        await tester.pump();
+        tester.binding.scheduleWarmUpFrame();
 
         expect(
           parent.reportedRouteInformation?.uri,
@@ -191,7 +190,8 @@ void main() {
           RouteInformation(uri: Uri.parse('/nested')),
         );
 
-        await pumpPostFrameCallbacks(tester);
+        await tester.pump();
+        tester.binding.scheduleWarmUpFrame();
 
         expect(
           parent.reportedRouteInformation?.uri,
@@ -215,7 +215,8 @@ void main() {
           RouteInformation(uri: Uri.parse('/nested')),
         );
 
-        await pumpPostFrameCallbacks(tester);
+        await tester.pump();
+        tester.binding.scheduleWarmUpFrame();
 
         expect(
           parent.reportedRouteInformation?.uri,
