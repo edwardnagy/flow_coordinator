@@ -26,7 +26,7 @@ class _BookListScreenState extends State<BookListScreen>
   static const _tabs = BookTabType.values;
 
   final _bookRepository = BookRepository();
-  late final TabController _tabController = TabController(
+  late final _tabController = TabController(
     length: _tabs.length,
     initialIndex: _tabs.indexOf(widget.tab),
     vsync: this,
@@ -42,15 +42,7 @@ class _BookListScreenState extends State<BookListScreen>
   @override
   void didUpdateWidget(covariant BookListScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-
-    // Wait for the next frame to select the initial tab to avoid marking
-    // the widget as needing to build in the build method.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) {
-        return;
-      }
-      _tabController.index = _tabs.indexOf(widget.tab);
-    });
+    _tabController.index = _tabs.indexOf(widget.tab);
   }
 
   void _onTabChanged() {

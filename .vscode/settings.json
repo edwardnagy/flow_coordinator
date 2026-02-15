@@ -2,8 +2,5 @@
     "markdownlint.config": {
         "MD013": true,
         "MD041": false
-    },
-    "chat.tools.terminal.autoApprove": {
-        "flutter": true
     }
 }

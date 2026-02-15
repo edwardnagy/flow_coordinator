@@ -48,10 +48,11 @@ class RootRouteInformationReporterDelegate
       'Route information reporting task was scheduled but no route information '
       'is pending.',
     );
-    final routeInformation = _pendingRouteInformation!;
+    _reportedRouteInformation = _pendingRouteInformation!;
     _pendingRouteInformation = null;
-    _reportedRouteInformation = routeInformation;
-    notifyListeners();
+    if (hasListeners) {
+      notifyListeners();
+    }
   }
 
   @override
