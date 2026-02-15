@@ -71,7 +71,11 @@ class RootRouteInformationReporterDelegate
     final isReportingNotScheduled = _pendingRouteInformation == null;
     _pendingRouteInformation = prefixedRouteInformation;
     if (isReportingNotScheduled) {
-      Future(_reportRouteInformation);
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _reportRouteInformation(),
+        debugLabel:
+            'RootRouteInformationReporterDelegate.reportRouteInformation',
+      );
     }
   }
 }
