@@ -1,7 +1,6 @@
 import 'package:flow_coordinator/src/flow_coordinator_mixin.dart';
 import 'package:flow_coordinator/src/flow_coordinator_router.dart';
 import 'package:flow_coordinator/src/flow_route_scope.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -30,17 +29,6 @@ Future<void> pumpFrames(WidgetTester tester, [int count = 3]) async {
     tester.binding.scheduleFrame();
     await tester.pump();
   }
-}
-
-Widget _buildTestApp({
-  required WidgetBuilder homeBuilder,
-}) {
-  return WidgetsApp.router(
-    routerConfig: FlowCoordinatorRouter(
-      homeBuilder: homeBuilder,
-    ),
-    color: const Color(0xFF000000),
-  );
 }
 
 void main() {
