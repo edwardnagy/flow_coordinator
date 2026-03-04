@@ -12,9 +12,15 @@ void main() {
     testWidgets(
       'assertion error includes context description when initialPages is empty',
       (tester) async {
+        final router = FlowCoordinatorRouter(
+          homeBuilder: (_) => const _EmptyFlowCoordinator(),
+        );
+        addTearDown(router.dispose);
+
         await tester.pumpWidget(
-          _buildTestApp(
-            homeBuilder: (_) => const _EmptyFlowCoordinator(),
+          WidgetsApp.router(
+            routerConfig: router,
+            color: const Color(0xFF000000),
           ),
         );
 
@@ -34,11 +40,17 @@ void main() {
       (tester) async {
         FlowNavigator? capturedNavigator;
 
+        final router = FlowCoordinatorRouter(
+          homeBuilder: (_) => _FlowNavigatorAccessFlowCoordinator(
+            onBuilt: (navigator) => capturedNavigator = navigator,
+          ),
+        );
+        addTearDown(router.dispose);
+
         await tester.pumpWidget(
-          _buildTestApp(
-            homeBuilder: (_) => _FlowNavigatorAccessFlowCoordinator(
-              onBuilt: (navigator) => capturedNavigator = navigator,
-            ),
+          WidgetsApp.router(
+            routerConfig: router,
+            color: const Color(0xFF000000),
           ),
         );
 
@@ -99,21 +111,27 @@ void main() {
             ValueNotifier<_TestFlowRouteInformationProvider>(providerA);
         addTearDown(activeProvider.dispose);
 
-        await tester.pumpWidget(
-          _buildTestApp(
-            homeBuilder: (_) =>
-                ValueListenableBuilder<_TestFlowRouteInformationProvider>(
-              valueListenable: activeProvider,
-              child: _RouteTrackingFlowCoordinator(
-                onRouteReceived: receivedRoutes.add,
-              ),
-              builder: (context, provider, child) {
-                return FlowRouteInformationProviderScope(
-                  provider,
-                  child: child!,
-                );
-              },
+        final router = FlowCoordinatorRouter(
+          homeBuilder: (_) =>
+              ValueListenableBuilder<_TestFlowRouteInformationProvider>(
+            valueListenable: activeProvider,
+            child: _RouteTrackingFlowCoordinator(
+              onRouteReceived: receivedRoutes.add,
             ),
+            builder: (context, provider, child) {
+              return FlowRouteInformationProviderScope(
+                provider,
+                child: child!,
+              );
+            },
+          ),
+        );
+        addTearDown(router.dispose);
+
+        await tester.pumpWidget(
+          WidgetsApp.router(
+            routerConfig: router,
+            color: const Color(0xFF000000),
           ),
         );
 
@@ -141,12 +159,18 @@ void main() {
       (tester) async {
         final receivedRoutes = <RouteInformation>[];
 
+        final router = FlowCoordinatorRouter(
+          homeBuilder: (_) => _InitialRouteFlowCoordinator(
+            initialRouteInfo: RouteInformation(uri: Uri.parse('/home')),
+            onRouteReceived: receivedRoutes.add,
+          ),
+        );
+        addTearDown(router.dispose);
+
         await tester.pumpWidget(
-          _buildTestApp(
-            homeBuilder: (_) => _InitialRouteFlowCoordinator(
-              initialRouteInfo: RouteInformation(uri: Uri.parse('/home')),
-              onRouteReceived: receivedRoutes.add,
-            ),
+          WidgetsApp.router(
+            routerConfig: router,
+            color: const Color(0xFF000000),
           ),
         );
 
@@ -157,18 +181,6 @@ void main() {
   });
 }
 
-Widget _buildTestApp({
-  required WidgetBuilder homeBuilder,
-  Uri? initialUri,
-}) {
-  return WidgetsApp.router(
-    routerConfig: FlowCoordinatorRouter(
-      homeBuilder: homeBuilder,
-      initialUri: initialUri,
-    ),
-    color: const Color(0xFF000000),
-  );
-}
 
 class _EmptyFlowCoordinator extends StatefulWidget {
   const _EmptyFlowCoordinator();

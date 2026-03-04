@@ -180,26 +180,32 @@ void main() {
       'sets isTopRoute correctly inside a MaterialPage',
       (tester) async {
         bool? isTopRoute;
-        await tester.pumpWidget(
-          _buildTestApp(
-            homeBuilder: (_) => _TestFlowCoordinator(
-              pages: [
-                MaterialPage(
-                  child: FlowRouteScope(
-                    routeInformation: RouteInformation(
-                      uri: Uri.parse('/home'),
-                    ),
-                    child: Builder(
-                      builder: (context) {
-                        final scope = FlowRouteStatusScope.maybeOf(context);
-                        isTopRoute = scope?.isTopRoute;
-                        return const SizedBox();
-                      },
-                    ),
+        final router = FlowCoordinatorRouter(
+          homeBuilder: (_) => _TestFlowCoordinator(
+            pages: [
+              MaterialPage(
+                child: FlowRouteScope(
+                  routeInformation: RouteInformation(
+                    uri: Uri.parse('/home'),
+                  ),
+                  child: Builder(
+                    builder: (context) {
+                      final scope = FlowRouteStatusScope.maybeOf(context);
+                      isTopRoute = scope?.isTopRoute;
+                      return const SizedBox();
+                    },
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
+          ),
+        );
+        addTearDown(router.dispose);
+
+        await tester.pumpWidget(
+          WidgetsApp.router(
+            routerConfig: router,
+            color: const Color(0xFF000000),
           ),
         );
 
@@ -211,27 +217,33 @@ void main() {
       'sets isActive to false when isActive property is false',
       (tester) async {
         bool? isActive;
-        await tester.pumpWidget(
-          _buildTestApp(
-            homeBuilder: (_) => _TestFlowCoordinator(
-              pages: [
-                MaterialPage(
-                  child: FlowRouteScope(
-                    routeInformation: RouteInformation(
-                      uri: Uri.parse('/home'),
-                    ),
-                    isActive: false,
-                    child: Builder(
-                      builder: (context) {
-                        final scope = FlowRouteStatusScope.maybeOf(context);
-                        isActive = scope?.isActive;
-                        return const SizedBox();
-                      },
-                    ),
+        final router = FlowCoordinatorRouter(
+          homeBuilder: (_) => _TestFlowCoordinator(
+            pages: [
+              MaterialPage(
+                child: FlowRouteScope(
+                  routeInformation: RouteInformation(
+                    uri: Uri.parse('/home'),
+                  ),
+                  isActive: false,
+                  child: Builder(
+                    builder: (context) {
+                      final scope = FlowRouteStatusScope.maybeOf(context);
+                      isActive = scope?.isActive;
+                      return const SizedBox();
+                    },
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
+          ),
+        );
+        addTearDown(router.dispose);
+
+        await tester.pumpWidget(
+          WidgetsApp.router(
+            routerConfig: router,
+            color: const Color(0xFF000000),
           ),
         );
 
@@ -243,33 +255,39 @@ void main() {
       'isActive is false when parent FlowRouteStatusScope isActive is false',
       (tester) async {
         bool? isActive;
-        await tester.pumpWidget(
-          _buildTestApp(
-            homeBuilder: (_) => _TestFlowCoordinator(
-              pages: [
-                MaterialPage(
+        final router = FlowCoordinatorRouter(
+          homeBuilder: (_) => _TestFlowCoordinator(
+            pages: [
+              MaterialPage(
+                child: FlowRouteScope(
+                  routeInformation: RouteInformation(
+                    uri: Uri.parse('/parent'),
+                  ),
+                  isActive: false,
                   child: FlowRouteScope(
                     routeInformation: RouteInformation(
-                      uri: Uri.parse('/parent'),
+                      uri: Uri.parse('/child'),
                     ),
-                    isActive: false,
-                    child: FlowRouteScope(
-                      routeInformation: RouteInformation(
-                        uri: Uri.parse('/child'),
-                      ),
-                      isActive: true, // widget says active
-                      child: Builder(
-                        builder: (context) {
-                          final scope = FlowRouteStatusScope.maybeOf(context);
-                          isActive = scope?.isActive;
-                          return const SizedBox();
-                        },
-                      ),
+                    isActive: true, // widget says active
+                    child: Builder(
+                      builder: (context) {
+                        final scope = FlowRouteStatusScope.maybeOf(context);
+                        isActive = scope?.isActive;
+                        return const SizedBox();
+                      },
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
+          ),
+        );
+        addTearDown(router.dispose);
+
+        await tester.pumpWidget(
+          WidgetsApp.router(
+            routerConfig: router,
+            color: const Color(0xFF000000),
           ),
         );
 
@@ -281,33 +299,39 @@ void main() {
       'isActive is true when both widget and parent scope are active',
       (tester) async {
         bool? isActive;
-        await tester.pumpWidget(
-          _buildTestApp(
-            homeBuilder: (_) => _TestFlowCoordinator(
-              pages: [
-                MaterialPage(
+        final router = FlowCoordinatorRouter(
+          homeBuilder: (_) => _TestFlowCoordinator(
+            pages: [
+              MaterialPage(
+                child: FlowRouteScope(
+                  routeInformation: RouteInformation(
+                    uri: Uri.parse('/parent'),
+                  ),
+                  isActive: true,
                   child: FlowRouteScope(
                     routeInformation: RouteInformation(
-                      uri: Uri.parse('/parent'),
+                      uri: Uri.parse('/child'),
                     ),
                     isActive: true,
-                    child: FlowRouteScope(
-                      routeInformation: RouteInformation(
-                        uri: Uri.parse('/child'),
-                      ),
-                      isActive: true,
-                      child: Builder(
-                        builder: (context) {
-                          final scope = FlowRouteStatusScope.maybeOf(context);
-                          isActive = scope?.isActive;
-                          return const SizedBox();
-                        },
-                      ),
+                    child: Builder(
+                      builder: (context) {
+                        final scope = FlowRouteStatusScope.maybeOf(context);
+                        isActive = scope?.isActive;
+                        return const SizedBox();
+                      },
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
+          ),
+        );
+        addTearDown(router.dispose);
+
+        await tester.pumpWidget(
+          WidgetsApp.router(
+            routerConfig: router,
+            color: const Color(0xFF000000),
           ),
         );
 
@@ -320,40 +344,46 @@ void main() {
       (tester) async {
         bool? firstPageIsTopRoute;
         bool? secondPageIsTopRoute;
+        final router = FlowCoordinatorRouter(
+          homeBuilder: (_) => _TestFlowCoordinator(
+            pages: [
+              MaterialPage(
+                child: FlowRouteScope(
+                  routeInformation: RouteInformation(
+                    uri: Uri.parse('/first'),
+                  ),
+                  child: Builder(
+                    builder: (context) {
+                      final scope = FlowRouteStatusScope.maybeOf(context);
+                      firstPageIsTopRoute = scope?.isTopRoute;
+                      return const SizedBox();
+                    },
+                  ),
+                ),
+              ),
+              MaterialPage(
+                child: FlowRouteScope(
+                  routeInformation: RouteInformation(
+                    uri: Uri.parse('/second'),
+                  ),
+                  child: Builder(
+                    builder: (context) {
+                      final scope = FlowRouteStatusScope.maybeOf(context);
+                      secondPageIsTopRoute = scope?.isTopRoute;
+                      return const SizedBox();
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+        addTearDown(router.dispose);
+
         await tester.pumpWidget(
-          _buildTestApp(
-            homeBuilder: (_) => _TestFlowCoordinator(
-              pages: [
-                MaterialPage(
-                  child: FlowRouteScope(
-                    routeInformation: RouteInformation(
-                      uri: Uri.parse('/first'),
-                    ),
-                    child: Builder(
-                      builder: (context) {
-                        final scope = FlowRouteStatusScope.maybeOf(context);
-                        firstPageIsTopRoute = scope?.isTopRoute;
-                        return const SizedBox();
-                      },
-                    ),
-                  ),
-                ),
-                MaterialPage(
-                  child: FlowRouteScope(
-                    routeInformation: RouteInformation(
-                      uri: Uri.parse('/second'),
-                    ),
-                    child: Builder(
-                      builder: (context) {
-                        final scope = FlowRouteStatusScope.maybeOf(context);
-                        secondPageIsTopRoute = scope?.isTopRoute;
-                        return const SizedBox();
-                      },
-                    ),
-                  ),
-                ),
-              ],
-            ),
+          WidgetsApp.router(
+            routerConfig: router,
+            color: const Color(0xFF000000),
           ),
         );
 
@@ -377,15 +407,4 @@ class _TestFlowCoordinatorState extends State<_TestFlowCoordinator>
     with FlowCoordinatorMixin {
   @override
   List<Page> get initialPages => widget.pages;
-}
-
-Widget _buildTestApp({
-  required WidgetBuilder homeBuilder,
-}) {
-  return WidgetsApp.router(
-    routerConfig: FlowCoordinatorRouter(
-      homeBuilder: homeBuilder,
-    ),
-    color: const Color(0xFF000000),
-  );
 }

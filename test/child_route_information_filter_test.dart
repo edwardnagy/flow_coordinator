@@ -11,22 +11,28 @@ void main() {
       'forwards child route info when parent consumed value matches predicate',
       (tester) async {
         RouteInformation? receivedByChild;
-        await tester.pumpWidget(
-          _buildTestApp(
-            initialUri: Uri.parse('/books'),
-            homeBuilder: (_) => _ParentWithFilteredChild(
-              parentChildRoute: RouteInformation(
-                uri: Uri.parse('/books/1'),
-              ),
-              filterPredicate: (info) =>
-                  info.uri.pathSegments.isNotEmpty &&
-                  info.uri.pathSegments.first == 'books',
-              childBuilder: (context) {
-                return _ChildFlowCoordinator(
-                  onRouteReceived: (info) => receivedByChild = info,
-                );
-              },
+        final router = FlowCoordinatorRouter(
+          initialUri: Uri.parse('/books'),
+          homeBuilder: (_) => _ParentWithFilteredChild(
+            parentChildRoute: RouteInformation(
+              uri: Uri.parse('/books/1'),
             ),
+            filterPredicate: (info) =>
+                info.uri.pathSegments.isNotEmpty &&
+                info.uri.pathSegments.first == 'books',
+            childBuilder: (context) {
+              return _ChildFlowCoordinator(
+                onRouteReceived: (info) => receivedByChild = info,
+              );
+            },
+          ),
+        );
+        addTearDown(router.dispose);
+
+        await tester.pumpWidget(
+          WidgetsApp.router(
+            routerConfig: router,
+            color: const Color(0xFF000000),
           ),
         );
 
@@ -39,22 +45,28 @@ void main() {
       'does not forward child route info when predicate does not match',
       (tester) async {
         RouteInformation? receivedByChild;
-        await tester.pumpWidget(
-          _buildTestApp(
-            initialUri: Uri.parse('/settings'),
-            homeBuilder: (_) => _ParentWithFilteredChild(
-              parentChildRoute: RouteInformation(
-                uri: Uri.parse('/settings/profile'),
-              ),
-              filterPredicate: (info) =>
-                  info.uri.pathSegments.isNotEmpty &&
-                  info.uri.pathSegments.first == 'books',
-              childBuilder: (context) {
-                return _ChildFlowCoordinator(
-                  onRouteReceived: (info) => receivedByChild = info,
-                );
-              },
+        final router = FlowCoordinatorRouter(
+          initialUri: Uri.parse('/settings'),
+          homeBuilder: (_) => _ParentWithFilteredChild(
+            parentChildRoute: RouteInformation(
+              uri: Uri.parse('/settings/profile'),
             ),
+            filterPredicate: (info) =>
+                info.uri.pathSegments.isNotEmpty &&
+                info.uri.pathSegments.first == 'books',
+            childBuilder: (context) {
+              return _ChildFlowCoordinator(
+                onRouteReceived: (info) => receivedByChild = info,
+              );
+            },
+          ),
+        );
+        addTearDown(router.dispose);
+
+        await tester.pumpWidget(
+          WidgetsApp.router(
+            routerConfig: router,
+            color: const Color(0xFF000000),
           ),
         );
 
@@ -62,19 +74,6 @@ void main() {
       },
     );
   });
-}
-
-Widget _buildTestApp({
-  required WidgetBuilder homeBuilder,
-  Uri? initialUri,
-}) {
-  return WidgetsApp.router(
-    routerConfig: FlowCoordinatorRouter(
-      homeBuilder: homeBuilder,
-      initialUri: initialUri,
-    ),
-    color: const Color(0xFF000000),
-  );
 }
 
 /// A parent flow coordinator that sets consumed and child route info,
