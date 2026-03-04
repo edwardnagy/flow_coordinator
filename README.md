@@ -5,7 +5,7 @@
 A navigation and routing API that organizes screens into *user flows*, using the
 Flow Controller (Coordinator) pattern.
 
-![Flow Coordinator Illustration](https://github.com/user-attachments/assets/b356c195-48a8-4f36-9415-8d9344f5324d)
+![flow-coordinator-illustration](https://github.com/user-attachments/assets/1dd952b7-b41b-4b05-a480-c3a67e3842f5)
 
 ## What Is a User Flow?
 
