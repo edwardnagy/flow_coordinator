@@ -1,6 +1,6 @@
 # Books App Example
 
-A demo app that shows how to use the `flow_coordinator` package for real-world
+A demo app that shows how to use the `flow_coordinator` package for various
 navigation scenarios.
 
 ## Running the Example
@@ -31,7 +31,7 @@ App
 - **Deep Linking:** Routes can be navigated directly via URI (e.g., `/books/new`,
 `/books/123`, `/settings`).
 - **Authentication Guard:** The root flow coordinator redirects to the login
-screen when unauthenticated and preserves deep links for after sign-in.
+screen when unauthenticated.
 - **Tabbed Navigation:** The home flow manages a tab bar with the books flow and
 settings as separate tabs, each wrapped in a `FlowRouteScope`.
 - **Programmatic Deep Links:** Selecting a random book from the settings screen
