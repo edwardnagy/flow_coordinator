@@ -66,7 +66,6 @@ void main() {
 
         expect(delegate.reportedRouteInformation, isNull);
 
-        await tester.pump();
         tester.binding.scheduleWarmUpFrame();
 
         expect(notified, isTrue);
@@ -88,7 +87,6 @@ void main() {
           RouteInformation(uri: Uri.parse('test')),
         );
 
-        await tester.pump();
         tester.binding.scheduleWarmUpFrame();
 
         expect(
@@ -109,7 +107,6 @@ void main() {
           RouteInformation(uri: Uri.parse('/existing')),
         );
 
-        await tester.pump();
         tester.binding.scheduleWarmUpFrame();
 
         expect(
@@ -130,11 +127,9 @@ void main() {
         delegate.childReportsRouteInformation(
           RouteInformation(uri: Uri.parse('/first')),
         );
-        await tester.pump();
         delegate.childReportsRouteInformation(
           RouteInformation(uri: Uri.parse('/second')),
         );
-        await tester.pump();
 
         tester.binding.scheduleWarmUpFrame();
 
@@ -162,7 +157,6 @@ void main() {
           RouteInformation(uri: Uri.parse('/child')),
         );
 
-        await tester.pump();
         tester.binding.scheduleWarmUpFrame();
 
         expect(
@@ -190,7 +184,6 @@ void main() {
           RouteInformation(uri: Uri.parse('/nested')),
         );
 
-        await tester.pump();
         tester.binding.scheduleWarmUpFrame();
 
         expect(
@@ -215,7 +208,6 @@ void main() {
           RouteInformation(uri: Uri.parse('/nested')),
         );
 
-        await tester.pump();
         tester.binding.scheduleWarmUpFrame();
 
         expect(
