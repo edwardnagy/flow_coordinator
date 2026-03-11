@@ -1,6 +1,6 @@
 name: flow_coordinator
 description: A navigation and routing API that organizes screens into user flows.
-version: 0.0.1
+version: 0.1.0
 repository: https://github.com/edwardnagy/flow_coordinator
 issue_tracker: https://github.com/edwardnagy/flow_coordinator/issues
 topics:
